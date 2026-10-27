@@ -1,0 +1,31 @@
+# Optional Azure DevOps CI. Connect this repository to a new YAML pipeline.
+trigger:
+  branches:
+    include: [main]
+pr:
+  branches:
+    include: [main]
+pool:
+  vmImage: ubuntu-latest
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '22.x'
+    displayName: Use Node.js 22
+  - script: npm ci
+    displayName: Install locked dependencies
+  - script: npx playwright install --with-deps chromium
+    displayName: Install browser
+  - script: npm run check
+    displayName: Test and build
+    env:
+      CI: 'true'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: dist
+      artifact: robots-vs-aliens-web
+  - task: PublishPipelineArtifact@1
+    condition: always()
+    inputs:
+      targetPath: test-results
+      artifact: browser-test-results

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Robots vs Aliens</string>
+    <string name="title_activity_main">Robots vs Aliens</string>
+    <string name="package_name">com.laska.robotvsaliens</string>
+    <string name="custom_url_scheme">com.laska.robotvsaliens</string>
+</resources>
