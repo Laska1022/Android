@@ -10,8 +10,10 @@ no Android collectors and is not a runtime dependency or a competing app project
 Based on [PLAN](../PLAN.md), [capability limits](CAPABILITIES.md), and A's version
 0.1 implementation agreement in `docs/DATA_CONTRACT.md` on
 `devicescope/a/ds-001-foundation` at `e55967b89027a687d3ae93bf53efd3b23f25236f`.
-The canonical [data contract](DATA_CONTRACT.md) remains owned by A. The symbols
-below describe that agreement; proposed additions are explicitly listed at the end.
+The canonical [data contract](DATA_CONTRACT.md) remains owned by A. DS-001 is now
+integrated on main at `ab7764e`; its actual non-null measurement model was reviewed.
+The symbols below describe that agreement; proposed additions are explicitly
+listed at the end. DS-003's registry on A's active branch is acknowledged below.
 
 ## 1. Product and visual direction
 
@@ -188,8 +190,9 @@ invent a history field or infer it from a new error timestamp.
 Capability `UNKNOWN` means discovery is unresolved, not available. A missing key
 in an incomplete snapshot is “Waiting for discovery”; a complete inventory with
 no metric needs an explicit supported/unsupported decision from the repository.
-Do not infer absence from a null alone. A null `sampledAt` has “Sample time not
-provided”, not “just now”. Static facts use “Reported at …”/“Read on this visit”
+Do not infer absence from a null alone. DS-001 requires a non-null `SampleTime`
+for every measurement. Until a first measurement exists, do not invent a timestamp;
+show “Waiting for a reading”. Static facts use “Reported at …”/“Read on this visit”
 when their actual timestamp exists; they do not become stale on the live cadence.
 
 Error/permission copy is resource-backed. Unknown extension enums/keys render
@@ -324,7 +327,7 @@ example does not validate that any physical device reports this reading.
 
 For each implemented detail row, test Available (including valid zero), Unsupported,
 PermissionRequired, TemporarilyUnavailable and Error. For available rows also test
-FRESH/STALE/PAUSED, null timestamp and old timestamp. Cover partial snapshots,
+FRESH/STALE/PAUSED and old timestamp; first-load UI has no measurement/time. Cover partial snapshots,
 unknown enum/key, long source/reason, first load and empty inventory. Cover
 navigation/back/restoration, rotation during session, lifecycle stop/resume,
 permission revocation, and rate-limited retry without creating more collectors.
@@ -347,13 +350,31 @@ These are integration requirements, not a request for A to expose hidden APIs.
 | --- | --- | --- |
 | CR-01 Canonical metric registry and heterogeneity | DS-003/004 | Publish stable keys/value types and enum types, plus a safe lookup for heterogeneous `HardwareSnapshot.measurements`; clarify scalar/list representations. B can use a pure UI formatting adapter without duplicate collector models. |
 | CR-02 Discovery and empty vs missing | DS-003/004 | Define snapshot discovery completion and empty inventory/error distinction, or emit explicit capability/reading entries for all agreed fields. UNKNOWN must remain distinguishable from absent/unsupported. |
-| CR-03 Freshness/time validity | DS-003/004/005 | Confirm nullable sample-time semantics, per-metric aging policy, static vs live freshness, and error precedence; current `Available + Freshness` works without last-valid history. No retained-history API required for DS-004. |
+| CR-03 Freshness/time validity | DS-003/004/005 | DS-001 has mandatory `SampleTime`; B accepts it. Confirm per-metric aging policy, static vs live freshness, and error precedence; current `Available + Freshness` works without last-valid history. No retained-history API required for DS-004. |
 | CR-04 Accurate units and derived provenance | DS-005/006 | Add microamp-hours for charge counter and sensor-specific units/vector channels before those fields are used; define representation of RAM's derived usage. B leaves unsupported fields unavailable until agreement. Do not encode charge as current or sensor values as unitless. |
 | CR-05 Session/controller/chart contract | DS-005/006 | Publish start/pause/resume/stop, lifecycle ownership, effective intervals/forecast horizon, discontinuities, bounded sample retention and valid-sample statistics; confirm explicit resume after background/route leave. Minimum headroom interval remains ≥10 s. No speculative UI controller implementation before agreement. |
 | CR-06 Report/settings boundary | DS-007/008 | Provide redacted report/session APIs, export result/cancellation/error and retention/delete behavior. Keep unit/theme preferences UI-side until persistence boundary is agreed. |
 | CR-07 File ownership transfer and production factory | DS-004 | After foundation integration, name the exact app/navigation files handed to B, module dependencies already available, real repository factory path and checks. A retains all Gradle/model/collector ownership unless a specific edit is reassigned. |
 
-CR-01/02/03/07 need an answer before final DS-004 integration; CR-04/05 gate DS-006,
+### Responses already observed
+
+- DS-001's `Measurement<T>` and `HardwareSnapshot(List<Measurement<*>>)` are
+  integrated; `Reading.Available` contains the only value. B will use exhaustive
+  reading-state handling and a presentation formatter, not cast heterogeneous
+  values to a fabricated common numeric type. `SampleTime` is mandatory.
+- A's `2026-10-29T181800Z-a-ds003-contract.md` and its registry on the DS-003
+  branch answer much of CR-01/02: explicit readings/capabilities, UNKNOWN for
+  transient/error/permission, list-of-text inventory, and ESTIMATED derived RAM.
+  Canonical IDs such as `system.android_version`, `cpu.soc_model`,
+  `cpu.logical_processors`, `storage.app_data.available`, and
+  `display.refresh_rate` supersede the semantic examples in section 4 when that
+  registry integrates. B accepts those choices; no alternate model is needed.
+- A's DS-001 handoff transfers `app` navigation and `core/designsystem` ownership
+  to B for DS-004. Existing app dependencies already include hardware/model/
+  designsystem, Material 3 and lifecycle Compose. Feature directories are reserved
+  only, not configured modules. Do not add module builds without coordination.
+
+Remaining CR-01/02/03/07 details need an answer before final DS-004 integration; CR-04/05 gate DS-006,
 CR-06 gates DS-008. They do not block publishing this design task. If A chooses a
 simpler equivalent, record it in DATA_CONTRACT and handoff, then update this spec
 at the next B task. Avoid parallel incompatible model definitions.

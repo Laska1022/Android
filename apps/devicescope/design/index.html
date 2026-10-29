@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <title>DeviceScope · Sample design reference</title>
+    <style>
+      :root { color-scheme: dark; --bg:#0d151c; --surface:#15212c; --text:#e8eff4; --muted:#b1c2cf; --accent:#7ed5d0; --selected:#183e43; --outline:#8195a5; --warn:#ffd18a; --error:#ffb4b8; }
+      :root.light { color-scheme: light; --bg:#f5f7fa; --surface:#fff; --text:#17212e; --muted:#4b596b; --accent:#005b63; --selected:#d9f1f0; --outline:#697889; --warn:#7d4e00; --error:#ab2530; }
+      * { box-sizing: border-box; }
+      body { margin:0; color:var(--text); background:var(--bg); font:1rem/1.5 system-ui,sans-serif; }
+      button, select { font:inherit; color:inherit; border:1px solid var(--outline); border-radius:12px; background:var(--surface); min-height:48px; padding:10px 16px; cursor:pointer; }
+      button:hover { background:var(--selected); }
+      :focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+      a { color:var(--accent); }
+      .preview { padding:16px 24px; border-bottom:1px solid var(--outline); background:var(--selected); }
+      .preview strong { display:block; font-size:.875rem; letter-spacing:.06em; }
+      .preview p { margin:4px 0 12px; }
+      .controls { display:flex; align-items:end; gap:12px; flex-wrap:wrap; }
+      .controls label { display:grid; min-width:0; gap:4px; font-size:.875rem; }
+      select { width:100%; min-width:0; max-width:100%; }
+      .shell { max-width:1440px; margin:auto; display:grid; grid-template-columns:220px minmax(0,1fr); min-height:80vh; }
+      aside { padding:32px 16px; border-right:1px solid var(--outline); }
+      .brand { display:flex; align-items:center; gap:12px; margin:0 8px 36px; font-size:1.25rem; font-weight:700; }
+      .mark { width:32px; height:32px; flex:none; border:2px solid var(--accent); border-radius:10px; position:relative; }
+      .mark::before,.mark::after { content:""; position:absolute; width:3px; height:12px; top:7px; background:var(--accent); }
+      .mark::before { left:9px; } .mark::after { left:17px; height:7px; top:12px; }
+      nav { display:grid; gap:12px; }
+      nav button { text-align:left; border-color:transparent; background:transparent; }
+      nav button[aria-current="page"] { border-color:var(--accent); color:var(--accent); background:var(--selected); font-weight:600; }
+      main { min-width:0; padding:36px 32px 64px; }
+      .eyebrow { color:var(--accent); font-size:.875rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+      h1 { font-size:1.75rem; line-height:1.2; margin:8px 0; }
+      h2 { font-size:1.25rem; line-height:1.3; margin:0 0 12px; }
+      h3 { font-size:1rem; margin:0 0 8px; }
+      p { margin:8px 0; }
+      .muted { color:var(--muted); }
+      .page-intro { margin-bottom:28px; }
+      .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+      .card { min-width:0; padding:24px; border-radius:20px; background:var(--surface); border:1px solid var(--outline); overflow-wrap:anywhere; }
+      .hero { border-color:var(--accent); background:linear-gradient(125deg,var(--selected),var(--surface)); }
+      .wide { grid-column:1/-1; }
+      .value { font-variant-numeric:tabular-nums; font-size:2rem; font-weight:600; line-height:1.25; margin:16px 0; }
+      .value small { font-size:1rem; font-weight:400; }
+      .meta { font-size:.875rem; color:var(--muted); }
+      .pill { display:inline-block; border:1px solid var(--outline); border-radius:8px; padding:3px 8px; margin:4px 0; font-size:.875rem; }
+      .row { display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:12px; padding:16px 0; border-bottom:1px solid var(--outline); }
+      .row:last-child { border:0; }
+      .row strong { max-width:100%; overflow-wrap:anywhere; }
+      .action { margin-top:16px; color:var(--accent); }
+      .actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
+      .categories { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 20px; }
+      .note { border-left:3px solid var(--accent); padding:0 0 0 16px; margin:24px 0; }
+      .empty { padding:48px 24px; text-align:center; }
+      #screen { animation:enter .15s ease; }
+      @keyframes enter { from { opacity:.4; } to { opacity:1; } }
+      .warning { color:var(--warn); } .error { color:var(--error); }
+      .chart { width:100%; height:auto; margin:16px 0; }
+      .chart text { fill:var(--muted); font:14px system-ui,sans-serif; }
+      .chart .axis { stroke:var(--outline); } .chart .trace { stroke:var(--accent); fill:none; stroke-width:3; }
+      table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+      th,td { padding:10px 6px; text-align:start; border-bottom:1px solid var(--outline); font-size:.875rem; }
+      caption { text-align:start; padding-bottom:12px; }
+      [hidden] { display:none !important; }
+      .sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; clip:rect(0,0,0,0); overflow:hidden; white-space:nowrap; }
+      @media (max-width:899px) { .shell { grid-template-columns:160px minmax(0,1fr); } main { padding:24px 20px; } .grid { grid-template-columns:1fr; } .brand { font-size:1rem; gap:8px; } }
+      @media (max-width:599px) { .shell { display:flex; flex-direction:column; } aside { padding:12px 16px; border:0; border-bottom:1px solid var(--outline); } .brand { margin:0 0 12px; } nav { grid-template-columns:repeat(auto-fit,minmax(min(100%,8rem),1fr)); gap:8px; } nav button { padding:10px 8px; text-align:center; } main { padding:24px 16px 48px; } .preview { padding:16px; } .controls { align-items:stretch; } .controls label { flex:1 1 190px; } .card { padding:20px; } }
+      @media (prefers-reduced-motion:reduce) { #screen { animation:none; } }
+    </style>
+  </head>
+  <body>
+    <div class="preview" aria-label="Design reference controls">
+      <strong>SAMPLE DATA · DESIGN PREVIEW</strong>
+      <p>Original UI reference. All example readings are fictional. This page cannot inspect your phone.</p>
+      <div class="controls">
+        <label>Battery temperature example state
+          <select id="state">
+            <option value="fresh">Available · fresh</option><option value="stale">Available · stale</option>
+            <option value="paused">Available · paused</option><option value="loading">Loading</option>
+            <option value="unsupported">Unsupported</option><option value="permission">Permission required</option>
+            <option value="waiting">Temporarily unavailable</option><option value="error">Error</option>
+          </select>
+        </label>
+        <button id="theme" type="button" aria-pressed="false">Light theme</button>
+        <a href="../docs/UI_SPEC.md">Read the implementation specification</a>
+      </div>
+    </div>
+    <div class="shell">
+      <aside>
+        <div class="brand"><span class="mark" aria-hidden="true"></span>DeviceScope</div>
+        <nav aria-label="Sample app navigation">
+          <button data-route="overview" aria-current="page">Overview</button>
+          <button data-route="hardware">Hardware</button>
+          <button data-route="monitor">Monitor</button>
+          <button data-route="reports">Reports</button>
+        </nav>
+      </aside>
+      <main>
+        <header class="page-intro"><div class="eyebrow">Know your device</div><h1 id="title" tabindex="-1">Overview</h1><p id="subtitle" class="muted">Example phone · Android sample · no connected device</p></header>
+        <div id="screen"></div>
+        <p class="note meta">All values on this reference are sample data. Native layouts use Compose, Android insets and accessibility semantics; this reference does not validate those behaviors.</p>
+      </main>
+    </div>
+    <div id="announcement" class="sr" role="status"></div>
+    <script>
+      const screen = document.querySelector('#screen');
+      const title = document.querySelector('#title');
+      const state = document.querySelector('#state');
+      let route = 'overview';
+      const states = {
+        fresh: ['34.6 <small>°C</small>', 'Measured · sample reading', 'Sample source: battery broadcast · sampled just now'],
+        stale: ['34.6 <small>°C · last reading</small>', 'Stale', 'Sample source: battery broadcast · last sampled 18 seconds ago'],
+        paused: ['34.6 <small>°C · last reading</small>', 'Paused', 'Sample source: battery broadcast · last sampled 18 seconds ago'],
+        loading: ['Loading', 'Waiting for first snapshot', 'No numeric value is implied.'],
+        unsupported: ['Unavailable', 'Not exposed', 'The sample device does not provide this reading.'],
+        permission: ['Permission needed', 'Example state only', 'Battery temperature normally needs no runtime permission. This exercises the generic row pattern.'],
+        waiting: ['Waiting for a reading', 'Temporarily unavailable', 'The sample source has not returned a valid reading.'],
+        error: ['Couldn’t read this value', 'Read error', 'Sample failure. No current numeric value is available.']
+      };
+      function temperature() {
+        const [value, badge, reason] = states[state.value];
+        return `<article class="card hero"><h2>Battery temperature</h2><span class="pill">${badge}</span><div class="value">${value}</div><p class="meta">${reason}</p><p class="meta">Sample data · not CPU temperature</p><button class="action" data-route="battery">Open battery details</button></article>`;
+      }
+      function row(label, value, source = '') { return `<div class="row"><span>${label}${source ? `<br><span class="meta">${source}</span>` : ''}</span><strong>${value}</strong></div>`; }
+      const categories = `<div class="categories" aria-label="Sample hardware categories"><button data-route="hardware">Device &amp; system</button><button data-route="battery">Battery</button><button data-route="thermals">Thermals</button></div>`;
+      function render(focus = false) {
+        const titles = {overview:'Overview', hardware:'Hardware', battery:'Battery', thermals:'Thermals', monitor:'Monitor', reports:'Reports'};
+        title.textContent = titles[route];
+        document.querySelectorAll('nav button').forEach(button => {
+          if (button.dataset.route === (['battery','thermals'].includes(route) ? 'hardware' : route)) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
+        });
+        if (route === 'overview') screen.innerHTML = `<div class="grid">${temperature()}<article class="card"><h2>Android thermal state</h2><div class="value">None</div><span class="pill">Reported · sample data</span><p class="meta">Sample PowerManager status. A named severity, not a temperature or a health score.</p><button class="action" data-route="thermals">Open thermals</button></article><article class="card"><h2>Memory available</h2><div class="value">3.2 <small>GiB of 8.0 GiB</small></div><p class="meta">Sample ActivityManager values, including Android’s available-memory semantics.</p></article><article class="card"><h2>Storage available</h2><div class="value">86.4 <small>GiB</small></div><p class="meta">Sample app-accessible internal volume · StatFs. This is not total physical flash.</p></article><article class="card wide"><h2>Follow a reading over time</h2><p class="muted">Select a supported metric and start a foreground session. Gaps and pauses remain visible.</p><button class="action" data-route="monitor">Open monitor reference</button></article></div>`;
+        if (route === 'hardware') screen.innerHTML = `${categories}<article class="card"><h2>Device &amp; system</h2><p class="meta">Sample inventory · reported fields</p>${row('Manufacturer / model','Example / Sample phone','Build fields')}${row('Android version','Sample OS','Build.VERSION')}${row('Supported ABIs','arm64-v8a','Sample Build.SUPPORTED_ABIS')}${row('Available logical processors','8','Sample Runtime.availableProcessors; not physical topology')}${row('CPU temperature','Unavailable','Not exposed to this app')}${row('Serial / IMEI','Not collected','Protected identifiers are outside the default report')}</article>`;
+        if (route === 'battery') screen.innerHTML = `${categories}<div class="grid">${temperature()}<article class="card"><h2>Battery details</h2><p class="meta">Sample data · reported by battery APIs</p>${row('Level','76%','Sample validated level / scale')}${row('Status','Discharging')}${row('Voltage','4.02 V','Sample source unit: millivolts')}${row('Current','Unavailable','Unsupported in this fixture')}${row('Reported health','Good','A status enum, not measured capacity wear')}</article></div>`;
+        if (route === 'thermals') screen.innerHTML = `${categories}<div class="grid"><article class="card"><h2>Temperature availability</h2>${row('Battery temperature','See battery details','Separate battery sensor')}${row('CPU temperature','Unavailable','Not exposed to ordinary Android apps')}${row('GPU temperature','Unavailable','No universal public source')}<button class="action" data-route="battery">Open battery temperature</button></article><article class="card"><h2>Android thermal state</h2>${row('Status','None','Sample PowerManager severity')}${row('Headroom','0.42','Sample dimensionless reading · effective interval 10 s')}<p class="meta">1.0 is Android’s severe-throttling reference. Values may exceed 1.0. This is not °C or CPU utilization.</p></article></div>`;
+        if (route === 'monitor') screen.innerHTML = `<article class="card"><h2>Battery temperature · sample session</h2><span class="pill">Paused · sample data</span><p class="meta">Illustrated interval 2 s · no live collection · gap at 6 s</p><svg class="chart" viewBox="0 0 640 240" role="img" aria-label="Sample battery temperature: 34.2 to 34.8 degrees Celsius, with a missing reading at 6 seconds. The same values are in the table below."><path class="axis" d="M56 20V200H610" fill="none"/><text x="4" y="26">°C</text><text x="8" y="62">35</text><text x="8" y="182">34</text><text x="54" y="225">0 s</text><text x="300" y="225">6 s gap</text><text x="555" y="225">12 s</text><path class="trace" d="M56 156L140 144L224 132 M392 108L476 96L560 84"/><text x="280" y="155">No sample</text></svg><p>Valid range: <strong>34.2–34.8 °C</strong> · 6 valid samples · one gap</p><table><caption>Accessible sample readings (fictional)</caption><thead><tr><th scope="col">Elapsed</th><th scope="col">Temperature</th><th scope="col">State</th></tr></thead><tbody><tr><td>0 s</td><td>34.2 °C</td><td>Measured</td></tr><tr><td>2 s</td><td>34.3 °C</td><td>Measured</td></tr><tr><td>4 s</td><td>34.4 °C</td><td>Measured</td></tr><tr><td>6 s</td><td>No data</td><td>Unavailable</td></tr><tr><td>8 s</td><td>34.6 °C</td><td>Measured</td></tr><tr><td>10 s</td><td>34.7 °C</td><td>Measured</td></tr><tr><td>12 s</td><td>34.8 °C</td><td>Measured</td></tr></tbody></table><p class="note">Native Start / Pause / Resume / Stop actions require A’s session contract. This illustration intentionally has no simulated sampling controls.</p></article>`;
+        if (route === 'reports') screen.innerHTML = `<article class="card empty"><div class="eyebrow">Local, by choice</div><h2>No saved sessions</h2><p class="muted">A completed monitoring session can become a report when persistence and export are implemented.</p><button class="action" data-route="monitor">View monitor reference</button></article><div class="note"><h2>Review before sharing</h2><p class="muted">The native report preview will show included fields and export format. Sensitive identifiers are excluded by default. This design reference cannot save or share phone data.</p></div>`;
+        if (focus) title.focus();
+      }
+      document.addEventListener('click', event => {
+        const button = event.target.closest('[data-route]');
+        if (!button) return;
+        route = button.dataset.route;
+        render(true);
+      });
+      state.addEventListener('change', () => { render(); document.querySelector('#announcement').textContent = `Sample battery temperature state: ${state.selectedOptions[0].textContent}`; });
+      document.querySelector('#theme').addEventListener('click', event => {
+        const light = document.documentElement.classList.toggle('light');
+        event.target.setAttribute('aria-pressed', String(light));
+      });
+      render();
+    </script>
+  </body>
+</html>
