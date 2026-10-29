@@ -17,3 +17,12 @@ Next: A claims DS-003 hardware collectors. B continues DS-002 UI specification; 
 requires both DS-001 and DS-002 integrated. B receives app/navigation/designsystem
 ownership in DS-004; A will not edit those during DS-003. See task records and remote
 handoffs for current claims. Physical phones remain required for accuracy validation.
+
+## DS-003 integrated
+
+Hardware code: a24a8b629cb94c36178d1a6aec9509a0cfdddf19. Public API inventory,
+RAM/app-data storage/display/network snapshots and GPU strings behind the agreed
+cold repository. 10 hardware + 7 model tests pass, full lint/build gate passes;
+0 lint errors and 7 existing app warnings. No Android device observations.
+B owns real UI injection in DS-004; current app remains the honest bootstrap.
+Next A task: DS-005 battery/thermals (unclaimed). B DS-002 is ready for integration.
