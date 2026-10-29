@@ -95,3 +95,41 @@ They must not be relabeled battery temperature or populated with headroom.
 Capability discovery reflects each reading: permission/transient/error results remain
 UNKNOWN; unsupported is UNSUPPORTED, available is AVAILABLE. UI still reads Reading
 and freshness rather than interpreting capability as evidence of a current sample.
+
+## Responses to B CR-01–07 (DS-003)
+
+- CR-01: `HardwareMetrics` in core:hardware is the canonical typed registry.
+  `snapshot.findMetric(HardwareMetrics.MEMORY_AVAILABLE.id)` returns `Measurement<*>?`
+  without unsafe casts. Match Reading first, then format Available.value by Long,
+  Double, String or List<String>. List membership is validated by the producer;
+  unknown types use an explicit unknown representation, not numeric coercion.
+  Use the registry's snake_case IDs rather than the UI spec's provisional aliases.
+  Camera IDs are hex-encoded public Camera2 IDs (`camera.id_<hex>.<field>`), stable
+  across list ordering changes; `cameraField(id, field)` constructs their keys.
+- CR-02: first emission finishes discovery for all DS-003 static/dynamic top-level
+  fields. Each has an explicit reading and capability. Available(emptyList()) is
+  successful empty inventory; discovery failures are Error/Permission/Unsupported.
+  Per-camera fields appear only for discovered Camera2 IDs. Missing domains such as
+  battery/thermals/sessions are not implemented yet, not hardware-unsupported.
+- CR-03: SampleTime is non-null by construction. Every result has the actual read
+  attempt time; static inventory retains its original time across dynamic emissions.
+  Freshness starts FRESH. UI marks retained dynamic results PAUSED on lifecycle stop,
+  STALE when monotonic age exceeds twice Capability.minimumIntervalMillis (2 s for
+  DS-003 dynamic fields). Interval 0 denotes static facts: label 'Read on this visit'.
+  No polling while stopped. Resume/recollect performs new discovery. Availability
+  takes precedence over freshness; no prior valid value is inserted into an error.
+- CR-04: RAM derivation uses ESTIMATED plus explicit cache-inclusive source text.
+  Charge units, vectors and live sensor units are deferred to DS-005 before use;
+  sensor inventory is TEXT with labeled sensor-specific units, not a numeric graph.
+- CR-05/06: session control, thermal forecast/interval, sample retention and exports
+  remain DS-005/007 gates. No placeholder session or export implementation added.
+- CR-07: B owns app/src/** and core/designsystem/src/** after DS-001 and may create
+  feature UI source in DS-004. A retains Gradle/catalog/locks and core model/hardware.
+  app already depends on core:model, core:hardware, core:designsystem, Material3,
+  activity-compose and lifecycle-runtime-compose. Production factory is
+  `com.laska.devicescope.core.hardware.AndroidHardwareRepository(applicationContext)`;
+  consume as HardwareRepository with lifecycle-aware collection. Feature Gradle
+  additions require a committed request/ownership agreement. Tests/build command
+  remains the README gate. No runtime CAMERA permission is declared/requested for
+  inventory; a PermissionRequired result explains restriction and must not offer an
+  ineffective permission button in this build. Only ACCESS_NETWORK_STATE is added.
