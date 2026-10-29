@@ -63,3 +63,73 @@ Package `com.laska.devicescope.core.model` is pure Kotlin/JVM and has no Android
 - DS-001 app is an honest bootstrap screen, with no numeric demo readings or production fake provider. Fakes live in test source sets only. Session persistence/selection contracts will be added by DS-005/DS-007 before consumers implement them.
 
 Ownership: A owns shared models/build configuration and core:hardware. B owns core:designsystem and feature UI after DS-001 integration; B may take app/navigation wiring in DS-004. A will not edit that wiring during DS-003. B should commit requested contract amendments in its task/handoff; A will review remote handoffs before integration. These additive Kotlin names formalize the existing 0.1 design; downstream impact is DS-003/004/005/006/007/008. No competing models should be introduced.
+
+## DS-003 additive field registry — slot A
+
+No changes to the shared model signatures. `AndroidHardwareRepository(context)` is the
+production factory in `com.laska.devicescope.core.hardware`; it implements the existing
+HardwareRepository. Cold flow: inventory/EGL once per collection, dynamic snapshots every
+2 seconds on Dispatchers.IO; cancellation stops polling. No receiver/service is retained.
+B owns lifecycle collection and app injection in DS-004; A does not edit app/navigation.
+
+Canonical keys: `device.manufacturer`, `device.model`, `system.android_version`,
+`system.security_patch`, `system.build`, `cpu.soc_model`, `cpu.soc_manufacturer` (String/TEXT);
+`cpu.abis`, `gpu.renderer`, `gpu.vendor`, `gpu.opengl_version` (ABIs List<String>/TEXT,
+GPU String/TEXT); `cpu.logical_processors` (Long/COUNT); `system.uptime` (Long/MILLISECONDS);
+`memory.total`, `memory.available`, `memory.used`, `storage.app_data.total`,
+`storage.app_data.available` (Long/BYTES). memory.used is cache-inclusive total minus
+available, labeled ESTIMATED derivation, not per-app memory. Storage is the app data
+filesystem, not a sum of all physical volumes.
+
+`display.width`, `display.height` (Long/PIXELS, current mode), `display.refresh_rate`
+(Double/HERTZ, mode rate not rendered FPS), `display.density` (Long/DPI),
+`display.supported_modes`, `display.hdr_types`, `camera.inventory`, `sensor.inventory`,
+`network.transports` (List<String>/TEXT). Inventory entries contain labeled public
+capabilities and units, never identifiers such as serial/IMEI, MAC, BSSID or SSID.
+`camera.<id>.focal_lengths`, `.facing`, `.hardware_level` use TEXT; local Camera2 IDs
+identify lenses only. Missing camera fields fail independently. No camera is opened.
+
+`cpu.temperature` and `gpu.temperature` (Double/CELSIUS), `cpu.frequency` (Double/HERTZ),
+`cpu.utilization` (Double/RATIO) explicitly report Unsupported in this public-API MVP.
+They must not be relabeled battery temperature or populated with headroom.
+Capability discovery reflects each reading: permission/transient/error results remain
+UNKNOWN; unsupported is UNSUPPORTED, available is AVAILABLE. UI still reads Reading
+and freshness rather than interpreting capability as evidence of a current sample.
+
+## Responses to B CR-01–07 (DS-003)
+
+- CR-01: `HardwareMetrics` in core:hardware is the canonical typed registry.
+  `snapshot.findMetric(HardwareMetrics.MEMORY_AVAILABLE.id)` returns `Measurement<*>?`
+  without unsafe casts. Match Reading first, then format Available.value by Long,
+  Double, String or List<String>. List membership is validated by the producer;
+  unknown types use an explicit unknown representation, not numeric coercion.
+  Use the registry's snake_case IDs rather than the UI spec's provisional aliases.
+  Camera IDs are hex-encoded public Camera2 IDs (`camera.id_<hex>.<field>`), stable
+  across list ordering changes; `cameraField(id, field)` constructs their keys.
+- CR-02: first emission finishes discovery for all DS-003 static/dynamic top-level
+  fields. Each has an explicit reading and capability. Available(emptyList()) is
+  successful empty inventory; discovery failures are Error/Permission/Unsupported.
+  Per-camera fields appear only for discovered Camera2 IDs. Missing domains such as
+  battery/thermals/sessions are not implemented yet, not hardware-unsupported.
+- CR-03: SampleTime is non-null by construction. Every result has the actual read
+  attempt time; static inventory retains its original time across dynamic emissions.
+  Freshness starts FRESH. UI marks retained dynamic results PAUSED on lifecycle stop,
+  STALE when monotonic age exceeds twice Capability.minimumIntervalMillis (2 s for
+  DS-003 dynamic fields). Interval 0 denotes static facts: label 'Read on this visit'.
+  No polling while stopped. Resume/recollect performs new discovery. Availability
+  takes precedence over freshness; no prior valid value is inserted into an error.
+- CR-04: RAM derivation uses ESTIMATED plus explicit cache-inclusive source text.
+  Charge units, vectors and live sensor units are deferred to DS-005 before use;
+  sensor inventory is TEXT with labeled sensor-specific units, not a numeric graph.
+- CR-05/06: session control, thermal forecast/interval, sample retention and exports
+  remain DS-005/007 gates. No placeholder session or export implementation added.
+- CR-07: B owns app/src/** and core/designsystem/src/** after DS-001 and may create
+  feature UI source in DS-004. A retains Gradle/catalog/locks and core model/hardware.
+  app already depends on core:model, core:hardware, core:designsystem, Material3,
+  activity-compose and lifecycle-runtime-compose. Production factory is
+  `com.laska.devicescope.core.hardware.AndroidHardwareRepository(applicationContext)`;
+  consume as HardwareRepository with lifecycle-aware collection. Feature Gradle
+  additions require a committed request/ownership agreement. Tests/build command
+  remains the README gate. No runtime CAMERA permission is declared/requested for
+  inventory; a PermissionRequired result explains restriction and must not offer an
+  ineffective permission button in this build. Only ACCESS_NETWORK_STATE is added.
