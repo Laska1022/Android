@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "apps": [
+    {
+      "id": "robots-vs-aliens",
+      "name": "Robots vs Aliens: Last Outpost",
+      "path": "apps/robots-vs-aliens",
+      "state": "playable",
+      "android_application_id": "com.laska.robotvsaliens",
+      "stack": "TypeScript, Vite, Canvas, Capacitor"
+    },
+    {
+      "id": "devicescope",
+      "name": "DeviceScope",
+      "path": "apps/devicescope",
+      "state": "planned",
+      "android_application_id": "com.laska.devicescope",
+      "stack": "Kotlin, Jetpack Compose (planned)"
+    }
+  ]
+}

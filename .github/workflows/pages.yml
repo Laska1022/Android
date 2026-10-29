@@ -1,4 +1,4 @@
-name: Publish web game to GitHub Pages
+name: Publish Robots vs Aliens to GitHub Pages
 on:
   workflow_dispatch:
 permissions:
@@ -8,6 +8,9 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: false
+defaults:
+  run:
+    working-directory: apps/robots-vs-aliens
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,13 +21,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: apps/robots-vs-aliens/.nvmrc
           cache: npm
+          cache-dependency-path: apps/robots-vs-aliens/package-lock.json
       - run: npm ci
       - run: npm run test && npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: apps/robots-vs-aliens/dist
       - id: deployment
         uses: actions/deploy-pages@v4

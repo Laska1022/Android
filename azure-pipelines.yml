@@ -1,10 +1,14 @@
-# Optional Azure DevOps CI. Connect this repository to a new YAML pipeline.
+# Robots vs Aliens only. Other apps use independent pipelines.
 trigger:
   branches:
     include: [main]
+  paths:
+    include: [apps/robots-vs-aliens/**, azure-pipelines.yml]
 pr:
   branches:
     include: [main]
+  paths:
+    include: [apps/robots-vs-aliens/**, azure-pipelines.yml]
 pool:
   vmImage: ubuntu-latest
 steps:
@@ -13,19 +17,22 @@ steps:
       versionSpec: '22.x'
     displayName: Use Node.js 22
   - script: npm ci
+    workingDirectory: apps/robots-vs-aliens
     displayName: Install locked dependencies
   - script: npx playwright install --with-deps chromium
+    workingDirectory: apps/robots-vs-aliens
     displayName: Install browser
   - script: npm run check
+    workingDirectory: apps/robots-vs-aliens
     displayName: Test and build
     env:
       CI: 'true'
   - task: PublishPipelineArtifact@1
     inputs:
-      targetPath: dist
+      targetPath: apps/robots-vs-aliens/dist
       artifact: robots-vs-aliens-web
   - task: PublishPipelineArtifact@1
     condition: always()
     inputs:
-      targetPath: test-results
-      artifact: browser-test-results
+      targetPath: apps/robots-vs-aliens/test-results
+      artifact: robots-vs-aliens-browser-tests

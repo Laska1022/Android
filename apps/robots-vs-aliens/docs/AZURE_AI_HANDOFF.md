@@ -4,14 +4,16 @@
 
 Continue **Robots vs Aliens: Last Outpost**, an original polished lane-defense game for Android and the web. The initial implementation includes a playable five-sector campaign, survival, five robots, five enemies, original procedural artwork, sound effects, resource economy, abilities, offline caching, local progress, tests, and a native Android host.
 
-Read `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`, and `docs/VALIDATION.md` first. Establish a passing baseline before changing behavior. Keep the app playable throughout development.
+Work in `apps/robots-vs-aliens/`. Read the repository-root `AGENTS.md` for shared boundaries, then this app’s `AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`, and `docs/VALIDATION.md` first. Establish a passing baseline before changing behavior. Keep the app playable throughout development.
 
 ## Ready-to-paste prompt
 
 ```text
 You are continuing development of Robots vs Aliens: Last Outpost in
-Laska1022/Android. Use the existing checkout and follow AGENTS.md.
-Read docs/AZURE_AI_HANDOFF.md and docs/VALIDATION.md.
+Laska1022/Android. Use the existing checkout. Read root AGENTS.md, then
+work only in apps/robots-vs-aliens/ and follow its AGENTS.md.
+Read the app’s docs/AZURE_AI_HANDOFF.md and docs/VALIDATION.md.
+Other apps, including DeviceScope, are independent.
 
 First run npm ci, npm run test, npm run build, and the existing Playwright
 desktop/mobile checks. Review the actual UI at desktop, phone portrait,
@@ -69,6 +71,7 @@ Add larger touch targets/zoom options, color-blind-safe state indicators, indepe
 ## Commands and environment
 
 ```bash
+cd apps/robots-vs-aliens
 npm ci
 npx playwright install chromium
 npm run check
@@ -83,9 +86,9 @@ Cloud machines with Chromium already installed can run tests with `PLAYWRIGHT_CH
 
 “Azure AI” needs a coding-agent host with filesystem, shell, browser-testing, and scoped GitHub capabilities to continue this repository. A model deployment or chat endpoint by itself does not provide those tools. Mount/clone the repository in that host, supply this guide as context, and authorize the intended Git operations there.
 
-`azure-pipelines.yml` can be selected when creating an Azure DevOps pipeline connected to this GitHub repository. It installs dependencies, runs checks, and publishes `dist` and browser-test artifacts. Hosted-agent capacity and service connections must be configured in your Azure organization.
+The repository-root `azure-pipelines.yml` can be selected when creating an Azure DevOps pipeline connected to this GitHub repository. It installs dependencies, runs checks, and publishes `dist` and browser-test artifacts. Hosted-agent capacity and service connections must be configured in your Azure organization.
 
-For Azure Static Web Apps, use application location `/`, build command `npm run build`, and output location `dist`; no API directory is needed. Use the service-generated deployment workflow and store its token in GitHub/Azure secrets. Do not put Azure AI keys into this client-side game. No Azure resources have been provisioned by this repository.
+For Azure Static Web Apps, use application location `/apps/robots-vs-aliens`, build command `npm run build`, and output location `dist`; no API directory is needed. Use the service-generated deployment workflow and store its token in GitHub/Azure secrets. Do not put Azure AI keys into this client-side game. No Azure resources have been provisioned by this repository.
 
 ## Definition of done
 

@@ -36,3 +36,9 @@ No physical Android phone or emulator session has been run. Native runtime behav
 - A debug APK is for testing. Store publication requires secure release signing, store materials, and device testing.
 
 The prioritized follow-up plan and acceptance criteria are in `docs/AZURE_AI_HANDOFF.md`.
+
+## Repository layout validation — October 29, 2026
+
+The game now lives at `apps/robots-vs-aliens/` in the multi-app repository. Its gameplay source, public assets, tests, package manifest, and dependency lockfile were compared byte-for-byte with the original game commit and preserved. Build/workflow/documentation paths were adjusted for the move.
+
+From the new app directory: 14 unit tests passed, TypeScript/production build passed, 5 browser tests passed with the same 1 intentional mobile keyboard skip, and Android `assembleDebug lintDebug` passed. An old preview process still pointing at the previous directory was stopped before the successful browser rerun; the test-server command now uses `--strictPort`. DeviceScope is a separate planned application and none of these results validate its future code or sensors.

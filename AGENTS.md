@@ -1,20 +1,30 @@
-# Robots vs Aliens — instructions for coding agents
+# Repository instructions — independent apps
 
-Read `README.md`, `docs/ARCHITECTURE.md`, and `docs/AZURE_AI_HANDOFF.md` before changing the game.
+## Scope
 
-## Working agreement
+- Read the requested app's `AGENTS.md` and `README.md` before making changes. These root rules apply repository-wide; app rules add requirements for that app only.
+- App code lives under `apps/<app-id>/`. DeviceScope is `apps/devicescope/`; Robots vs Aliens is `apps/robots-vs-aliens/`.
+- Work only in the requested app and its dedicated workflow. Do not modify another app's source, dependencies, tests, package identity, assets, or release configuration as part of an unrelated task.
+- Root documentation, the app catalog, `.gitignore`, and shared workflows are integration surfaces. Name the intended shared-file edits in the task claim and coordinate their ownership before concurrent edits.
+- Use the existing checkout. Cloud tasks already run in isolated environments; do not create a worktree unless the user explicitly requests one.
+- Keep each application's dependency graph and build root independent. Never run another application's initializer in the repository root. Do not add cross-app source dependencies by convenience.
 
-- This is an original sci-fi lane-defense game. Preserve the original robot/alien identity, illustrated neon outpost, responsive UI, and offline play. Do not use Plants vs Zombies art, characters, branding, sounds, or source code.
-- Use the existing checkout. Cloud tasks already run in isolated environments; do not create a worktree unless the user asks for one.
-- TypeScript strict mode stays enabled. Keep simulation independent of DOM, rendering, and audio. New combat mechanics need deterministic tests.
-- Install with `npm ci`; keep `package-lock.json` synchronized when intentionally changing dependencies. Use Node 22+ and Java 21 for Android.
-- Run `npm run check` before finishing a gameplay/UI change. It runs unit tests, type checks, the production build, and real Chromium desktop/mobile tests. `npx playwright install chromium` installs the browser; in cloud environments with a system Chromium use `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium` instead.
-- After native/configuration changes: `npm run android:sync`, then `cd android && ./gradlew --no-daemon --max-workers=2 assembleDebug lintDebug`. Report device tests separately from compilation.
-- Inspect screenshots at desktop and phone sizes. Do not claim UI or offline readiness from unit tests alone. Preserve actual runner failures; do not remove assertions to make checks pass.
-- Do not commit `node_modules`, `dist`, SDKs, build outputs, signing keys, `.env` secrets, or local SDK paths. Debug APKs belong in CI artifacts or releases.
-- No backend or API key is required by the game. Azure credentials, if later needed, belong in the deployment service's secret store, never client code.
-- Report the concrete change, validation results, and remaining limitations. Distinguish a debug APK from a signed store release.
+## GitHub is the durable handoff
 
-## Start commands
+- Fetch remote state at the start of each session. Check `git status` and preserve existing local work before switching branches or pulling.
+- For DeviceScope, follow `apps/devicescope/COLLABORATION.md`. Use task claims, distinct branches, and committed handoffs; do not assume the other Codex can see this chat or local files.
+- Use normal, non-force pushes. On rejection, fetch and inspect competing changes; do not reset remote work or resolve conflicts by discarding the other session's edits.
+- Push authorized work and its handoff before ending. If upload is blocked, report the actual failure and do not claim the work is available on GitHub.
+- Never commit credentials, environment secret files, SDK installations, caches, local SDK paths, signing keys, or build output. Publish app-specific APK/AAB artifacts through CI or releases when authorized.
 
-`npm run dev` starts Vite on port 5173. For a production/offline check use `npm run build && npm run preview -- --port 4173`. Start the process again in each fresh cloud task; live processes do not survive a snapshot. Stop only processes you started. See the handoff guide for prioritized next work.
+## Validation
+
+- Run the affected app's documented checks from its own directory. A docs-only plan does not require inventing tests or claiming an app exists.
+- After relocating an app or changing its build/CI paths, run its existing checks and validate its native build where configured.
+- Keep passed, failed, skipped, and unrun checks distinct. Update the task and handoff with evidence and remaining blockers.
+- All metrics in DeviceScope must report real availability, units, source, and timestamp. Never present demo readings as measurements from the user's phone.
+
+## Current commands
+
+- Game: `cd apps/robots-vs-aliens && npm ci && npm run check`; native: `npm run android:sync`, then `cd android && ./gradlew --no-daemon --max-workers=2 assembleDebug lintDebug`.
+- DeviceScope: implementation has not started. Begin with its task board; build commands become valid only after DS-001 is integrated. Do not run the game's Node/Capacitor tooling for DeviceScope.
