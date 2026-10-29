@@ -1,33 +1,19 @@
 # Integrated status
 
-Updated: 2026-10-29. Scope: DeviceScope only.
+Updated: 2026-10-29. DeviceScope only.
 
-## What exists on main
+DS-001 native foundation integrated: implementation 605d6b8880229a14f1f9f277ff3c3d33005de919,
+tested merged tree 388b897f2f3716e0553f0cf3d8f1ad9064a43a4a. Independent Kotlin/Compose
+build, package com.laska.devicescope, model/hardware/designsystem modules, bootstrap
+screen, dependency locks and dedicated CI. Exact shared symbols: docs/DATA_CONTRACT.md.
 
-- Dedicated application directory and reserved package ID.
-- Product plan, measurement contract, API limitations, and architecture decisions.
-- Nine task records with acceptance criteria, dependencies, and proposed A/B ownership.
-- GitHub-based claim, branch, integration, and handoff instructions.
-- Starting prompts for both Codex Cloud sessions.
+Native testDebugUnitTest/lintDebug/assembleDebug passed with locks: 7 JVM contract tests,
+0 failures/skips; lint 0 errors, 7 app warnings. APK package/launcher/signature verified.
+Device/emulator startup and real measurements are NOT tested (no connected device).
+Full collectors/screens/sessions/reports are still upcoming; bootstrap shows no fake data.
+Remote CI execution has not been observed.
 
-## What does not exist yet
-
-No Kotlin source, Gradle project, collectors, UI implementation, DeviceScope CI workflow, APK, emulator validation, or physical-device measurements have been completed. Game build results are not DeviceScope validation.
-
-## Next work
-
-1. Slot A: claim DS-001 and create the independent native foundation and typed contracts.
-2. Slot B: claim DS-002 and create the UI/state specification while DS-001 is built.
-3. Integrate DS-001 before either worker starts dependent Kotlin implementation.
-
-All initial tasks are unclaimed. Consult the individual [task records](tasks/README.md), remote branches, and [handoffs](handoffs/README.md) for current work after this snapshot. This file describes integrated milestones only; it is not a replacement for task claims.
-
-## Blockers and open validation needs
-
-- Real hardware is required to verify battery/temperature accuracy and OEM-specific capability support. Public-API implementation and emulator work can proceed independently.
-- Select and pin compatible Kotlin/Compose/AGP/Gradle versions in DS-001; recheck target-SDK requirements before publication.
-- DeviceScope has no backend or credential requirement in the current scope.
-
-## Updating this file
-
-The task integrator updates this snapshot when a milestone reaches main. Record the implementation commit, actual passing/failing/skipped checks, and next task IDs. Concurrent workers update their own task and handoff files instead.
+Next: A claims DS-003 hardware collectors. B continues DS-002 UI specification; DS-004
+requires both DS-001 and DS-002 integrated. B receives app/navigation/designsystem
+ownership in DS-004; A will not edit those during DS-003. See task records and remote
+handoffs for current claims. Physical phones remain required for accuracy validation.
