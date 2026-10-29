@@ -19,3 +19,23 @@ Two cloud sessions use task claims on main, distinct task branches, a defined sh
 ## Adding a decision
 
 Append an ID, date, owner/task, context, decision, alternatives, affected paths/interfaces, and validation/migration impact. Reversing an earlier decision requires a new entry linking to it; do not erase the earlier rationale.
+
+## D-005 — Reproducible native bootstrap (2026-10-29, A / DS-001)
+
+Pin AGP 8.13.0 / Gradle 8.14.3 / Kotlin and Compose compiler 2.2.20,
+Compose BOM 2025.10.00, Java 21, compile/target 36 and min 26. Keep the version
+catalog and checksum-pinned wrapper entirely within DeviceScope. A dedicated CI
+workflow runs tests, lint and APK assembly from this build root.
+
+Implement app, model, hardware and designsystem modules now. Model remains pure
+Kotlin/JVM for deterministic tests; a root testDebugUnitTest aggregate includes its
+tests. Data/feature paths remain documented boundaries until implementation needs
+them, avoiding empty Android modules. No cross-app dependencies or production fakes.
+DS-004/B takes app navigation and designsystem ownership after DS-001 integration;
+DS-003/A touches hardware only. Existing design contract 0.1 is formalized with exact
+Kotlin names in DATA_CONTRACT.md; B amendments arrive through committed handoffs.
+
+Gradle dependency locking records resolved debug/test/lint configurations in each
+module. Refresh deliberately with `--write-locks` on the documented gate when
+updating dependencies; commit resulting locks with the catalog change. TLS and the
+Gradle distribution checksum remain enabled.

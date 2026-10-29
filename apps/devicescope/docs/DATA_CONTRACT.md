@@ -49,3 +49,17 @@ Static capability metadata includes API-level requirements, optional permission 
 Default monitoring interval proposal: 2 seconds for ordinary polled metrics, with collector-specific minimums overriding it. Sensor streams use explicit bounded rates suitable for the selected chart, not raw maximum rates. Validate sign conventions for battery current by device; do not silently invert current to match an assumption.
 
 Shared interface changes require: a version note here, named downstream task impact, migration of affected fakes/tests, and notification through the pushed task/handoff. Do not resolve contract differences by maintaining incompatible duplicate model classes.
+
+## Version 0.1 implementation agreement — DS-001, slot A
+
+The existing design above is the bootstrap agreement; no downstream Kotlin exists yet.
+Package `com.laska.devicescope.core.model` is pure Kotlin/JVM and has no Android/Compose imports.
+
+- `MetricKey<T>(id, unit)` and `Measurement<T>(key, result, source, provenance, sampledAt, freshness)` keep values typed. `Reading<T>` is sealed: `Available(value)`, `Unsupported(explanation)`, `PermissionRequired(permission, explanation)`, `TemporarilyUnavailable(explanation)`, `Error(explanation)`. Only Available has a value. Invalid numeric values are rejected, never rendered as zero.
+- `SampleTime(epochMillis, elapsedRealtimeMillis)` uses UTC wall time plus Android monotonic time since boot. Plot session-relative time by subtracting session start's monotonic time; never subtract wall times for intervals.
+- `Freshness` is FRESH, STALE or PAUSED. `Provenance` is REPORTED, MEASURED or ESTIMATED. `MetricUnit` distinguishes CELSIUS, RATIO, BYTES, MICROAMPS, MILLIVOLTS, MILLISECONDS, COUNT, HERTZ, PIXELS, DPI and TEXT.
+- `Capability(key, minimumApi, permission, minimumIntervalMillis, availability)` uses explicit availability (AVAILABLE, UNSUPPORTED, UNKNOWN). UNKNOWN discovery does not imply a fresh sample.
+- `HardwareSnapshot(measurements, capabilities)` and `HardwareRepository.observe(): Flow<HardwareSnapshot>` form the read-only UI boundary. Production repositories are cold and stop when collection is cancelled. DS-003 supplies the factory `AndroidHardwareRepository(context)` in `core:hardware`; DS-004 should collect inside `repeatOnLifecycle(STARTED)`/`collectAsStateWithLifecycle`.
+- DS-001 app is an honest bootstrap screen, with no numeric demo readings or production fake provider. Fakes live in test source sets only. Session persistence/selection contracts will be added by DS-005/DS-007 before consumers implement them.
+
+Ownership: A owns shared models/build configuration and core:hardware. B owns core:designsystem and feature UI after DS-001 integration; B may take app/navigation wiring in DS-004. A will not edit that wiring during DS-003. B should commit requested contract amendments in its task/handoff; A will review remote handoffs before integration. These additive Kotlin names formalize the existing 0.1 design; downstream impact is DS-003/004/005/006/007/008. No competing models should be introduced.
