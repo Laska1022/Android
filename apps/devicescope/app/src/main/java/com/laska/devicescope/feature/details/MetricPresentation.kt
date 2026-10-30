@@ -16,6 +16,7 @@ data class MetricPresentation(
     val provenance: Provenance? = null,
     val sampledAt: SampleTime? = null,
     val intervalMillis: Long = 0,
+    val exactValue: String? = null,
 )
 
 fun presentMetric(
@@ -49,7 +50,9 @@ fun presentMetric(
                 measurement.freshness == Freshness.STALE || (interval > 0 && (age < 0 || (age > interval && age - interval > interval))) -> DisplayState.STALE
                 else -> DisplayState.AVAILABLE
             }
-            base.copy(state = state, value = formatted.first, spokenValue = formatted.second)
+            base.copy(state = state, value = formatted.first, spokenValue = formatted.second,
+                exactValue = if (measurement.key.unit == MetricUnit.BYTES && reading.value is Number)
+                    "${NumberFormat.getIntegerInstance(locale).format(reading.value)} bytes" else null)
         }
     }
 }
@@ -85,8 +88,11 @@ internal fun formatValue(value: Any, unit: MetricUnit, id: String, locale: Local
         MetricUnit.MICROAMPS -> result(number / 1_000, "mA", "milliamps", 1)
         MetricUnit.MILLIVOLTS -> result(number / 1_000, "V", "volts", 2)
         // Only named bounded fractions may be percentages. Headroom is dimensionless.
-        MetricUnit.RATIO -> if (id == "battery.level" || id == "cpu.utilization") result(number * 100, "%", "percent", 1) else n(number, 2).let { it to it }
-        MetricUnit.COUNT -> n(number).let { it to it }
+        MetricUnit.RATIO -> if (id == "battery.level" || id == "cpu.utilization") {
+            if (number in 0.0..1.0) result(number * 100, "%", "percent", 1) else null
+        } else n(number, 2).let { it to it }
+        MetricUnit.COUNT -> if (number < 0 || number % 1.0 != 0.0) null else
+            NumberFormat.getIntegerInstance(locale).format(value).let { it to it }
         MetricUnit.HERTZ -> result(number, "Hz", "hertz", 2)
         MetricUnit.PIXELS -> result(number, "px", "pixels")
         MetricUnit.DPI -> result(number, "dpi", "dots per inch")

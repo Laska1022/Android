@@ -21,13 +21,12 @@
     <string name="no_sample">No reading yet</string>
     <string name="empty_inventory">No accessible items reported</string>
     <string name="read_this_visit">Read on this visit</string>
-    <string name="sample_age">Last read %1$d seconds ago</string>
     <string name="sample_clock_changed">Sample clock changed · refresh required</string>
     <string name="sample_time">Read attempt: %1$s</string>
     <string name="source_label">Source: %1$s</string>
-    <string name="reported">Provenance: reported by Android</string>
-    <string name="measured">Provenance: measured</string>
-    <string name="estimated">Provenance: estimated or derived; see source definition</string>
+    <string name="reported">Reported by Android</string>
+    <string name="measured">Measured</string>
+    <string name="estimated">Estimated or derived; see source definition</string>
     <string name="permission_restriction">This version does not request additional access for this field. Other device information remains available.</string>
     <string name="open_source">View source and explanation</string>
     <string name="view_details">View details</string>
@@ -92,4 +91,9 @@
     <string name="reports_pending_title">Reports are not available yet</string>
     <string name="reports_pending_hint">Session history and local exports are not available in this version. No reports are saved or uploaded.</string>
     <string name="metric">Hardware field</string>
+    <string name="camera_identity">Camera %1$s</string>
+    <plurals name="sample_age">
+        <item quantity="one">Last read %1$d second ago</item>
+        <item quantity="other">Last read %1$d seconds ago</item>
+    </plurals>
 </resources>

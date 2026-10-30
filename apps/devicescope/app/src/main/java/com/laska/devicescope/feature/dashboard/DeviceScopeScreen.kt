@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.unit.dp
 import com.laska.devicescope.R
@@ -60,7 +61,7 @@ fun DeviceScopeScreen(
         val compactNav = maxWidth < 360.dp || fontScale > 1.3f
         val overviewColumns = maxWidth >= 600.dp && fontScale <= 1.3f
         val selected = hardwareSections.firstOrNull { it.id == sectionId }
-        BackHandler(enabled = detailId == null && (destination != 0 || sectionId != null)) {
+        BackHandler(enabled = detailId == null && destination != 0) {
             if (destination == 1 && sectionId != null && !twoPane) sectionId = null
             else { destination = 0; sectionId = null }
         }
@@ -180,20 +181,21 @@ private fun SectionLink(title: Int, subtitle: Int, id: String, onSection: (Strin
 @Composable
 private fun Hardware(state: ExplorerState, locale: Locale, selected: HardwareSection?, twoPane: Boolean, onSection: (String) -> Unit, onDetail: (String) -> Unit) {
     val detailState = rememberSaveableStateHolder()
+    val activeSection = selected ?: hardwareSections.first().takeIf { twoPane }
     Row(Modifier.fillMaxSize()) {
         if (twoPane || selected == null) LazyColumn(
             Modifier.then(if (twoPane) Modifier.width(256.dp) else Modifier.fillMaxWidth()).testTag("hardware-list"),
             contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(hardwareSections, key = { it.id }) { section ->
                 OutlinedButton(onClick = { onSection(section.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
-                    .testTag("section-${section.id}").semantics { this.selected = selected?.id == section.id },
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selected?.id == section.id)
+                    .testTag("section-${section.id}").semantics { this.selected = activeSection?.id == section.id },
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = if (activeSection?.id == section.id)
                         MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                     Text(stringResource(section.title), modifier = Modifier.fillMaxWidth())
                 }
             }
         }
-        val detail = selected ?: if (twoPane) hardwareSections.first() else null
+        val detail = activeSection
         if (detail != null) detailState.SaveableStateProvider(detail.id) {
             SectionDetails(detail, state, locale, Modifier.weight(1f), onDetail)
         }
@@ -219,7 +221,9 @@ private fun fieldFor(id: String): MetricField = (hardwareSections.flatMap { it.f
         "facing" -> R.string.camera_facing; "hardware_level" -> R.string.camera_level; "focal_lengths" -> R.string.focal_lengths; else -> R.string.metric
     })
 
-private fun presentation(state: ExplorerState, field: MetricField, locale: Locale) = presentMetric(
+private fun presentation(state: ExplorerState, field: MetricField, locale: Locale) = if (state.failed)
+    MetricPresentation(DisplayState.ERROR)
+else presentMetric(
     state.snapshot?.findMetric(field.id), state.snapshot?.capabilities?.firstOrNull { it.key.id == field.id },
     state.nowElapsedMillis, state.collecting, state.snapshot != null, locale)
 
@@ -231,7 +235,9 @@ private fun MetricCard(field: MetricField, p: MetricPresentation, now: Long, mod
     val value = if (empty) stringResource(R.string.empty_inventory) else p.value ?: status
     val source = p.source ?: stringResource(R.string.no_sample)
     val freshness = ageLabel(p, now)
-    val spoken = listOf(title, if (empty) value else p.spokenValue ?: status, if (p.value != null) status else null,
+    val provenance = p.provenance?.let { stringResource(provenanceLabel(it)) }
+    val camera = if (field.id.startsWith("camera.id_")) stringResource(R.string.camera_identity, field.id.substringBeforeLast('.').removePrefix("camera.")) else null
+    val spoken = listOf(title, camera, if (empty) value else p.spokenValue ?: status, if (p.value != null) status else null, provenance,
         p.explanation, source, freshness).filterNotNull().joinToString(". ")
     val actionLabel = stringResource(R.string.open_source)
     OutlinedCard(onClick = onDetail, modifier = modifier.fillMaxWidth().clearAndSetSemantics {
@@ -240,11 +246,12 @@ private fun MetricCard(field: MetricField, p: MetricPresentation, now: Long, mod
     }, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
-            if (field.id.startsWith("camera.id_")) Text(field.id.substringBeforeLast('.'), style = MaterialTheme.typography.bodyMedium)
+            camera?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             Text(value, style = if (p.value != null && p.value.length < 36) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.bodyLarge)
             if (p.value != null) Text(status, style = MaterialTheme.typography.labelLarge,
                 color = if (p.state == DisplayState.AVAILABLE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
             p.explanation?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            provenance?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             field.hint?.let { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
             Text(source, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(freshness, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -259,7 +266,14 @@ private fun ageLabel(p: MetricPresentation, now: Long): String {
     if (p.intervalMillis == 0L) return stringResource(R.string.read_this_visit)
     val age = now - sampled.elapsedRealtimeMillis
     if (age < 0) return stringResource(R.string.sample_clock_changed)
-    return stringResource(R.string.sample_age, age / 1_000)
+    val seconds = age / 1_000
+    return pluralStringResource(R.plurals.sample_age, seconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), seconds)
+}
+
+private fun provenanceLabel(value: Provenance) = when (value) {
+    Provenance.REPORTED -> R.string.reported
+    Provenance.MEASURED -> R.string.measured
+    Provenance.ESTIMATED -> R.string.estimated
 }
 
 private fun stateLabel(state: DisplayState) = when (state) {
@@ -277,12 +291,11 @@ private fun SourceDialog(field: MetricField, p: MetricPresentation, locale: Loca
             Column(Modifier.verticalScroll(rememberScrollState()).testTag("source-details"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(stateLabel(p.state)))
                 p.value?.let { Text(it.ifEmpty { stringResource(R.string.empty_inventory) }) }
+                p.exactValue?.let { Text(it) }
                 p.explanation?.let { Text(it) }
                 if (p.state == DisplayState.PERMISSION) Text(stringResource(R.string.permission_restriction))
                 Text(stringResource(R.string.source_label, p.source ?: stringResource(R.string.no_sample)))
-                p.provenance?.let { Text(stringResource(when (it) {
-                    Provenance.REPORTED -> R.string.reported; Provenance.MEASURED -> R.string.measured; Provenance.ESTIMATED -> R.string.estimated
-                })) }
+                p.provenance?.let { Text(stringResource(provenanceLabel(it))) }
                 p.sampledAt?.let { Text(stringResource(R.string.sample_time, DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG, locale).format(Date(it.epochMillis)))) }
                 field.hint?.let { Text(stringResource(it)) }
             }

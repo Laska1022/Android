@@ -41,7 +41,9 @@ internal fun DeviceScopeRoute(repository: HardwareRepository, sampleData: Boolea
             return@LaunchedEffect
         }
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            state = state.copy(collecting = true, failed = false)
+            // Permissions and static inventory may have changed while we were stopped.
+            // Clear the previous snapshot until this collection finishes fresh discovery.
+            state = ExplorerState(collecting = true, nowElapsedMillis = SystemClock.elapsedRealtime())
             val clock = launch {
                 while (true) {
                     state = state.copy(nowElapsedMillis = SystemClock.elapsedRealtime())

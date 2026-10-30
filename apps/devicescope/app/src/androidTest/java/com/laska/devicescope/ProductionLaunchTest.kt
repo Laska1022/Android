@@ -21,6 +21,7 @@ class ProductionLaunchTest {
         rule.onNodeWithTag("nav-1").performClick()
         rule.onNodeWithTag("section-cpu").performClick()
         rule.onNodeWithTag("detail-list").performScrollToNode(hasTestTag("metric-cpu.temperature"))
-        rule.onNodeWithContentDescription("No universal public Android API", substring = true).assertExists()
+        rule.onNodeWithTag("metric-cpu.temperature")
+            .assert(hasContentDescription("No universal public Android API", substring = true))
     }
 }

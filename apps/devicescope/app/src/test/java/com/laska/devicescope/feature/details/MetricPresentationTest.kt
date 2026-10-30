@@ -88,4 +88,21 @@ class MetricPresentationTest {
         assertEquals(Reading.Available(34.6), reading.result)
         assertEquals("34,6 degrees Celsius", result.spokenValue)
     }
+
+    @Test fun boundedPercentagesCannotOverflowAndHeadroomRemainsUnbounded() {
+        for (value in listOf(-0.1, 1.01, Double.MAX_VALUE)) {
+            assertNull(formatValue(value, MetricUnit.RATIO, "battery.level", Locale.US))
+            assertNull(formatValue(value, MetricUnit.RATIO, "cpu.utilization", Locale.US))
+        }
+        assertEquals("1.25", formatValue(1.25, MetricUnit.RATIO, "thermal.headroom", Locale.US)?.first)
+    }
+
+    @Test fun integerCountsAndExactBytesDoNotLoseLongPrecision() {
+        assertEquals("9,223,372,036,854,775,807", formatValue(Long.MAX_VALUE, MetricUnit.COUNT, "sensor.count", Locale.US)?.first)
+        assertNull(formatValue(1.5, MetricUnit.COUNT, "sensor.count", Locale.US))
+        assertNull(formatValue(-1L, MetricUnit.COUNT, "sensor.count", Locale.US))
+        val bytes = MetricKey<Long>("memory.total", MetricUnit.BYTES)
+        val reading = Measurement(bytes, Reading.Available(Long.MAX_VALUE), "Sample memory", Provenance.REPORTED, time)
+        assertEquals("9,223,372,036,854,775,807 bytes", presentMetric(reading, Capability(bytes), 10_000, true, true, Locale.US).exactValue)
+    }
 }

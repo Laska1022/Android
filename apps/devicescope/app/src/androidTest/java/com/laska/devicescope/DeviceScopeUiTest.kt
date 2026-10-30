@@ -2,6 +2,7 @@ package com.laska.devicescope
 
 import android.graphics.Bitmap
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.CompositionLocalProvider
@@ -9,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.StateRestorationTester
@@ -49,7 +51,7 @@ class DeviceScopeUiTest {
         rule.setContent {
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
                 DeviceScopeTheme(darkTheme = dark) {
-                    Box(Modifier.requiredSize(width.dp, 700.dp)) { DeviceScopeScreen(state, sampleData = true) }
+                    Box(Modifier.requiredSize(width.dp, 700.dp).testTag("device-frame")) { DeviceScopeScreen(state, sampleData = true) }
                 }
             }
         }
@@ -138,7 +140,7 @@ class DeviceScopeUiTest {
         show(width = 320, fontScale = 2f)
         rule.onNodeWithTag("overview-list").performScrollToNode(hasTestTag("metric-memory.available"))
         val bounds = rule.onNodeWithTag("metric-memory.available").fetchSemanticsNode().boundsInRoot
-        val root = rule.onRoot().fetchSemanticsNode().boundsInRoot
+        val root = rule.onNodeWithTag("device-frame").fetchSemanticsNode().boundsInRoot
         assertTrue(bounds.left >= root.left); assertTrue(bounds.right <= root.right)
         for (index in 0..3) rule.onNodeWithTag("nav-$index").assertIsDisplayed().assertHasClickAction()
         screenshot("phone-large-text.png")
@@ -151,14 +153,38 @@ class DeviceScopeUiTest {
         rule.onNodeWithTag("nav-1").performClick()
         rule.onNodeWithTag("hardware-list").assertIsDisplayed()
         rule.onNodeWithTag("detail-list").assertIsDisplayed()
+        rule.onNodeWithTag("section-device").assertIsSelected()
         rule.onNodeWithTag("section-cpu").performClick()
         rule.onNodeWithTag("detail-list").assertExists()
         screenshot("tablet-light.png")
     }
 
+    @Test fun overviewBackReachesTheHostEvenWithRetainedHardwareSelection() {
+        var hostBacks = 0
+        rule.setContent {
+            BackHandler { hostBacks++ }
+            DeviceScopeTheme { DeviceScopeScreen(fixture(), sampleData = true) }
+        }
+        rule.onNodeWithTag("nav-1").performClick()
+        rule.onNodeWithTag("section-cpu").performClick()
+        rule.onNodeWithTag("nav-0").performClick()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.runOnIdle { assertEquals(1, hostBacks) }
+    }
+
+    @Test fun openSourceDialogPreservesReadFailureInsteadOfCallingItMissingFeature() {
+        val state = mutableStateOf(fixture())
+        rule.setContent { DeviceScopeTheme { DeviceScopeScreen(state.value, sampleData = true) } }
+        rule.onNodeWithTag("metric-memory.available").performClick()
+        rule.runOnIdle { state.value = ExplorerState(failed = true) }
+        rule.onNode(hasText("Couldn’t read this value") and hasAnyAncestor(hasTestTag("source-details"))).assertExists()
+        rule.onNodeWithText("Not available in this version").assertDoesNotExist()
+        rule.onNodeWithText("Source: Sample ActivityManager").assertDoesNotExist()
+    }
+
     private fun screenshot(name: String) {
         rule.waitForIdle()
-        val image = rule.onRoot().captureToImage().asAndroidBitmap()
+        val image = rule.onNodeWithTag("device-frame").captureToImage().asAndroidBitmap()
         File(rule.activity.cacheDir, name).outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 }
