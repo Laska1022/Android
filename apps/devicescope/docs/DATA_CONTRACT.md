@@ -133,3 +133,15 @@ and freshness rather than interpreting capability as evidence of a current sampl
   remains the README gate. No runtime CAMERA permission is declared/requested for
   inventory; a PermissionRequired result explains restriction and must not offer an
   ineffective permission button in this build. Only ACCESS_NETWORK_STATE is added.
+
+## DS-010 correctness clarifications (2026-10-30)
+
+No public signatures, keys, units or ownership change. A zero/invalid total capacity
+cannot justify an Available free-byte counter: both RAM and storage validate the
+pair (`total > 0`, `0 <= available <= total`). A real full filesystem still reports
+Available(0). Sensor inventory strings preserve valid numbers, but invalid/negative/
+non-finite numeric metadata is explicitly unavailable. Sensor.getMinDelay sentinels
+-1 and 0 are described as one-shot and non-periodic reporting, not negative or
+zero-period sampling intervals. GPU acquisition/preflight/cleanup exceptions affect
+GPU readings only; cancellation remains cancellation. Failed resource releases are
+not reported as a successful query, and other cleanup steps are still attempted.
