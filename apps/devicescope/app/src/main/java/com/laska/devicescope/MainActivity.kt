@@ -17,6 +17,7 @@ import com.laska.devicescope.feature.dashboard.ExplorerState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,10 +36,13 @@ internal fun DeviceScopeRoute(repository: HardwareRepository, sampleData: Boolea
     var required by remember { mutableStateOf(true) }
     var retry by remember { mutableIntStateOf(0) }
     var lastRetry by remember { mutableLongStateOf(-2_000) }
-    LaunchedEffect(repository, lifecycle, required, retry) {
-        if (!required) {
+    LaunchedEffect(repository, lifecycle) {
+      // collectLatest cancels AND joins the prior collection, including resource cleanup.
+      // Restarting independent effects could overlap old cleanup with the new subscription.
+      snapshotFlow { required to retry }.collectLatest { (needed, _) ->
+        if (!needed) {
             state = state.copy(collecting = false)
-            return@LaunchedEffect
+            return@collectLatest
         }
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             // Permissions and static inventory may have changed while we were stopped.
@@ -64,6 +68,7 @@ internal fun DeviceScopeRoute(repository: HardwareRepository, sampleData: Boolea
                 state = state.copy(collecting = false)
             }
         }
+      }
     }
     DeviceScopeScreen(state, sampleData = sampleData, onCollectionNeeded = { required = it }, onRetry = {
         val now = SystemClock.elapsedRealtime()

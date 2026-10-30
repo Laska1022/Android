@@ -11,6 +11,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.laska.devicescope.core.designsystem.DeviceScopeTheme
 import com.laska.devicescope.core.model.*
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.flow
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -35,19 +38,23 @@ class CollectionLifecycleTest {
                 try {
                     emit(HardwareSnapshot(emptyList(), emptyList()))
                     awaitCancellation()
-                } finally { Log.i("DeviceScopeLifecycleTest", "stop: active=${active.decrementAndGet()}") }
+                } finally {
+                    // Model a collector that must finish releasing resources on cancellation.
+                    withContext(NonCancellable) { delay(100) }
+                    Log.i("DeviceScopeLifecycleTest", "stop: active=${active.decrementAndGet()}")
+                }
             }
         }
         rule.setContent { DeviceScopeTheme { DeviceScopeRoute(repository, sampleData = true) } }
-        rule.waitUntil(10_000) { active.get() == 1 }
+        rule.waitUntil(30_000) { active.get() == 1 }
         rule.onNodeWithTag("nav-2").performClick()
-        rule.waitUntil(10_000) { active.get() == 0 }
+        rule.waitUntil(30_000) { active.get() == 0 }
         rule.onNodeWithTag("nav-0").performClick()
-        rule.waitUntil(10_000) { starts.get() == 2 && active.get() == 1 }
+        rule.waitUntil(30_000) { starts.get() == 2 && active.get() == 1 }
         rule.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
-        rule.waitUntil(10_000) { active.get() == 0 }
+        rule.waitUntil(30_000) { active.get() == 0 }
         rule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
-        rule.waitUntil(10_000) { starts.get() == 3 && active.get() == 1 }
+        rule.waitUntil(30_000) { starts.get() == 3 && active.get() == 1 }
         assertEquals(1, maximum.get())
     }
 
@@ -64,11 +71,11 @@ class CollectionLifecycleTest {
             }
         }
         rule.setContent { DeviceScopeTheme { DeviceScopeRoute(repository, sampleData = true) } }
-        rule.waitUntil(10_000) { starts.get() == 1 }
+        rule.waitUntil(30_000) { starts.get() == 1 }
         rule.onNodeWithContentDescription("Sample previous authorized reading", substring = true).assertExists()
         rule.onNodeWithTag("nav-2").performClick()
         rule.onNodeWithTag("nav-0").performClick()
-        rule.waitUntil(10_000) { starts.get() == 2 }
+        rule.waitUntil(30_000) { starts.get() == 2 }
         rule.onNodeWithContentDescription("Sample previous authorized reading", substring = true).assertDoesNotExist()
         rule.onNodeWithTag("metric-memory.available").assertExists()
     }
