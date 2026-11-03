@@ -57,3 +57,14 @@ devices. JVM tests validate guards, invalid counters, field failure isolation an
 stream cancellation, not vendor readings, EGL driver cleanup, hotplug behavior,
 permission transitions or background/rotation on Android. Those require device
 validation and remain explicit DS-009 checks. See DS-003 handoff for exact counts.
+
+## Collector regression review (DS-010, 2026-10-30)
+
+JVM fault injection reproduced invalid capacity-pair acceptance, non-finite sensor
+metadata formatting, misinterpreted [Sensor.getMinDelay](https://developer.android.com/reference/android/hardware/Sensor#getMinDelay())
+sentinels, uncaught GPU preflight exceptions and incomplete/unchecked cleanup.
+Corrections preserve valid zero values and existing metric identities. Cleanup tries
+restore/unbind, surface, context and display release independently; failure is a GPU
+error rather than a whole-stream exception. These tests cover failure policy and
+formatting, not actual vendor EGL behavior or physical sensor accuracy. Device rows
+above remain untested. See the DS-010 handoff for exact test counts and build results.

@@ -69,9 +69,8 @@ internal class AndroidHardwareSource(private val context: Context) : HardwareSou
             val manager = context.getSystemService(SensorManager::class.java)
                 ?: return@field Reading.Unsupported("Sensor service unavailable")
             Reading.Available(manager.getSensorList(Sensor.TYPE_ALL).map { sensor ->
-                "${sensor.name} | vendor=${sensor.vendor} | type=${sensor.stringType} | " +
-                    "range=${sensor.maximumRange} ${sensorUnit(sensor.type)} | resolution=${sensor.resolution} ${sensorUnit(sensor.type)} | " +
-                    "power=${sensor.power} mA | minimum delay=${sensor.minDelay} us"
+                formatSensorMetadata(sensor.name, sensor.vendor, sensor.stringType, sensorUnit(sensor.type),
+                    sensor.maximumRange, sensor.resolution, sensor.power, sensor.minDelay)
             })
         }
         var manager: CameraManager? = null
@@ -122,7 +121,7 @@ internal class AndroidHardwareSource(private val context: Context) : HardwareSou
         field(HardwareMetrics.MEMORY_TOTAL, "ActivityManager.MemoryInfo.totalMem", interval = 2_000) { positive(memoryInfo().totalMem) }
         field(HardwareMetrics.MEMORY_AVAILABLE, "ActivityManager.MemoryInfo.availMem", interval = 2_000) {
             val m = memoryInfo()
-            if (m.availMem > m.totalMem) Reading.TemporarilyUnavailable("Inconsistent RAM counters") else nonNegative(m.availMem)
+            availableCapacity(m.totalMem, m.availMem)
         }
         field(HardwareMetrics.MEMORY_USED, "MemoryInfo.totalMem - availMem (cache-inclusive)", interval = 2_000, provenance = Provenance.ESTIMATED) {
             val m = memoryInfo(); usedMemory(m.totalMem, m.availMem)
@@ -131,7 +130,7 @@ internal class AndroidHardwareSource(private val context: Context) : HardwareSou
         fun stat(): StatFs { if (storage == null) storage = StatFs(context.filesDir.absolutePath); return checkNotNull(storage) }
         field(HardwareMetrics.STORAGE_APP_DATA_TOTAL, "StatFs(app data filesystem).totalBytes", interval = 2_000) { positive(stat().totalBytes) }
         field(HardwareMetrics.STORAGE_APP_DATA_AVAILABLE, "StatFs(app data filesystem).availableBytes", interval = 2_000) {
-            if (stat().availableBytes > stat().totalBytes) Reading.TemporarilyUnavailable("Inconsistent storage counters") else nonNegative(stat().availableBytes)
+            availableCapacity(stat().totalBytes, stat().availableBytes)
         }
         fun display() = checkNotNull(context.getSystemService(DisplayManager::class.java)?.getDisplay(Display.DEFAULT_DISPLAY))
         field(HardwareMetrics.DISPLAY_WIDTH, "Display.Mode.physicalWidth", interval = 2_000) { positive(display().mode.physicalWidth.toLong()) }

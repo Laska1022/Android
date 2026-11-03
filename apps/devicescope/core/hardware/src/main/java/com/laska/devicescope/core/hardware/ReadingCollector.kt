@@ -43,3 +43,9 @@ internal fun positive(value: Double): Reading<Double> = if (!value.isFinite() ||
 
 internal fun usedMemory(total: Long, available: Long): Reading<Long> = if (total <= 0 || available < 0 || available > total)
     Reading.TemporarilyUnavailable("Android returned inconsistent RAM counters") else Reading.Available(total - available)
+
+// Shared path for RAM and app-data storage capacity pairs.
+internal fun availableCapacity(total: Long, available: Long): Reading<Long> =
+    if (total <= 0 || available < 0 || available > total)
+        Reading.TemporarilyUnavailable("Android returned unavailable or inconsistent capacity counters")
+    else Reading.Available(available)

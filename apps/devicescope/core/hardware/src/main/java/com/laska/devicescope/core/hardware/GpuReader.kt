@@ -6,13 +6,16 @@ import com.laska.devicescope.core.model.Reading
 import kotlinx.coroutines.CancellationException
 
 /** Called on IO, never the UI thread. Every partial setup path is cleaned up. */
-internal fun readGpuStrings(): Reading<Map<Int, String?>> {
+internal fun readGpuStrings(): Reading<Map<Int, String?>> = gpuReading { queryGpuStrings() }
+
+private fun queryGpuStrings(): Reading<Map<Int, String?>> {
     val previousDisplay = E.eglGetCurrentDisplay()
     val previousContext = E.eglGetCurrentContext()
     val previousDraw = E.eglGetCurrentSurface(E.EGL_DRAW)
     val previousRead = E.eglGetCurrentSurface(E.EGL_READ)
     val display = E.eglGetDisplay(E.EGL_DEFAULT_DISPLAY)
     if (display == E.EGL_NO_DISPLAY) return Reading.Error("EGL display unavailable")
+    var cancelled = false
     var initialized = false
     var context = E.EGL_NO_CONTEXT
     var surface = E.EGL_NO_SURFACE
@@ -29,16 +32,26 @@ internal fun readGpuStrings(): Reading<Map<Int, String?>> {
         check(surface != E.EGL_NO_SURFACE)
         check(E.eglMakeCurrent(display, surface, surface, context))
         Reading.Available(listOf(G.GL_VENDOR, G.GL_RENDERER, G.GL_VERSION).associateWith { G.glGetString(it) })
-    } catch (cancelled: CancellationException) { throw cancelled
+    } catch (cancellation: CancellationException) { cancelled = true; throw cancellation
     } catch (_: Exception) { Reading.Error("Android could not initialize a public OpenGL context")
     } finally {
         if (initialized) {
-            if (previousDisplay != E.EGL_NO_DISPLAY && previousContext != E.EGL_NO_CONTEXT)
-                E.eglMakeCurrent(previousDisplay, previousDraw, previousRead, previousContext)
-            else E.eglMakeCurrent(display, E.EGL_NO_SURFACE, E.EGL_NO_SURFACE, E.EGL_NO_CONTEXT)
-            if (surface != E.EGL_NO_SURFACE) E.eglDestroySurface(display, surface)
-            if (context != E.EGL_NO_CONTEXT) E.eglDestroyContext(display, context)
-            E.eglTerminate(display)
+            var previousRestored = false
+            val released = releaseGpuResources(
+                {
+                    if (previousDisplay != E.EGL_NO_DISPLAY && previousContext != E.EGL_NO_CONTEXT) {
+                        previousRestored = E.eglMakeCurrent(previousDisplay, previousDraw, previousRead, previousContext)
+                        previousRestored
+                    } else true
+                },
+                // Separate attempt: still unbind our context if restoration itself throws.
+                { previousRestored || E.eglMakeCurrent(display, E.EGL_NO_SURFACE, E.EGL_NO_SURFACE, E.EGL_NO_CONTEXT) },
+                { surface == E.EGL_NO_SURFACE || E.eglDestroySurface(display, surface) },
+                { context == E.EGL_NO_CONTEXT || E.eglDestroyContext(display, context) },
+                { E.eglTerminate(display) },
+            )
+            // Preserve cancellation even if cleanup also fails.
+            if (!cancelled) check(released) { "EGL cleanup failed" }
         }
     }
 }
