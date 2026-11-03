@@ -1,6 +1,6 @@
 # Integrated status
 
-Updated: 2026-10-29. DeviceScope only.
+Updated: 2026-11-03. DeviceScope only.
 
 ## Completed milestones
 
@@ -15,30 +15,45 @@ Updated: 2026-10-29. DeviceScope only.
   A integration 106c782f73a4827e5f3a827d5481a8a71b9cc971. Canonical collector IDs
   and mandatory timestamps in DATA_CONTRACT override provisional UI examples.
 
+- DS-004: original adaptive Compose explorer using the real hardware repository,
+  explicit availability/freshness/source details, lifecycle-safe collection and
+  native regression coverage. Code c223fc837940e963d821c2ea758242e96474bcb8;
+  main merge 6e675bc153005898db7763900a54bcc3440a1270.
+
 ## Actual validation
 
-A: testDebugUnitTest/lintDebug/assembleDebug passed from apps/devicescope with
-locks, including merged main after DS-003: 10 hardware + 7 model JVM tests,
-0 failures/skips. Lint 0 errors, 7 existing app warnings (dependency update notices,
-backup guidance, bootstrap icon); no hardware/designsystem issues. APK package,
-min26/target36, launcher, normal permissions and debug signature verified.
-B's design handoff records 42 browser layout cases, state/theme checks, token
-contrast and screenshot inspection. A reviewed spec/contract/code boundaries and
-validated documentation links/sample labels; no Android UI result is inferred.
-No device/emulator is connected; runtime, sensor accuracy, EGL drivers, lifecycle,
-rotation, native accessibility and performance are untested. Remote CI not observed.
+B: documented testDebugUnitTest/lintDebug/assembleDebug plus
+:app:assembleDebugAndroidTest passed on merged DS-004 main. 27 JVM tests (10 UI
+presenter, 10 hardware, 7 model), zero failures/errors/skips. Lint: zero errors,
+six existing app warnings (five dependency updates, DataExtractionRules);
+hardware/designsystem clean. Debug app and instrumentation APKs assembled.
+
+API 29 software emulator: 13/14 full-suite scenarios passed; the remaining Back
+test was synchronized with navigation recomposition and passed in the final focused
+2/2 Back/large-text rerun. All 14 scenarios have a passing result across runs,
+not a single clean full-suite run. Real production launch, honest unsupported CPU
+temperature, route/background cancellation, rediscovery and serialized collector
+cleanup passed. Native phone dark, tablet light and 320dp/200% text captures inspected;
+merged accessibility semantics/actions checked. API 35 attempts were not a clean
+pass. Manual TalkBack, physical sensor accuracy, OEM EGL behavior and release
+performance/device matrix remain untested. Remote CI has not been observed.
+
+B's DS-002 handoff separately records 42 browser layout cases, state/theme checks
+and contrast checks; those are design reference evidence, not native device tests.
+See tasks/DS-004.md and handoffs/2026-11-03T064700Z-b-ds004-ready.md for commands,
+failures, corrections and scope. No Robots vs Aliens changes.
 
 ## Next work and ownership
 
-B may claim DS-004 (both prerequisites integrated) and wire real repository data
-into Compose. A's next available task is DS-005 battery/thermal monitoring; it is
-unclaimed. Current app still shows bootstrap; collectors are provided for DS-004
-injection. Session/report implementations do not exist yet.
+B is the current integrator. A has requested review/merge of ready DS-010 collector
+fixes on devicescope/a/ds-010-collector-fixes; review the remote task/handoff, run
+combined native checks and exercise actual GPU identification/background/resume.
+A's DS-005 battery/thermal/sampling contract is still unclaimed/unimplemented.
+B's DS-006 monitoring UI needs that agreed contract before production integration.
+DS-007 session persistence/report interfaces and later DS-008 UI are also pending.
+The app accurately labels these sections as not available in this version.
 
-B owns app/src and core/designsystem/src, with feature packages inside app for
-DS-004. A grants B narrowly scoped test-dependency/runner configuration edits to
-app/build.gradle.kts, gradle/libs.versions.toml and affected app/test locks during
-DS-004; record them in its claim and use the existing compatible toolchain. Other
-Gradle/model/hardware ownership stays A. B may serve as DS-004 integrator after
-its checks pass, coordinating main/STATUS through normal fetch/merge/push. There
-is no active A integration after this handoff. Check task branches before new work.
+B owns app/src and core/designsystem/src. A retains model/collector and other build
+ownership. DS-004 test dependency/runner edits were limited to the explicitly
+authorized app/build.gradle.kts, gradle/libs.versions.toml and app locks; no new
+modules or competing build. Read task branches and newest handoffs before new work.
