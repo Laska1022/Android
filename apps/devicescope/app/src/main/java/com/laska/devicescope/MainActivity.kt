@@ -37,38 +37,38 @@ internal fun DeviceScopeRoute(repository: HardwareRepository, sampleData: Boolea
     var retry by remember { mutableIntStateOf(0) }
     var lastRetry by remember { mutableLongStateOf(-2_000) }
     LaunchedEffect(repository, lifecycle) {
-      // collectLatest cancels AND joins the prior collection, including resource cleanup.
-      // Restarting independent effects could overlap old cleanup with the new subscription.
-      snapshotFlow { required to retry }.collectLatest { (needed, _) ->
-        if (!needed) {
-            state = state.copy(collecting = false)
-            return@collectLatest
-        }
-        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            // Permissions and static inventory may have changed while we were stopped.
-            // Clear the previous snapshot until this collection finishes fresh discovery.
-            state = ExplorerState(collecting = true, nowElapsedMillis = SystemClock.elapsedRealtime())
-            val clock = launch {
-                while (true) {
-                    state = state.copy(nowElapsedMillis = SystemClock.elapsedRealtime())
-                    delay(1_000)
-                }
-            }
-            try {
-                repository.observe().collect { snapshot ->
-                    state = ExplorerState(snapshot, true, SystemClock.elapsedRealtime())
-                }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                // A failed whole stream must not masquerade as current cached measurements.
-                state = ExplorerState(failed = true)
-            } finally {
-                clock.cancel()
+        // collectLatest cancels AND joins the prior collection, including resource cleanup.
+        // Restarting independent effects could overlap old cleanup with the new subscription.
+        snapshotFlow { required to retry }.collectLatest { (needed, _) ->
+            if (!needed) {
                 state = state.copy(collecting = false)
+                return@collectLatest
+            }
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Permissions and static inventory may have changed while we were stopped.
+                // Clear the previous snapshot until this collection finishes fresh discovery.
+                state = ExplorerState(collecting = true, nowElapsedMillis = SystemClock.elapsedRealtime())
+                val clock = launch {
+                    while (true) {
+                        state = state.copy(nowElapsedMillis = SystemClock.elapsedRealtime())
+                        delay(1_000)
+                    }
+                }
+                try {
+                    repository.observe().collect { snapshot ->
+                        state = ExplorerState(snapshot, true, SystemClock.elapsedRealtime())
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    // A failed whole stream must not masquerade as current cached measurements.
+                    state = ExplorerState(failed = true)
+                } finally {
+                    clock.cancel()
+                    state = state.copy(collecting = false)
+                }
             }
         }
-      }
     }
     DeviceScopeScreen(state, sampleData = sampleData, onCollectionNeeded = { required = it }, onRetry = {
         val now = SystemClock.elapsedRealtime()

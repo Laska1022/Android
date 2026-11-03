@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -143,6 +145,12 @@ class DeviceScopeUiTest {
         val root = rule.onNodeWithTag("device-frame").fetchSemanticsNode().boundsInRoot
         assertTrue(bounds.left >= root.left); assertTrue(bounds.right <= root.right)
         for (index in 0..3) rule.onNodeWithTag("nav-$index").assertIsDisplayed().assertHasClickAction()
+        for ((index, label) in listOf(0 to "Overview", 1 to "Hardware")) {
+            val layouts = mutableListOf<TextLayoutResult>()
+            rule.onNode(hasText(label) and hasAnyAncestor(hasTestTag("nav-$index")), useUnmergedTree = true)
+                .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> assertTrue(action(layouts)) }
+            assertEquals("Large-text navigation label must remain whole", 1, layouts.single().lineCount)
+        }
         screenshot("phone-large-text.png")
     }
 
@@ -168,7 +176,9 @@ class DeviceScopeUiTest {
         rule.onNodeWithTag("nav-1").performClick()
         rule.onNodeWithTag("section-cpu").performClick()
         rule.onNodeWithTag("nav-0").performClick()
-        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.onNodeWithTag("nav-0").assertIsSelected()
+        // Dispatch after navigation's composition has applied the BackHandler enabled state.
+        rule.runOnIdle { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.runOnIdle { assertEquals(1, hostBacks) }
     }
 

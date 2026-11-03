@@ -125,6 +125,7 @@ private fun AppNavigation(destination: Int, stacked: Boolean, onNavigate: (Int) 
                     row.forEach { index ->
                         OutlinedButton(onClick = { onNavigate(index) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)
                             .testTag("nav-$index").semantics { selected = destination == index },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
                             colors = ButtonDefaults.outlinedButtonColors(containerColor = if (destination == index)
                                 MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)) {
                             Text(stringResource(destinationLabels[index]))
@@ -238,7 +239,7 @@ private fun MetricCard(field: MetricField, p: MetricPresentation, now: Long, mod
     val provenance = p.provenance?.let { stringResource(provenanceLabel(it)) }
     val camera = if (field.id.startsWith("camera.id_")) stringResource(R.string.camera_identity, field.id.substringBeforeLast('.').removePrefix("camera.")) else null
     val spoken = listOf(title, camera, if (empty) value else p.spokenValue ?: status, if (p.value != null) status else null, provenance,
-        p.explanation, source, freshness).filterNotNull().joinToString(". ")
+        p.explanation, source, freshness.takeUnless { it == source }).filterNotNull().joinToString(". ")
     val actionLabel = stringResource(R.string.open_source)
     OutlinedCard(onClick = onDetail, modifier = modifier.fillMaxWidth().clearAndSetSemantics {
         contentDescription = spoken; role = Role.Button; testTag = "metric-${field.id}"
@@ -254,7 +255,7 @@ private fun MetricCard(field: MetricField, p: MetricPresentation, now: Long, mod
             provenance?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             field.hint?.let { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
             Text(source, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(freshness, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (freshness != source) Text(freshness, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(actionLabel, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         }
     }
