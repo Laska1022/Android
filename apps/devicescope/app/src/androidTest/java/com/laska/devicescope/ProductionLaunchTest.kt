@@ -47,5 +47,8 @@ class ProductionLaunchTest {
         rule.onNodeWithTag("metric-gpu.renderer").assertIsDisplayed().performClick()
         rule.onNodeWithText("Source: EGL14 pbuffer / GLES20.glGetString").assertExists()
         rule.onNodeWithText("Close").performClick()
+        // Complete dialog disposal before driving the Activity lifecycle outside Compose.
+        rule.onNodeWithTag("source-details").assertDoesNotExist()
+        rule.waitForIdle()
     }
 }
