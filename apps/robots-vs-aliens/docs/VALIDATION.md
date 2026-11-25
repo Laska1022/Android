@@ -1,5 +1,7 @@
 # Validation record
 
+This page preserves the October 2026 cloud results for version 1.0.0. Later development and device runs are recorded by version in [TESTING.md](../TESTING.md). See [HANDOFF.md](../HANDOFF.md) for the current limitations and next work.
+
 Validated in the Codex cloud workspace on October 27, 2026. The repository started empty; all application code and game assets were created for this project.
 
 ## Web and game simulation
@@ -23,9 +25,9 @@ Two defects found during verification were fixed and retested: a missing accessi
 
 The native project uses Capacitor 8, Java 21, Gradle 8.14.3 (distribution SHA-256 pinned), compile/target SDK 36, and minimum SDK 24. Android SDK command-line tools were downloaded over verified TLS and checked against Google's published repository checksum. **`assembleDebug` and `lintDebug` both passed.** A development-signed APK was produced (approximately 4.1 MB). The Capacitor library uses its upstream lint baseline; no assertions or project checks were disabled to pass the build. The final app lint report contains 0 errors and 4 warnings (an empty legacy resource qualifier and three generated resources considered unused). The Cordova compatibility module reports an available upstream update. These are warnings, not test failures. The APK signature and inclusion of the current production web build were also checked. A complete JDK was installed after the base image was found to contain only a Java runtime.
 
-No physical Android phone or emulator session has been run. Native runtime behavior, performance, lifecycle transitions, WebView compatibility, and release signing remain separate validation tasks.
+The October cloud validation ran without a physical phone or emulator session. Native runtime behavior, performance, lifecycle transitions and WebView compatibility were open at that checkpoint.
 
-## Remaining limitations
+## Limitations at the October checkpoint
 
 - Balance is initial; normal-budget playtesting across all five sectors is still needed.
 - Sector names/difficulty differ, but the landscape art is shared between sectors.

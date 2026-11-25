@@ -3,6 +3,17 @@ export const COLS = 9;
 export type BotKind = 'pulse' | 'spark' | 'frost' | 'nova' | 'bastion';
 export type EnemyKind = 'scout' | 'runner' | 'brute' | 'spitter' | 'overlord';
 export type Phase = 'playing' | 'paused' | 'won' | 'lost';
+export type CampaignDifficulty = 'cadet' | 'veteran';
+const FIRST_PATROL = [2, 2, 1, 3, 2];
+export const FIRST_PATROL_LANE = FIRST_PATROL[0] + 1;
+
+function cadetAllowance(sector: number, difficulty: CampaignDifficulty) {
+  return difficulty === 'cadet' ? Math.max(0, 2 - sector) : 0;
+}
+
+export function startingEnergy(sector: number, difficulty: CampaignDifficulty) {
+  return [325, 375, 400][cadetAllowance(sector, difficulty)];
+}
 export const BOTS: Record<
   BotKind,
   {
@@ -174,7 +185,7 @@ export class Game {
   events: GameEvent[] = [];
   sweeps: Sweep[] = [];
   sweepers = [true, true, true, true, true];
-  energy = 325;
+  energy: number;
   lives = 5;
   score = 0;
   kills = 0;
@@ -189,12 +200,16 @@ export class Game {
   private energyTimer = 0;
   private pickupTimer = 7;
   private seed: number;
+  readonly difficulty: CampaignDifficulty;
   constructor(
     public sector = 0,
     public endless = false,
     seed = Date.now(),
+    difficulty: CampaignDifficulty = 'cadet',
   ) {
     this.seed = seed >>> 0;
+    this.difficulty = endless ? 'veteran' : difficulty;
+    this.energy = startingEnergy(sector, this.difficulty);
   }
   random() {
     this.seed = (Math.imul(1664525, this.seed) + 1013904223) >>> 0;
@@ -205,6 +220,9 @@ export class Game {
   }
   get waveActive() {
     return this.intermission < 0;
+  }
+  get awaitingLaunch() {
+    return this.difficulty === 'cadet' && this.sector === 0 && this.wave === 0;
   }
   private event(type: GameEvent['type'], kind?: string) {
     this.events.push({ type, kind });
@@ -233,9 +251,9 @@ export class Game {
       col,
       hp: BOTS[kind].hp,
       timer: kind === 'spark' ? 8 : 0.25,
-      flash: 0.3,
+      flash: this.awaitingLaunch ? 0 : 0.3,
     });
-    this.burst(col + 0.5, row + 0.5, BOTS[kind].color, 15);
+    if (!this.awaitingLaunch) this.burst(col + 0.5, row + 0.5, BOTS[kind].color, 15);
     this.event('place');
     return true;
   }
@@ -245,7 +263,7 @@ export class Game {
     if (!bot) return false;
     this.energy += Math.floor((BOTS[bot.kind].cost * 0.5 * bot.hp) / BOTS[bot.kind].hp);
     this.bots = this.bots.filter((b) => b !== bot);
-    this.burst(col + 0.5, row + 0.5, '#a8f570', 12);
+    if (!this.awaitingLaunch) this.burst(col + 0.5, row + 0.5, '#a8f570', 12);
     return true;
   }
   collect(id: number) {
@@ -259,7 +277,14 @@ export class Game {
     return true;
   }
   beam(row: number) {
-    if (this.phase !== 'playing' || this.beamCooldown > 0 || row < 0 || row >= ROWS) return false;
+    if (
+      this.phase !== 'playing' ||
+      this.awaitingLaunch ||
+      this.beamCooldown > 0 ||
+      row < 0 ||
+      row >= ROWS
+    )
+      return false;
     this.beamCooldown = 42;
     for (const e of this.enemies.filter((e) => e.row === row)) {
       e.hp -= 320;
@@ -275,7 +300,8 @@ export class Game {
     this.wave++;
     this.intermission = -1;
     this.spawned = 0;
-    this.spawnTotal = 5 + this.wave * 2 + this.sector * 2;
+    this.spawnTotal =
+      5 + this.wave * 2 + this.sector * 2 - cadetAllowance(this.sector, this.difficulty);
     this.spawnTimer = 1.5;
     this.event('wave');
     return true;
@@ -328,7 +354,7 @@ export class Game {
     this.bots = this.bots.filter((b) => b.hp > 0);
   }
   update(dt: number) {
-    if (this.phase !== 'playing') return;
+    if (this.phase !== 'playing' || this.awaitingLaunch) return;
     dt = Math.min(Math.max(dt, 0), 0.1);
     this.time += dt;
     this.beamCooldown = Math.max(0, this.beamCooldown - dt);
@@ -365,9 +391,15 @@ export class Game {
         if ((this.wave >= 3 || this.sector >= 1) && r > 0.7) kind = 'brute';
         if (this.sector >= 2 && r > 0.45 && r < 0.7) kind = 'spitter';
         if (this.wave >= this.totalWaves && this.spawned === this.spawnTotal - 1) kind = 'overlord';
-        this.spawn(kind, Math.floor(this.random() * ROWS));
+        const firstPatrol = this.difficulty === 'cadet' && this.sector === 0 && this.wave === 1;
+        this.spawn(
+          kind,
+          firstPatrol ? FIRST_PATROL[this.spawned] : Math.floor(this.random() * ROWS),
+        );
         this.spawned++;
-        this.spawnTimer = Math.max(1.1, 3.7 - this.wave * 0.2 - this.sector * 0.15);
+        this.spawnTimer = firstPatrol
+          ? 5
+          : Math.max(1.1, 3.7 - this.wave * 0.2 - this.sector * 0.15);
       }
     }
     for (const b of this.bots) {
@@ -437,6 +469,7 @@ export class Game {
         } else {
           this.lives = Math.max(0, this.lives - (e.kind === 'overlord' ? 3 : 1));
           this.event('breach');
+          this.enemies = this.enemies.filter((enemy) => enemy !== e);
         }
         e.hp = 0;
       }

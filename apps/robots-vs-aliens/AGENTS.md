@@ -2,7 +2,19 @@
 
 These rules apply only to `apps/robots-vs-aliens/`. Run commands from that directory. Read the repository-root `AGENTS.md` for multi-app boundaries. DeviceScope is independent and is not governed by the game-specific instructions below.
 
-Read `README.md`, `docs/ARCHITECTURE.md`, and `docs/AZURE_AI_HANDOFF.md` before changing the game.
+Start with [HANDOFF.md](HANDOFF.md) for the current version, tested behavior and priorities. Read [README.md](README.md) for player controls, [architecture](docs/ARCHITECTURE.md) for simulation and renderer boundaries, and [TESTING.md](TESTING.md) for validation commands.
+
+## Where changes belong
+
+| Area                                           | Source                                                       | Contract                                                                                                                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Campaign, economy, difficulty, enemy schedules | `src/game/engine.ts`                                         | Cell-space coordinates, seeded randomness, fixed time steps. Cover balance with a normal-budget strategy in addition to combat stress tests.                     |
+| Saves and audio                                | `src/game/storage.ts`, `src/game/audio.ts`                   | Validate individual fields, load existing `rva-save-v1` progress and respect mute before playing any sound.                                                      |
+| Screens and controls                           | `src/main.ts`, `src/style.css`                               | Preserve keyboard focus, semantic touch targets, portrait, landscape and pause on visibility change.                                                             |
+| Artwork and feedback                           | `src/game/render.ts`, `public/`                              | Keep combat legible on small screens. Cache static scene work, bound effects and keep hitboxes independent of animation. Record art origins in `docs/ASSETS.md`. |
+| Offline and Android                            | `scripts/generate-sw.mjs`, `capacitor.config.ts`, `android/` | Bundle runtime assets locally, sync the built web app before Gradle, and retain the package ID `com.laska.robotvsaliens`.                                        |
+
+Design for adults who enjoy colorful science fiction. Use recognizable mechanical silhouettes, readable lane threats and a clear hierarchy for energy, core health and wave state. Give a new player time to choose and place a robot before the first Cadet attack. Keep Veteran and Survival challenging.
 
 ## Working agreement
 
@@ -16,6 +28,12 @@ Read `README.md`, `docs/ARCHITECTURE.md`, and `docs/AZURE_AI_HANDOFF.md` before 
 - Do not commit `node_modules`, `dist`, SDKs, build outputs, signing keys, `.env` secrets, or local SDK paths. Debug APKs belong in CI artifacts or releases.
 - No backend or API key is required by the game. Azure credentials, if later needed, belong in the deployment service's secret store, never client code.
 - Report the concrete change, validation results, and remaining limitations. Distinguish a debug APK from a signed store release.
+
+## Publishing and handoff
+
+Fetch the target branch and check the working tree before a new iteration. Use a development branch for substantial changes. Update the app version in `package.json`, the root package entry in `package-lock.json`, and Android's `versionName` and increasing `versionCode` together. Record each tested release in [CHANGELOG.md](CHANGELOG.md) and leave the next developer a current [handoff](HANDOFF.md). Use descriptive commits and normal pushes when authorized.
+
+Cloud agents can run seeded simulation tests, Playwright and Gradle. If an Android emulator is available, record its API and WebView under emulator results. Only an actual phone run counts as physical verification. Report the tested build, date, device and scenarios. Leave untested phone behavior in the handoff with a concrete next check.
 
 ## Start commands
 

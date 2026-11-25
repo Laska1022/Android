@@ -15,7 +15,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 - Offline production build with bundled fonts; no account, server, API key, ads, or tracking.
 - Capacitor Android project, GitHub CI/APK artifacts, optional GitHub Pages publishing, and Azure DevOps CI.
 
-This is a playable first release, not a signed Google Play release. Ongoing battles are not saved when the app closes. See [validation and limitations](docs/VALIDATION.md).
+The Android package is a development-signed debug build. Campaign unlocks and preferences persist locally. Closing the process ends an ongoing battle. See the [current handoff](HANDOFF.md) and [test record](TESTING.md).
 
 ## Run locally
 
@@ -39,7 +39,7 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 
 ## How to play
 
-1. Choose a sector and **Deploy squad**.
+1. Choose a sector and **Deploy squad**. The default **Cadet** campaign lets you set up before the first attack in First Contact. Press **Send wave** when ready. For the original challenge, choose **Veteran** in Settings. Survival always uses Veteran rules.
 2. Select a robot card, then an empty tile. Aliens enter from the right; defend the core on the left.
 3. Place Spark generators in the back. Cover threatened lanes with Pulse, then combine Frost and Nova. Put Bastion in front to buy time.
 4. Collect golden energy cells. Orbital strike clears a threatened lane; each lane also has one automatic emergency sweeper.
@@ -70,7 +70,7 @@ cd android
 
 The debug APK is `android/app/build/outputs/apk/debug/app-debug.apk`. Install with `adb install -r <apk-path>` or transfer it to your test phone. It uses a development signing key. **Do not distribute it as a production/store-signed build.** GitHub Actions also builds an APK artifact named `robots-vs-aliens-debug-apk`.
 
-`npm run android:open` opens Android Studio. After web changes, run `npm run android:sync` before rebuilding. Release signing, store listing, privacy disclosures, and physical-device testing are separate release tasks. Keep signing keys out of Git.
+`npm run android:open` opens Android Studio. After web changes, run `npm run android:sync` before rebuilding. Follow the [USB phone procedure](TESTING.md#reproduce-a-muted-usb-phone-test) for hardware validation. Store publication still requires release signing, a listing and privacy disclosures. Keep signing keys out of Git.
 
 ## Tests
 
@@ -87,9 +87,9 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run check
 
 Unit tests cover economy, combat, special attacks, wave progression, victory/defeat, and save validation. Browser tests cover desktop/mobile interaction, pause, offline reload, keyboard deployment, and dialog focus. Screenshots and failure traces are written to `test-results/`.
 
-## Continue with Azure AI
+## Continue development
 
-Give your coding agent [docs/AZURE_AI_HANDOFF.md](docs/AZURE_AI_HANDOFF.md). It includes a ready-to-paste continuation prompt, architecture, prioritized improvements, acceptance criteria, and validation commands. `AGENTS.md` provides repository instructions. Azure AI model access alone does not edit or push a repository; use a coding-agent environment with this checkout, shell tools, and scoped GitHub access.
+Start with the [agent instructions](AGENTS.md), [development handoff](HANDOFF.md), [testing procedures and results](TESTING.md) and [changelog](CHANGELOG.md). Azure agents can also use the [Azure continuation guide](docs/AZURE_AI_HANDOFF.md).
 
 The repository-root [`azure-pipelines.yml`](../../azure-pipelines.yml) builds and tests the web application in Azure DevOps. For hosting, deploy `dist/` to Azure Static Web Apps or use the manual **Publish web game to GitHub Pages** workflow after enabling Pages with GitHub Actions in repository settings. No hosting has been configured merely by committing these workflows.
 

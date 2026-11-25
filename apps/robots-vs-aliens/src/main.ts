@@ -7,7 +7,14 @@ import '@fontsource/dm-sans/latin-600.css';
 import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/space-mono/latin-400.css';
 import './style.css';
-import { BOTS, Game, SECTORS, type BotKind } from './game/engine';
+import {
+  BOTS,
+  FIRST_PATROL_LANE,
+  Game,
+  SECTORS,
+  startingEnergy,
+  type BotKind,
+} from './game/engine';
 import { BOARD, Renderer, botIcon } from './game/render';
 import { AudioEngine } from './game/audio';
 import { loadSave, storeSave } from './game/storage';
@@ -148,7 +155,7 @@ function updateSectors() {
 function start(endless = false) {
   audio.unlock();
   closeModal(false);
-  game = new Game(sector, endless);
+  game = new Game(sector, endless, undefined, save.difficulty);
   menu = false;
   previousPhase = 'playing';
   speed = 1;
@@ -162,7 +169,8 @@ function start(endless = false) {
   select('pulse');
   updateSectors();
   updateHud();
-  toast('Deploy Pulse in each lane. Spark generates energy. Collect gold energy cells!');
+  if (!game.awaitingLaunch)
+    toast('Deploy Pulse in threatened lanes. Collect gold cells for energy.');
   $('#arena').classList.add('is-playing');
   $('.cell').focus({ preventScroll: true });
 }
@@ -180,7 +188,10 @@ function mainMenu() {
   $('#start-button').focus();
 }
 function updateHud() {
-  $('#energy').textContent = String(menu ? 325 : Math.floor(game.energy));
+  $('#battle-grid').toggleAttribute('data-first-patrol', !menu && game.awaitingLaunch);
+  $('#energy').textContent = String(
+    menu ? startingEnergy(sector, save.difficulty) : Math.floor(game.energy),
+  );
   $('#wave-label').textContent = menu
     ? 'PREPARE YOUR SQUAD'
     : game.endless
@@ -196,19 +207,28 @@ function updateHud() {
   const waveButton = $<HTMLButtonElement>('#wave-button');
   waveButton.disabled = menu || game.phase !== 'playing' || game.waveActive;
   waveButton.innerHTML =
-    !menu && !game.waveActive
+    !menu && !game.waveActive && !game.awaitingLaunch
       ? `Send wave · ${Math.ceil(game.intermission)}s ${icon('arrow')}`
       : `Send wave ${icon('arrow')}`;
   $('#tactical-status').textContent = menu
-    ? 'Awaiting your command'
+    ? `${save.difficulty === 'cadet' ? 'Cadet' : 'Veteran'} campaign · Change in Settings`
     : game.phase === 'paused'
       ? 'Simulation paused'
-      : game.waveActive
-        ? `${game.enemies.length} hostiles detected · ${game.score.toLocaleString()} points`
-        : `Wave ${game.wave + 1} incoming · +75 energy between waves`;
+      : game.awaitingLaunch
+        ? game.bots.some((bot) => bot.row === FIRST_PATROL_LANE - 1 && BOTS[bot.kind].damage > 0)
+          ? `Lane ${FIRST_PATROL_LANE} covered. Send wave when ready.`
+          : `Place Pulse in lane ${FIRST_PATROL_LANE} (center), then Send wave.`
+        : game.waveActive
+          ? `${game.enemies.length} hostiles detected · ${game.pickups.length && game.wave === 1 ? 'Collect gold cells for energy' : game.score.toLocaleString() + ' points'}`
+          : `Wave ${game.wave + 1} incoming · +75 energy between waves`;
   $('#beam-status').textContent =
-    game.beamCooldown > 0 && !menu ? `${Math.ceil(game.beamCooldown)}s RECHARGING` : 'READY · Q';
-  $<HTMLButtonElement>('#beam-button').disabled = !menu && game.beamCooldown > 0;
+    !menu && game.awaitingLaunch
+      ? 'ON STANDBY'
+      : game.beamCooldown > 0 && !menu
+        ? `${Math.ceil(game.beamCooldown)}s RECHARGING`
+        : 'READY · Q';
+  $<HTMLButtonElement>('#beam-button').disabled =
+    !menu && (game.awaitingLaunch || game.beamCooldown > 0);
   $('#pickup-count').textContent = String(game.pickups.length);
   $<HTMLButtonElement>('#collect-button').disabled =
     menu || game.phase !== 'playing' || !game.pickups.length;
@@ -335,8 +355,14 @@ $('#sound-button').onclick = () => {
 $('#settings-button').onclick = () => {
   openModal(
     'Make it yours.',
-    `<p>Small adjustments for a better mission.</p><label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
+    `<label class="setting"><span>Campaign difficulty<small>Cadet gives you time to prepare. Veteran uses the original waves. Applies at deployment.</small></span><select id="difficulty-setting" aria-label="Campaign difficulty"><option value="cadet" ${save.difficulty === 'cadet' ? 'selected' : ''}>Cadet</option><option value="veteran" ${save.difficulty === 'veteran' ? 'selected' : ''}>Veteran</option></select></label>` +
+      `<p>Small adjustments for a better mission.</p><label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
   );
+  $('#difficulty-setting').onchange = (event) => {
+    save.difficulty = (event.target as HTMLSelectElement).value === 'veteran' ? 'veteran' : 'cadet';
+    persist();
+    updateHud();
+  };
   $('#sound-setting').onchange = (e) => {
     audio.unlock();
     audio.muted = !(e.target as HTMLInputElement).checked;
@@ -424,7 +450,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Tab') {
       const focusables = [
         ...$('#modal').querySelectorAll<HTMLElement>(
-          'button:not(:disabled), input, [tabindex="0"]',
+          'button:not(:disabled), input, select, [tabindex="0"]',
         ),
       ];
       const first = focusables[0],
@@ -445,7 +471,7 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).matches('input, textarea'))
     return;
   if (e.key >= '1' && e.key <= '5') select(kinds[Number(e.key) - 1]);
-  if (e.key.toLowerCase() === 'q') select('beam');
+  if (e.key.toLowerCase() === 'q' && !$<HTMLButtonElement>('#beam-button').disabled) select('beam');
   if (e.key.toLowerCase() === 'r') select('recycle');
   if (!menu && e.key.toLowerCase() === 'e') {
     for (const p of [...game.pickups]) game.collect(p.id);

@@ -13,8 +13,12 @@ test('deploy, recycle, pause, resume, and fight without browser errors', async (
   });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Deploy squad' }).click();
+  await expect(page.locator('#energy')).toHaveText('400');
+  await expect(page.locator('#tactical-status')).toContainText('Place Pulse in lane 3');
+  await expect(page.getByRole('button', { name: 'Send wave', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Lane 3, column 2, empty', exact: true }).click();
   await expect(page.getByRole('button', { name: /Lane 3, column 2, Pulse/ })).toBeVisible();
+  await expect(page.locator('#tactical-status')).toContainText('Send wave when ready');
   await page.getByRole('button', { name: 'Recycle a robot for up to 50 percent energy' }).click();
   await page.getByRole('button', { name: /Lane 3, column 2, Pulse/ }).click();
   await expect(
@@ -40,6 +44,30 @@ test('deploy, recycle, pause, resume, and fight without browser errors', async (
     fullPage: true,
   });
   expect(errors).toEqual([]);
+});
+
+test('campaign difficulty persists, and Survival deploys with Veteran rules', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#tactical-status')).toContainText('Cadet campaign');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const difficulty = page.getByRole('combobox', { name: 'Campaign difficulty' });
+  await expect(difficulty).toHaveValue('cadet');
+  await difficulty.selectOption('veteran');
+  await page.getByRole('button', { name: 'Back to the outpost' }).click();
+  await page.reload();
+  await expect(page.locator('#tactical-status')).toContainText('Veteran campaign');
+  await expect(page.locator('#energy')).toHaveText('325');
+  await page.getByRole('button', { name: 'Deploy squad' }).click();
+  await expect(page.getByRole('button', { name: /Send wave · \d+s/ })).toBeEnabled();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await difficulty.selectOption('cadet');
+  await page.getByRole('button', { name: 'Back to the outpost' }).click();
+  await expect(page.getByRole('button', { name: /Send wave · \d+s/ })).toBeEnabled();
+  await page.getByRole('button', { name: 'Pause game', exact: true }).click();
+  await page.getByRole('button', { name: 'Return to command' }).click();
+  await page.getByRole('button', { name: /Survival mode/ }).click();
+  await expect(page.locator('#wave-label')).toHaveText('SURVIVAL MODE');
+  await expect(page.getByRole('button', { name: /Send wave · \d+s/ })).toBeEnabled();
 });
 
 test('guide, settings, preferences, and offline launch', async ({ page, context }) => {

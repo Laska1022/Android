@@ -27,6 +27,23 @@ describe('save data', () => {
       stars: [3, 0, 0, 0, 0],
       muted: false,
       reducedMotion: false,
+      difficulty: 'cadet',
     });
+  });
+  it('keeps v1 progress while accepting only supported campaign difficulty values', () => {
+    const raw = {
+      unlocked: 3,
+      best: 3200,
+      stars: [3, 2, 1, 0, 0],
+      muted: true,
+      reducedMotion: true,
+    };
+    for (const difficulty of [undefined, 'unknown', 'cadet', 'veteran']) {
+      vi.stubGlobal('localStorage', { getItem: () => JSON.stringify({ ...raw, difficulty }) });
+      expect(loadSave()).toEqual({
+        ...raw,
+        difficulty: difficulty === 'veteran' ? 'veteran' : 'cadet',
+      });
+    }
   });
 });

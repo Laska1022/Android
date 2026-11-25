@@ -5,7 +5,7 @@ function advance(game: Game, seconds: number) {
   for (let i = 0; i < Math.ceil(seconds * 60); i++) game.update(1 / 60);
 }
 function sandbox() {
-  const g = new Game(0, false, 42);
+  const g = new Game(0, false, 42, 'veteran');
   g.intermission = 10000;
   return g;
 }
@@ -103,12 +103,16 @@ describe('combat', () => {
     advance(g, 0.1);
     expect(g.sweepers[2]).toBe(false);
     expect(g.lives).toBe(5);
+    expect(g.kills).toBe(1);
+    const { kills, energy, score } = g;
     g.sweeps = [];
     g.lives = 1;
     g.spawn('scout', 2, -0.2);
     advance(g, 0.1);
     expect(g.lives).toBe(0);
     expect(g.phase).toBe('lost');
+    expect({ kills: g.kills, energy: g.energy, score: g.score }).toEqual({ kills, energy, score });
+    expect(g.enemies).toHaveLength(0);
   });
   it('freezes simulation and resources while paused', () => {
     const g = sandbox();
@@ -121,14 +125,67 @@ describe('combat', () => {
   });
 });
 describe('waves and progression', () => {
-  it('automatically starts the first wave and prevents duplicate wave starts', () => {
-    const g = new Game(0, false, 42);
-    advance(g, 18.1);
-    expect(g.wave).toBe(1);
-    expect(g.waveActive).toBe(true);
+  it.each([false, true])(
+    'preserves original opening pressure for Veteran or Survival (endless %s)',
+    (endless) => {
+      const g = new Game(0, endless, 42, endless ? 'cadet' : 'veteran');
+      expect(g.energy).toBe(325);
+      advance(g, 18.1);
+      expect(g.wave).toBe(1);
+      expect(g.waveActive).toBe(true);
+      expect(g.spawnTotal).toBe(7);
+      expect(g.startWave()).toBe(false);
+      advance(g, 2);
+      expect(g.enemies.length).toBeGreaterThan(0);
+    },
+  );
+  it('waits for a manual Cadet launch without passive income, then sends the advertised first patrol', () => {
+    const g = new Game(0, false, 7);
+    expect(g.energy).toBe(400);
+    expect(g.place('spark', 0, 0)).toBe(true);
+    advance(g, 90);
+    expect([g.wave, g.time, g.energy, g.pickups.length]).toEqual([0, 0, 340, 0]);
+    expect(g.startWave()).toBe(true);
     expect(g.startWave()).toBe(false);
-    advance(g, 2);
-    expect(g.enemies.length).toBeGreaterThan(0);
+    advance(g, 6);
+    expect(g.enemies.map((e) => e.row)).toEqual([2]);
+    advance(g, 18);
+    expect(g.enemies.map((e) => e.row)).toEqual([2, 2, 1, 3, 2]);
+    expect(g.enemies.every((e) => e.kind === 'scout')).toBe(true);
+  });
+  it('tapers Cadet reserves and wave reductions over the first two sectors', () => {
+    for (const [sector, energy, count] of [
+      [1, 375, 8],
+      [2, 325, 11],
+    ]) {
+      const g = new Game(sector, false, 1);
+      expect(g.energy).toBe(energy);
+      advance(g, 18.1);
+      expect(g.waveActive).toBe(true);
+      expect(g.spawnTotal).toBe(count);
+    }
+  });
+  it.each([1, 42, 123])('lets a normal-budget squad clear First Contact (seed %s)', (seed) => {
+    const g = new Game(0, false, seed);
+    const lanes = [2, 1, 3, 0, 4];
+    expect(g.place('pulse', lanes[0], 1)).toBe(true);
+    g.startWave();
+    let placed = 1;
+    let sawBoss = false;
+    for (let tick = 0; tick < 60 * 360 && g.phase === 'playing'; tick++) {
+      // One purchase attempt every eight seconds, with no extra income or special attacks.
+      if (tick % (8 * 60) === 0 && placed < 10) {
+        if (g.place('pulse', lanes[placed % lanes.length], 1 + Math.floor(placed / lanes.length)))
+          placed++;
+      }
+      g.update(1 / 60);
+      sawBoss ||= g.enemies.some((enemy) => enemy.kind === 'overlord');
+    }
+    expect(g.phase).toBe('won');
+    expect(sawBoss).toBe(true);
+    expect(g.wave).toBe(4);
+    expect(g.lives).toBe(5);
+    expect(g.kills).toBe(32);
   });
   it('ends a campaign only after the last wave is cleared and continues survival', () => {
     for (const endless of [false, true]) {
@@ -142,7 +199,7 @@ describe('waves and progression', () => {
     }
   });
   it('a funded tactical squad can complete the first sector through actual simulated combat', () => {
-    const g = new Game(0, false, 123);
+    const g = new Game(0, false, 123, 'veteran');
     g.energy = 4000;
     for (let row = 0; row < 5; row++) {
       g.place('pulse', row, 0);

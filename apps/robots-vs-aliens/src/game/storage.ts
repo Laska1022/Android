@@ -1,9 +1,12 @@
+import type { CampaignDifficulty } from './engine';
+
 export interface Save {
   unlocked: number;
   best: number;
   stars: number[];
   muted: boolean;
   reducedMotion: boolean;
+  difficulty: CampaignDifficulty;
 }
 const defaults = (): Save => ({
   unlocked: 0,
@@ -11,6 +14,7 @@ const defaults = (): Save => ({
   stars: [0, 0, 0, 0, 0],
   muted: false,
   reducedMotion: false,
+  difficulty: 'cadet',
 });
 export function loadSave(): Save {
   try {
@@ -24,6 +28,7 @@ export function loadSave(): Save {
       ),
       muted: raw.muted === true,
       reducedMotion: raw.reducedMotion === true,
+      difficulty: raw.difficulty === 'veteran' ? 'veteran' : 'cadet',
     };
   } catch {
     return defaults();
