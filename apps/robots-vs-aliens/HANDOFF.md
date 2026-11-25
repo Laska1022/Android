@@ -14,6 +14,8 @@ The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offli
 
 ## Gameplay decisions
 
+RVA-01 tested sectors 2–5 on November 26. Both a Pulse line and a mixed squad cleared every sampled Cadet and Veteran mission from the normal budget. The mixed squad cleared Last light in 455–501 simulated seconds, compared with 520–532 for the Pulse line. Cadet keeps its current tuning. The next balance evidence to collect is how first-time players handle those later waves on a phone. [Strategy, seeds and measurements](TESTING.md#november-26-2026--later-sector-campaign-balance-rva-01)
+
 The hosted web and Android builds passed at `c213a6e`, which also finalized the two cloud prompts. Start new work from the latest `main`. [GitHub build and debug APK](https://github.com/Laska1022/Android/actions/runs/45652679628)
 
 The 1.1.0 Redmi run cleared First Contact at the real starting budget with three stars, 32 enemies stopped and 4,060 points. All 21 unit tests and seven applicable browser scenarios passed. The device and methods are recorded in [TESTING.md](TESTING.md).
@@ -34,7 +36,7 @@ The tactical UI highlights the opening patrol lane and places mission and loadou
 
 Copy the [standalone prompt for Codex A or Codex B](PROMPTS.md) into the corresponding cloud session. Start from the latest `origin/main` and target `main` in each PR. Release `c6faa3a` is the physically tested baseline.
 
-All four assignments are **unclaimed** at this handoff. Each row is one assignment a separate agent can take from this repository. Fetch the latest integrated game branch before starting, check for an existing PR on the suggested branch, and open a PR with the task ID, actual test results and any hardware checks still due. The integrator owns shared release files, version bumps and final screenshots.
+The table describes the original assignments. See the current state and gameplay decisions above for completed work. Fetch the latest integrated game branch before starting, check for an existing PR on the suggested branch, and open a PR with the task ID, actual test results and any hardware checks still due. The integrator owns shared release files, version bumps and final screenshots.
 
 | ID and suggested branch                | Owner and scope                                                                                                                                                                                                                                                                    | Acceptance and dependencies                                                                                                                                                                                                                                                                            |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

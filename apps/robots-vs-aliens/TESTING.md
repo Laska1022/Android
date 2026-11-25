@@ -67,6 +67,31 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 26, 2026 · Later-sector campaign balance (RVA-01)
+
+Both squads cleared sectors 2–5 on Cadet and Veteran on seeds `1`, `42` and `123`. All 48 simulated missions finished with five core integrity and zero breaches. The Pulse squad used one automatic sweeper in sector 4 on seed `1` on each difficulty. These results support keeping the current Cadet budgets and wave sizes for the tested sectors.
+
+Each run starts with the normal budget (375 for Cadet sector 2, otherwise 325). Every four simulated seconds the player collects visible pickups and tries to buy the first missing defender in formation order. Each column fills from the center outward. The waves start automatically, and the orbital strike stays in reserve.
+
+- **Pulse squad.** Deploy two columns of Pulse. Every run ended with ten defenders except sector 5 on seed `123`, where nine remained on both difficulties.
+- **Mixed squad.** Buy one rear Spark, then fill a column each of Pulse, Frost, Nova and Bastion. Every run ended with all 21 positions occupied.
+
+The ranges below span the three seeds. Sectors 3–5 use the same starting budget and waves on both difficulties and produced identical results for each paired seed and squad. Ending energy includes income accumulated after filling the formation.
+
+| Sector            | Difficulty | Pulse clear time (s) | Mixed clear time (s) | Pulse end energy | Mixed end energy |
+| ----------------- | ---------- | -------------------: | -------------------: | ---------------: | ---------------: |
+| 2 · Dust & echoes | Cadet      |              300–316 |              285–290 |      2,159–2,277 |      1,519–1,594 |
+| 2 · Dust & echoes | Veteran    |              302–329 |              303–316 |      2,190–2,376 |      1,686–1,807 |
+| 3 · The hollow    | Both       |              349–386 |              332–350 |      2,586–2,805 |      2,055–2,232 |
+| 4 · Iron horizon  | Both       |              473–530 |              416–434 |      3,701–3,729 |      3,179–3,378 |
+| 5 · Last light    | Both       |              520–532 |              455–501 |      3,897–4,194 |      3,657–3,992 |
+
+Run the comparison from the game directory to print one JSON record per mission. The runner uses a fixed 60 Hz step and a 12-minute simulated limit. Seeds fix the starting random state, and player actions can affect later enemy draws. Human input timing and physical-device performance require separate playtests.
+
+```sh
+RVA_BALANCE_REPORT=1 npm test -- tests/unit/campaign-strategy.test.ts --reporter=verbose
+```
+
 ### Physical test device
 
 | Item               | November 25, 2026 measurement                                                                       |
