@@ -15,6 +15,8 @@ cd android
 
 On Windows use `gradlew.bat`. For an installed Chromium browser set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to its executable and skip the browser download. In a fresh checkout the game CI uses Node 22, Chromium and Temurin 21. A game PR runs both web and Android jobs. See the [game workflow](../../.github/workflows/ci.yml).
 
+The Android job requests `platform-tools`, `platforms;android-36` and `build-tools;35.0.0` explicitly. The setup action's default also requested the retired `tools` package and failed before Gradle started on the hosted runner. [Original CI log](https://github.com/Laska1022/Android/actions/runs/45652395673)
+
 | Check                                | What to inspect                                                                                                                                                                                              |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `npm test`                           | Seeded simulation, control-independent balance and save parsing. Keep any funded combat stress test separate from a real starting-budget campaign.                                                           |

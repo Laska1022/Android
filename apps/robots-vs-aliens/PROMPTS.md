@@ -10,11 +10,10 @@ tests for Robots vs Aliens 1.2.0. Fetch origin in the existing cloud checkout.
 Read root AGENTS.md, then apps/robots-vs-aliens/{AGENTS,HANDOFF,TESTING}.md.
 Work only in apps/robots-vs-aliens/.
 
-Use origin/main if it contains 1.2.0. Before the visual release merges,
-use origin/codex/outpost-redmi-polish as the base and PR target. Record the
-base SHA in your PR. Check for existing work, then use the branch
-codex/rva-campaign-balance. Own one new file, tests/unit/campaign-strategy.test.ts.
-Codex B owns the browser input tests.
+Start from the latest origin/main, which includes release c6faa3a. Target main
+in your PR and record the base SHA. Check for existing work, then use branch
+codex/rva-campaign-balance. Own tests/unit/campaign-strategy.test.ts and any
+evidence-based Cadet tuning in src/game/engine.ts. Codex B owns mobile input.
 
 Read src/game/engine.ts and tests/unit/engine.test.ts. The existing suite
 already wins First Contact on three seeds at the normal budget. Extend coverage
@@ -27,8 +26,10 @@ a valid observation. Keep those observations separate from engine invariants.
 
 Run npm ci, your focused Vitest test and npm run check. Use Chromium as
 described in TESTING.md. Publish a normal commit and PR with test counts,
-seeds, strategy and measured outcomes. Put tuning proposals in the PR for
-a separate reviewed change. Report only checks that ran. Physical Redmi
+seeds, strategy and measured outcomes. If multiple seeds and plausible squad
+choices expose a difficulty spike, make a focused Cadet adjustment and rerun
+the same scenarios. Preserve Veteran and Survival pressure. Report only
+checks that ran. Physical Redmi
 validation belongs to RVA-04.
 ```
 
@@ -40,12 +41,12 @@ coverage for Robots vs Aliens 1.2.0. Fetch origin in the existing cloud
 checkout. Read root AGENTS.md, then apps/robots-vs-aliens/{AGENTS,HANDOFF,TESTING}.md.
 Work only in apps/robots-vs-aliens/.
 
-Use origin/main if it contains 1.2.0. Before the visual release merges,
-use origin/codex/outpost-redmi-polish as the base and PR target. Record the
-base SHA in your PR. Check for existing work, then use the branch
-codex/rva-mobile-layout. Own one new file, tests/e2e/viewport.spec.ts.
-Codex A owns the campaign balance tests. Record any product defect with
-reproduction evidence in your PR so the integrator can assign the fix.
+Start from the latest origin/main, which includes release c6faa3a. Target main
+in your PR and record the base SHA. Check for existing work, then use branch
+codex/rva-mobile-layout. Own tests/e2e/viewport.spec.ts and any touch or layout
+fixes in src/main.ts and src/style.css. Codex A owns campaign balance.
+If you reproduce a missed tap or obscured control, fix it, keep the regression
+test, and include the failing and corrected behavior in your PR.
 
 Read tests/e2e/presentation.spec.ts and game.spec.ts first. Version 1.2.0
 already tests offline art, center placement, rotation, accessible controls,
