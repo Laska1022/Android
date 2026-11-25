@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { reloadOffline } from './offline';
 
 const artwork = [
   'bastion',
@@ -11,27 +12,16 @@ const artwork = [
   'pulse',
   'runner',
   'scout',
+  'sectors',
   'spark',
   'spitter',
 ];
 
-test('command, battlefield and all ten unit illustrations decode after an offline reload', async ({
+test('command, sector cards, battlefield and all ten unit illustrations decode after an offline reload', async ({
   page,
-  context,
 }) => {
   await page.goto('/');
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-    if (!navigator.serviceWorker.controller) {
-      await new Promise<void>((resolve) =>
-        navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), {
-          once: true,
-        }),
-      );
-    }
-  });
-  await context.setOffline(true);
-  await page.reload();
+  await reloadOffline(page);
   await expect(page.locator('#arena')).toHaveCSS('background-image', /command-[^/]+\.webp/);
   // Use the actual files requested by this build; their Vite hashes change with the art.
   const artworkUrls = () =>

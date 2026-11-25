@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { reloadOffline } from './offline';
 
 test('deploy, recycle, pause, resume, and fight without browser errors', async ({
   page,
@@ -70,7 +71,7 @@ test('campaign difficulty persists, and Survival deploys with Veteran rules', as
   await expect(page.getByRole('button', { name: /Send wave · \d+s/ })).toBeEnabled();
 });
 
-test('guide, settings, preferences, and offline launch', async ({ page, context }) => {
+test('guide, settings, preferences, and offline launch', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Field guide' }).click();
   await expect(page.getByRole('heading', { name: 'Know your squad.' })).toBeVisible();
@@ -85,17 +86,7 @@ test('guide, settings, preferences, and offline launch', async ({ page, context 
     'aria-pressed',
     'false',
   );
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-    if (!navigator.serviceWorker.controller)
-      await new Promise<void>((resolve) =>
-        navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), {
-          once: true,
-        }),
-      );
-  });
-  await context.setOffline(true);
-  await page.reload();
+  await reloadOffline(page);
   await expect(page.getByRole('button', { name: 'Deploy squad' })).toBeVisible();
   await page.getByRole('button', { name: 'Deploy squad' }).click();
   await page.getByRole('button', { name: 'Lane 1, column 1, empty', exact: true }).click();

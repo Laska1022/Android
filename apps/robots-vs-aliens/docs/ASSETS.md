@@ -2,7 +2,7 @@
 
 ## Game artwork
 
-The game bundles three pieces of original art made for Robots vs Aliens with the built-in OpenAI ImageGen tool. Each used a text prompt and no reference image. The shipped WebP files are the source assets for the game build. The prompts below preserve their design direction. Generating again can produce different artwork.
+The command scene, original perimeter, unit sheet and four-panel campaign landscape sheet were created for Robots vs Aliens with OpenAI ImageGen from text prompts. The shipped WebP files are the source assets for the game build.
 
 | Asset under `src/assets/` | Game use                                                                                                                                                         | Packaging                                                                                                         |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -17,6 +17,21 @@ The Canvas renderer draws lighting, recoil, hit flashes, shadows, projectiles, p
 Vite resolves these local images into the production build. The service worker precaches the emitted files for subsequent offline browser sessions. Capacitor packages the same build inside the Android app, so the first native launch can display art offline. The game never calls an image generator during play.
 
 ## Image generation prompts
+
+### Later campaign sectors
+
+The 1.3.0 sheet was generated as four separate matte paintings on one 1774 × 887 canvas. Each panel puts its landmark high on the right so the tactical platform leaves it visible. Each was cropped to 884 × 438 and encoded at WebP quality 85.
+
+| Asset           | Art direction                                                        |  Bytes |
+| --------------- | -------------------------------------------------------------------- | -----: |
+| `badlands.webp` | Sandstone arch above a desert waystation under a copper sun          | 65,460 |
+| `basin.webp`    | Translucent quartz fan above a glacial river and survey station      | 96,864 |
+| `relay.webp`    | Ridge-top parabolic dish and amber lights against a break in a storm | 63,312 |
+| `nest.webp`     | Eclipse above black chitin spires and a red volcanic caldera         | 45,428 |
+
+The five sector cards share `sectors.webp` (1120 × 112, 26,110 bytes). It combines 224 × 112 thumbnails of the original perimeter and the four new landscapes in campaign order. Scouting loads the chosen panorama at full size. During combat the renderer draws the landscape and platform into a single reusable background canvas.
+
+### Original outpost and units
 
 <details>
 <summary>Command screen</summary>

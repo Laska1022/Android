@@ -91,33 +91,38 @@ export const ENEMIES: Record<
 export const SECTORS = [
   {
     name: 'First contact',
+    terrain: 'perimeter',
     location: 'KEPLER-186F · GREENLINE',
     waves: 4,
-    description: 'A strange signal. A quiet outpost. Hold the line.',
+    description: 'Build your defense. Hold five lanes against the invasion.',
   },
   {
     name: 'Dust & echoes',
+    terrain: 'badlands',
     location: 'KEPLER-186F · THE BADLANDS',
     waves: 5,
-    description: 'Fast-moving signatures approach through the dust.',
+    description: 'Frost slows the runners. Save your orbital strike for a lane full of brutes.',
   },
   {
     name: 'The hollow',
+    terrain: 'basin',
     location: 'KEPLER-186F · CRYSTAL BASIN',
     waves: 5,
-    description: 'The swarm has learned to strike from a distance.',
+    description: 'Spitters fire from range. Keep your Pulse line behind a Bastion.',
   },
   {
     name: 'Iron horizon',
+    terrain: 'relay',
     location: 'KEPLER-186F · RELAY NINE',
     waves: 6,
-    description: 'Heavy armor detected. Bring the big guns.',
+    description: 'Armored packs crowd the relay. Nova rounds can hit aliens in neighboring lanes.',
   },
   {
     name: 'Last light',
+    terrain: 'nest',
     location: 'KEPLER-186F · THE NEST',
     waves: 6,
-    description: 'One last stand. The Overlord is coming.',
+    description: 'Hold a strike in reserve. The Overlord enters at the end of the final wave.',
   },
 ];
 export interface Bot {

@@ -4,18 +4,18 @@
 
 Vite + strict TypeScript, Canvas 2D, semantic HTML controls, CSS, Web Audio, a generated service worker, and Capacitor 8 for Android. There is no backend. Runtime dependencies are Capacitor and bundled font packages; there is no large game framework.
 
-| File                         | Responsibility                                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `src/game/engine.ts`         | Deterministic fixed-step simulation, content definitions, economy, collisions, wave lifecycle, combat events |
-| `src/game/render.ts`         | Composites unit sprites, cached landscape, projectiles and light effects on the tactical canvas              |
-| `src/assets/`                | Bundled WebP command scene, perimeter and ten class sprites. See [asset provenance](ASSETS.md).              |
-| `src/game/audio.ts`          | Gesture-unlocked synthesized effects, bounded transient voices, mute                                         |
-| `src/game/storage.ts`        | Versioned, validated, failure-tolerant local saves                                                           |
-| `src/main.ts`                | UI controller, input, focus management, lifecycle, modals, campaign progression, 60 Hz game loop             |
-| `src/style.css`              | Desktop, tablet, phone, landscape layouts; reduced-motion styles                                             |
-| `scripts/generate-sw.mjs`    | Content-hashed precache for every production asset, offline navigation                                       |
-| `scripts/generate-icons.mjs` | Reproducible PWA and Android icons from original SVG using Chromium                                          |
-| `android/`                   | Native Capacitor host, Gradle wrapper, SDK pins, application identity                                        |
+| File                         | Responsibility                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `src/game/engine.ts`         | Deterministic fixed-step simulation, content definitions, economy, collisions, wave lifecycle, combat events     |
+| `src/game/render.ts`         | Composites unit sprites, cached landscape, projectiles and light effects on the tactical canvas                  |
+| `src/assets/`                | Bundled command scene, five sector landscapes, sector thumbnails and ten class sprites. [Art sources](ASSETS.md) |
+| `src/game/audio.ts`          | Gesture-unlocked synthesized effects, bounded transient voices, mute                                             |
+| `src/game/storage.ts`        | Versioned, validated, failure-tolerant local saves                                                               |
+| `src/main.ts`                | UI controller, input, focus management, lifecycle, modals, campaign progression, 60 Hz game loop                 |
+| `src/style.css`              | Desktop, tablet, phone, landscape layouts; reduced-motion styles                                                 |
+| `scripts/generate-sw.mjs`    | Content-hashed precache for every production asset, offline navigation                                           |
+| `scripts/generate-icons.mjs` | Reproducible PWA and Android icons from original SVG using Chromium                                              |
+| `android/`                   | Native Capacitor host, Gradle wrapper, SDK pins, application identity                                            |
 
 ## Simulation
 
@@ -41,6 +41,6 @@ The service worker is registered in production only. Capacitor packages `dist` i
 
 ## Performance and accessibility
 
-The command screen uses a static CSS background. Combat draws against a cached 1200 × 700 perimeter, loading each class image once and sharing light textures. Particles are bounded at 600 and Canvas device pixel ratio is capped at 2. HUD updates are throttled and tile labels change when the occupant or its health changes.
+The command screen uses a static CSS background and a single thumbnail strip for its sector cards. Each sector identifies its terrain in `SECTORS`. Scouting and deployment use the same landscape URL for the later missions. At deployment the renderer paints that terrain and the grid into one reusable 1200 × 700 canvas. It loads each class image once and shares light textures. Particles are bounded at 600 and Canvas device pixel ratio is capped at 2. HUD updates are throttled and tile labels change when the occupant or its health changes.
 
 All placement cells and loadout cards are actual buttons. The battlefield uses roving focus and arrow keys. Modals trap keyboard focus and restore it. Touch and pointer inputs use the same command methods. Reduced motion disables ambience and particles. Full nonvisual gameplay, high-contrast options, and customizable input remain future accessibility work.

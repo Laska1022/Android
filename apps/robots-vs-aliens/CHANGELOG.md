@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 · November 25, 2026
+
+- Scout all five campaign sectors from the command screen. Each card opens its location and briefing. Locked deployments show the prerequisite mission.
+- Fight beneath the Badlands sandstone arch, the Crystal Basin quartz fan, the Relay Nine radio dish and the eclipse over the Nest. The briefings and battles share locally bundled terrain, available offline after the first web visit and included in the Android app.
+
 ## 1.2.0 · November 25, 2026
 
 - Replaced the original command and battlefield scenery with an illustrated industrial outpost. Ten transparent WebP sprites give each robot and enemy a distinct silhouette. Cards, the field guide and deployment previews share the battlefield art.

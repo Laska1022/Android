@@ -3,6 +3,7 @@ import {
   COLS,
   ENEMIES,
   ROWS,
+  SECTORS,
   type BotKind,
   type EnemyKind,
   type Game,
@@ -10,6 +11,10 @@ import {
 } from './engine';
 
 export const BOARD = { x: 157, y: 170, cw: 100, ch: 82, width: 1200, height: 700 };
+
+export function terrainUrl(sector: number) {
+  return new URL(`../assets/${SECTORS[sector].terrain}.webp`, import.meta.url).href;
+}
 type Ctx = CanvasRenderingContext2D;
 type UnitKind = BotKind | EnemyKind;
 const sprites = new Map<UnitKind, HTMLImageElement>();
@@ -181,6 +186,7 @@ function projectile(c: Ctx, shot: Shot) {
 export class Renderer {
   private c: Ctx;
   private background = document.createElement('canvas');
+  private terrain = new Image();
   hover: { row: number; col: number } | null = null;
   selection: BotKind | 'recycle' | 'beam' = 'pulse';
   reducedMotion = false;
@@ -189,11 +195,16 @@ export class Renderer {
     this.c = canvas.getContext('2d')!;
     this.background.width = BOARD.width;
     this.background.height = BOARD.height;
-    this.drawBackground();
-    const perimeter = new Image();
-    perimeter.onload = () => this.drawBackground(perimeter);
-    perimeter.src = new URL('../assets/perimeter.webp', import.meta.url).href;
+    this.terrain.onload = () => this.drawBackground(this.terrain);
+    this.setSector(0);
     for (const kind of [...Object.keys(BOTS), ...Object.keys(ENEMIES)]) sprite(kind as UnitKind);
+  }
+
+  setSector(sector: number) {
+    const url = terrainUrl(sector);
+    if (this.terrain.src === url && (!this.terrain.complete || this.terrain.naturalWidth)) return;
+    this.drawBackground();
+    this.terrain.src = url;
   }
 
   private drawBackground(perimeter?: HTMLImageElement) {

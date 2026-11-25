@@ -15,7 +15,7 @@ import {
   startingEnergy,
   type BotKind,
 } from './game/engine';
-import { BOARD, Renderer, botIcon } from './game/render';
+import { BOARD, Renderer, botIcon, terrainUrl } from './game/render';
 import { AudioEngine } from './game/audio';
 import { loadSave, storeSave } from './game/storage';
 
@@ -28,6 +28,7 @@ const icons = {
   target: '<circle cx="12" cy="12" r="7"/><path d="M12 1v7m0 8v7M1 12h7m8 0h7"/>',
   recycle: '<path d="m8 3-5 7h5M3 10h7m10 4-4 7-4-3m4 3 3-5M9 19H3v-7m0 7 5-5M16 3h5v7m0-7-5 5"/>',
   arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
+  lock: '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
   book: '<path d="M12 5C8 2 3 4 3 4v15s5-2 9 1c4-3 9-1 9-1V4s-5-2-9 1zm0 0v15"/>',
   close: '<path d="m6 6 12 12M6 18 18 6"/>',
 };
@@ -64,16 +65,18 @@ $('#app').innerHTML = `
           <div class="arena" id="arena">
             <canvas id="battlefield" aria-label="Animated alien landscape and tactical battlefield"></canvas>
             <div id="battle-grid" class="battle-grid" role="group" aria-label="Battlefield: 5 lanes and 9 columns" hidden>${Array.from({ length: 45 }, (_, i) => `<button class="cell" data-row="${Math.floor(i / 9)}" data-col="${i % 9}" aria-label="Lane ${Math.floor(i / 9) + 1}, column ${(i % 9) + 1}, empty" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}</div>
-            <div class="menu-cover" id="menu-cover"><div class="mission-chip">KEPLER-186F / PERIMETER DEFENSE</div><h1>The last <em>outpost.</em></h1><p>Build your defense. Hold five lanes against the invasion.</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button></div>
-            <div class="arena-caption"><span>TACTICAL FEED</span><span id="arena-instruction">SELECT AN EMPTY TILE TO DEPLOY PULSE</span></div>
+            <div class="menu-cover" id="menu-cover"><div class="mission-chip" id="mission-location"></div><h1 id="mission-title"></h1><p id="mission-brief" aria-live="polite"></p><button class="primary" id="start-button"></button></div>
+            <div class="arena-caption"><span id="battle-location"></span><span id="arena-instruction">SELECT AN EMPTY TILE TO DEPLOY PULSE</span></div>
             <div class="toast" id="toast" role="status" aria-live="polite"></div>
             <div class="wave-banner" id="wave-banner" aria-hidden="true"></div>
           </div>
+          <div class="campaign"><div class="campaign-label"><span class="eyebrow">CAMPAIGN</span><strong>Scout a sector</strong></div><div class="sectors" id="sectors" role="group" aria-label="Campaign sectors">
+            ${SECTORS.map((s, i) => `<button class="sector" data-sector="${i}" aria-controls="menu-cover" style="--strip-position:${(100 * i) / (SECTORS.length - 1)}%"><span>0${i + 1}</span><div><strong>${s.name}</strong><small></small></div></button>`).join('')}
+          </div></div>
           <div class="battle-toolbar"><div class="tactical-status"><span class="pulse-dot"></span><span id="tactical-status">Awaiting your command</span></div><div class="battle-actions"><button id="collect-button" class="tool-button" disabled>${icon('bolt')} Collect <span id="pickup-count">0</span></button><button id="speed-button" class="tool-button" aria-label="Toggle double speed" aria-pressed="false">1×</button><button id="wave-button" class="tool-button next-wave" disabled>Send wave ${icon('arrow')}</button></div></div>
         </div>
         <aside class="deck"><div class="deck-heading"><div><span class="eyebrow">ROBOT SYSTEMS</span><h2>Squad loadout</h2></div><span class="count">05</span></div><div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card ${i === 0 ? 'selected' : ''}" data-bot="${kind}" aria-pressed="${i === 0}" aria-label="Select ${BOTS[kind].name}, ${BOTS[kind].cost} energy. ${BOTS[kind].description}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind)}" alt=""/><span class="bot-details"><strong>${BOTS[kind].name}</strong><small>${BOTS[kind].role}</small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div><div class="loadout-tip"><span id="selected-name">PULSE / BLASTER</span><p id="selected-description">${BOTS.pulse.description}</p></div><div class="abilities"><button id="beam-button" class="ability" aria-label="Select orbital strike, then select a lane" aria-pressed="false">${icon('target')}<span>Orbital strike<small id="beam-status">READY · Q</small></span></button><button id="recycle-button" class="recycle-button" aria-label="Recycle a robot for up to 50 percent energy" aria-pressed="false">${icon('recycle')}<span>Recycle</span></button></div></aside>
       </div>
-      <div class="campaign"><div class="campaign-label"><span class="eyebrow">CAMPAIGN</span><strong>Select sector</strong></div><div class="sectors" id="sectors">${SECTORS.map((s, i) => `<button class="sector ${i === 0 ? 'active' : ''}" data-sector="${i}" ${i > save.unlocked ? 'disabled' : ''} aria-label="Sector ${i + 1}: ${s.name}${i > save.unlocked ? ', locked' : ''}"><span>0${i + 1}</span><div><strong>${s.name}</strong><small>${i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : i === 0 ? 'START HERE' : 'AVAILABLE'}</small></div>${i > save.unlocked ? '<b>⌑</b>' : '<b>↗</b>'}</button>`).join('')}</div></div>
     </section>
     <footer><button class="text-button" id="endless-button">Survival mode ↗</button></footer>
   </main>
@@ -123,29 +126,50 @@ function select(choice: typeof selected) {
 }
 function setSector(i: number) {
   sector = i;
+  const mission = SECTORS[i];
+  const locked = i > save.unlocked;
   $('#sector-label').textContent = `SECTOR 0${i + 1}`;
-  $('#mission-label').textContent = SECTORS[i].name.toUpperCase();
-  document
-    .querySelectorAll<HTMLElement>('[data-sector]')
-    .forEach((b) => b.classList.toggle('active', Number(b.dataset.sector) === i));
+  $('#mission-label').textContent = mission.name.toUpperCase();
+  $('#battle-location').textContent = mission.location;
+  $('#mission-location').textContent = mission.location;
+  $('#mission-brief').textContent = mission.description;
+  if (i === 0) {
+    $('#arena').style.removeProperty('--sector-art');
+    $('#mission-title').innerHTML = 'The last <em>outpost.</em>';
+  } else {
+    $('#arena').style.setProperty('--sector-art', `url("${terrainUrl(i)}")`);
+    $('#mission-title').textContent = mission.name;
+  }
+  const deploy = $<HTMLButtonElement>('#start-button');
+  deploy.disabled = locked;
+  deploy.innerHTML = locked
+    ? `${icon('lock')} Clear sector 0${i} first`
+    : `Deploy squad ${icon('arrow')}`;
+  updateSectors();
 }
 function updateSectors() {
   document.querySelectorAll<HTMLButtonElement>('[data-sector]').forEach((b) => {
     const i = Number(b.dataset.sector);
-    b.disabled = i > save.unlocked || !menu;
-    b.querySelector('small')!.textContent =
-      i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : 'AVAILABLE';
-    b.querySelector('b')!.textContent = i > save.unlocked ? '⌑' : '↗';
+    const locked = i > save.unlocked;
+    b.disabled = !menu;
+    b.setAttribute('aria-pressed', String(i === sector));
+    b.querySelector('small')!.textContent = locked
+      ? 'SCOUT'
+      : save.stars[i]
+        ? '★'.repeat(save.stars[i])
+        : 'AVAILABLE';
     b.setAttribute(
       'aria-label',
-      `Sector ${i + 1}: ${SECTORS[i].name}${i > save.unlocked ? ', locked' : ''}`,
+      `Sector ${i + 1}: ${SECTORS[i].name}${locked ? ', locked, preview terrain' : ''}`,
     );
   });
 }
 function start(endless = false) {
+  if (sector > save.unlocked) return;
   audio.unlock();
   closeModal(false);
   game = new Game(sector, endless, undefined, save.difficulty);
+  renderer.setSector(sector);
   menu = false;
   document.body.classList.add('in-mission');
   window.scrollTo(0, 0);
@@ -522,6 +546,7 @@ function frame(now: number) {
   }
   requestAnimationFrame(frame);
 }
+setSector(0);
 updateHud();
 requestAnimationFrame(frame);
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

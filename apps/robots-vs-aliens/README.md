@@ -39,11 +39,12 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 
 ## How to play
 
-1. Choose a sector and **Deploy squad**. The default **Cadet** campaign lets you set up before the first attack in First Contact. Press **Send wave** when ready. For the original challenge, choose **Veteran** in Settings. Survival always uses Veteran rules.
-2. Select a robot card, then an empty tile. Aliens enter from the right; defend the core on the left.
-3. Place Spark generators in the back. Cover threatened lanes with Pulse, then combine Frost and Nova. Put Bastion in front to buy time.
-4. Collect golden energy cells. Orbital strike clears a threatened lane; each lane also has one automatic emergency sweeper.
-5. Clear every wave to unlock the next sector. Remaining core integrity determines your stars.
+1. Tap a sector card to scout its terrain and read the squad briefing. **Deploy squad** starts an unlocked mission. Locked sectors show which mission to clear first.
+2. The default **Cadet** campaign lets you set up before the first attack in First Contact. Press **Send wave** when ready. For the original challenge, choose **Veteran** in Settings. Survival always uses Veteran rules.
+3. Select a robot card, then an empty tile. Aliens enter from the right and head for the core on the left.
+4. Place Spark generators in the back. Cover threatened lanes with Pulse, then combine Frost and Nova. Put Bastion in front to buy time.
+5. Collect golden energy cells. Orbital strike damages a whole lane, and each lane has one automatic emergency sweeper.
+6. Clear every wave to unlock the next sector. Remaining core integrity determines your stars.
 
 | Control                  | Action                                                         |
 | ------------------------ | -------------------------------------------------------------- |

@@ -4,6 +4,8 @@
 
 The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offline in a browser or its Capacitor Android host. Run all game commands from this directory. See [AGENTS.md](AGENTS.md) for code ownership, [TESTING.md](TESTING.md) for reproducible checks and physical evidence, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
+Version 1.3.0 adds sector scouting and distinct terrain for the four later missions. RVA-03 was developed on `codex/rva-sector-art` from `e15908a`. The sector cards preview locked missions, and the deployment button shows the unlock requirement. [Command preview](docs/screenshots/sector-briefing.webp) · [Battlefields](docs/screenshots/sector-battlefields.webp)
+
 | Revision  | Significance                                                                                                     |
 | --------- | ---------------------------------------------------------------------------------------------------------------- |
 | `3fe9e0f` | Original web and Android game, version 1.0.0.                                                                    |
@@ -34,7 +36,7 @@ The tactical UI highlights the opening patrol lane and places mission and loadou
 
 Copy the [standalone prompt for Codex A or Codex B](PROMPTS.md) into the corresponding cloud session. Start from the latest `origin/main` and target `main` in each PR. Release `c6faa3a` is the physically tested baseline.
 
-All four assignments are **unclaimed** at this handoff. Each row is one assignment a separate agent can take from this repository. Fetch the latest integrated game branch before starting, check for an existing PR on the suggested branch, and open a PR with the task ID, actual test results and any hardware checks still due. The integrator owns shared release files, version bumps and final screenshots.
+RVA-03 is implemented and tested on its feature branch. RVA-01, RVA-02 and RVA-04 remain open. Fetch the latest integrated game branch before starting, check for an existing PR on the suggested branch, and open a PR with the task ID, actual test results and any hardware checks still due. The integrator owns shared release files, version bumps and final screenshots.
 
 | ID and suggested branch                | Owner and scope                                                                                                                                                                                                                                                                    | Acceptance and dependencies                                                                                                                                                                                                                                                                            |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
