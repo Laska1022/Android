@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 · November 25, 2026
+
+- Replaced the original command and battlefield scenery with an illustrated industrial outpost. Ten transparent WebP sprites give each robot and enemy a distinct silhouette. Cards, the field guide and deployment previews share the battlefield art.
+- Added weapon trails, recoil, hit lighting, grounded shadows and clearer health feedback. The renderer caches the terrain and light textures. Reduced motion suppresses combat flashes and ambient effects.
+- Updated the menu, loadout, native launcher and web app icons. The battlefield highlights the first patrol's lane, and the tactical controls adapt to the screen width. All visuals ship in the Android bundle and browser offline cache.
+
 ## 1.1.0 · November 25, 2026
 
 - Added Cadet and Veteran campaign difficulty. Cadet gives players time to set up a defense in First Contact before sending the opening wave. Veteran and Survival retain the original combat pace.

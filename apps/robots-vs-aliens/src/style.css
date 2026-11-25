@@ -3,7 +3,7 @@
   color: #e4ebe6;
   background: #090e14;
   font-synthesis: none;
-  --lime: #b5ee83;
+  --lime: #7ce5dd;
   --muted: #75877f;
   --line: #26342e;
   --mono: 'Space Mono', monospace;
@@ -15,7 +15,7 @@
 }
 body {
   margin: 0;
-  background: radial-gradient(ellipse at 50% -10%, #1b2925 0, transparent 55%), #090e14;
+  background: radial-gradient(ellipse at 70% -10%, #18333b, transparent 60%), #080f15;
   min-width: 340px;
 }
 button,
@@ -1915,5 +1915,406 @@ kbd {
   * {
     animation-duration: 0.01ms !important;
     transition: none !important;
+  }
+}
+
+.site-header {
+  border-color: #283d45;
+}
+.brand > img {
+  border-color: #40606a;
+  border-radius: 6px;
+}
+.console {
+  border-color: #344953;
+  border-radius: 8px;
+  background: #0e1b24;
+}
+.console-top,
+.hud,
+.battle-toolbar,
+.campaign {
+  background: #11232b;
+  border-color: #304550;
+}
+.console-top,
+.console-tags,
+#mission-label {
+  color: #bed1d7;
+}
+.console-tags b {
+  color: #f2d7a6;
+}
+.deck,
+.modal {
+  background: linear-gradient(150deg, #1b323a, #0e1b25);
+  border-color: #37515b;
+}
+.bot-card {
+  background: #162831;
+  border-color: #324852;
+  border-radius: 4px;
+}
+.bot-card.selected {
+  background: linear-gradient(100deg, #214348, #192f39);
+  border-color: var(--lime);
+}
+.bot-card.unaffordable {
+  opacity: 0.72;
+}
+.bot-card img {
+  max-width: 100%;
+}
+.bot-details small,
+.tactical-status,
+.loadout-tip p,
+.setting small {
+  color: #b1c6ca;
+}
+.bot-cost,
+.energy-stat strong {
+  color: #ffda91;
+}
+.loadout-tip > span,
+.wave-stat > span,
+.integrity span {
+  color: #aed6d3;
+}
+.sector {
+  background: #14252e;
+  border-color: #364b52;
+}
+.sector.active {
+  background: #1b3b40;
+  border-color: #588e92;
+}
+.sector.active > span,
+.sector.active small,
+.sector.active b {
+  color: var(--lime);
+}
+.primary {
+  border: 1px solid #a6efe8;
+  color: #082a2a;
+  border-radius: 3px;
+}
+.tool-button {
+  color: #c4d5d9;
+}
+.next-wave {
+  border-color: #4d777b;
+  color: #b4f4eb;
+}
+.setting select {
+  background: #0a1c25;
+  color: #e7f4ef;
+  border: 1px solid #517980;
+  border-radius: 4px;
+  padding: 8px;
+}
+.modal {
+  max-height: 90vh;
+  max-height: 90dvh;
+}
+.arena:not(.is-playing) {
+  background:
+    linear-gradient(90deg, #06151c99 0%, #07172145 42%, transparent 67%),
+    url('./assets/command.webp') center / cover;
+}
+.arena:not(.is-playing) canvas {
+  visibility: hidden;
+}
+.arena:not(.is-playing) .arena-caption {
+  display: none;
+}
+.menu-cover h1 {
+  margin: 0;
+  font: 700 clamp(54px, 6.2vw, 100px)/0.85 var(--display);
+  text-transform: uppercase;
+  color: #f5ede1;
+  letter-spacing: -0.015em;
+}
+.menu-cover h1 em {
+  display: block;
+  font-style: normal;
+  color: var(--lime);
+}
+.menu-cover > p {
+  color: #e1e7e4;
+  max-width: 27ch;
+  line-height: 1.5;
+}
+.mission-chip {
+  color: #ffbe9b;
+  font-size: 9px;
+  letter-spacing: 1.3px;
+}
+.battle-grid[data-first-patrol] .cell[data-row='2'] {
+  background: #72efe214;
+  box-shadow:
+    inset 0 1px #83e4d788,
+    inset 0 -1px #83e4d788;
+}
+.battle-grid[data-first-patrol] .cell[data-row='2'][data-col='0'] {
+  border-left: 3px solid var(--lime);
+}
+.in-mission .campaign,
+.in-mission footer {
+  display: none;
+}
+footer {
+  justify-content: flex-end;
+}
+.arena.is-playing {
+  animation: connect-feed 0.25s ease-out;
+}
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+}
+@keyframes connect-feed {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.arena-caption {
+  color: #d2e9e6;
+  text-shadow: 0 1px 4px #000;
+}
+#arena-instruction {
+  color: #cee5df;
+  font-size: 9px;
+}
+button {
+  touch-action: manipulation;
+}
+@media (max-width: 600px) {
+  main {
+    padding: 10px 6px 0;
+  }
+  .site-header {
+    padding: 0 12px;
+    height: 58px;
+  }
+  .site-header nav {
+    gap: 4px;
+  }
+  .site-header nav button {
+    width: 40px;
+    height: 40px;
+  }
+  .in-mission .site-header {
+    height: 48px;
+  }
+  .console-top {
+    font-size: 9px;
+    height: 30px;
+    padding-inline: 10px;
+  }
+  .hud {
+    height: 47px;
+    gap: 10px;
+  }
+  .hud .icon-button {
+    width: 38px;
+    height: 38px;
+  }
+  .integrity span,
+  .wave-stat > span {
+    font-size: 8px;
+    letter-spacing: 0.25px;
+  }
+  .wave-stat > span {
+    max-width: 78px;
+  }
+  .menu-cover {
+    padding: 17px 0 17px 17px;
+    width: 57%;
+  }
+  .menu-cover h1 {
+    font-size: clamp(38px, 11vw, 61px);
+  }
+  .mission-chip {
+    font-size: 8px;
+    margin-bottom: 14px;
+    letter-spacing: 0.65px;
+  }
+  .menu-cover > p {
+    font-size: 12px;
+    max-width: 21ch;
+    margin: 12px 0;
+  }
+  .menu-cover .primary {
+    min-height: 40px;
+    font-size: 12px;
+  }
+  .battle-toolbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 6px 8px;
+    gap: 5px;
+  }
+  .tactical-status {
+    line-height: 1.35;
+    font-size: 11px;
+    max-width: none;
+    flex: 1 1 114px;
+  }
+  .tool-button {
+    height: 38px;
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+  #speed-button {
+    height: 38px;
+    width: 35px;
+  }
+  .deck {
+    gap: 7px;
+    padding: 9px 7px;
+  }
+  .bot-card {
+    min-height: 90px;
+    padding-bottom: 6px;
+  }
+  .bot-card img {
+    width: 61px;
+    height: 43px;
+  }
+  .keycap {
+    display: none;
+  }
+  .bot-details strong {
+    font-size: 12px;
+  }
+  .bot-details small {
+    font-size: 7px;
+    letter-spacing: 0.1px;
+  }
+  .bot-cost {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+  .loadout-tip > span {
+    font-size: 8px;
+  }
+  .loadout-tip p {
+    font-size: 11px;
+  }
+  .abilities {
+    height: 42px;
+  }
+  .ability > span,
+  .recycle-button span {
+    font-size: 11px;
+  }
+  .ability small {
+    font-size: 8px;
+  }
+  .recycle-button {
+    width: 85px;
+  }
+  .sectors {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .sector {
+    padding: 6px 3px;
+  }
+  .sector strong {
+    font-size: 9px;
+  }
+  .sector small {
+    font-size: 6px;
+  }
+  footer .text-button {
+    min-height: 40px;
+    font-size: 11px;
+  }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  main {
+    padding: 4px 8px 0;
+  }
+  .site-header {
+    height: 38px;
+  }
+  .site-header .brand small {
+    display: none;
+  }
+  .site-header .brand img {
+    width: 27px;
+    height: 27px;
+  }
+  .in-mission .console-top {
+    display: none;
+  }
+  .console-body {
+    grid-template-columns: minmax(0, 1fr) 174px;
+  }
+  .battle-column .hud {
+    height: 34px;
+  }
+  .arena {
+    height: clamp(172px, calc(100vh - 146px), 460px);
+  }
+  .arena.is-playing {
+    height: clamp(172px, calc(100vh - 123px), 460px);
+  }
+  .arena canvas {
+    height: 100%;
+    width: 100%;
+  }
+  .menu-cover {
+    padding: 12px 16px;
+  }
+  .menu-cover h1 {
+    font-size: clamp(35px, 13vh, 62px);
+  }
+  .menu-cover > p {
+    margin: 4px 0 8px;
+  }
+  .mission-chip {
+    font-size: 7px;
+    margin-bottom: 8px;
+  }
+  .battle-toolbar {
+    height: 40px;
+  }
+  .tool-button {
+    min-height: 32px;
+  }
+  .tactical-status {
+    font-size: 10px;
+  }
+  .deck {
+    gap: 4px;
+    padding: 6px;
+  }
+  .bot-card {
+    min-height: 37px;
+  }
+  .bot-card img {
+    width: 40px;
+    height: 32px;
+  }
+  .abilities {
+    height: 34px;
+    margin: 4px 0 0;
+  }
+  .recycle-button {
+    width: 45px;
+  }
+  body:not(.in-mission) .campaign,
+  body:not(.in-mission) footer {
+    display: flex;
+  }
+  .modal {
+    max-height: 94vh;
   }
 }

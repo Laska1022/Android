@@ -8,7 +8,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 
 - Five robot classes: **Pulse** blaster, **Spark** generator, **Frost** disruptor, **Nova** artillery, and **Bastion** defender.
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
-- Original Canvas artwork: animated robots, aliens, lunar landscape, portal, projectiles, particles, health bars, and emergency sweepers.
+- Original sci-fi artwork with a command outpost, industrial perimeter, ten robot and alien sprites, weapon trails, impact lighting and emergency sweepers.
 - Energy pickups, health-based recycling, lane-wide orbital strikes, pause, and double speed.
 - Procedural sci-fi sound effects, reduced-motion settings, keyboard navigation, and touch controls.
 - Saved campaign unlocks, star ratings, preferences, and best score on the current device.

@@ -53,46 +53,36 @@ let resumeAfterDialog = false;
 $('#app').innerHTML = `
   <header class="site-header">
     <a class="brand" href="./" aria-label="Robots vs Aliens home"><img src="./icon.svg" alt=""/><span>ROBOTS <span class="brand-vs">vs</span> ALIENS<small>LAST OUTPOST</small></span></a>
-    <nav aria-label="Game tools"><span class="connection"><i></i> ALL SYSTEMS ONLINE</span><button class="quiet" id="guide-button" aria-label="Field guide">${icon('book')}<span>Field guide</span></button><button class="icon-button" id="sound-button" aria-label="Toggle sound" aria-pressed="${!save.muted}">${icon('sound')}</button><button class="icon-button settings-button" id="settings-button" aria-label="Settings">⚙</button></nav>
+    <nav aria-label="Game tools"><span class="connection"><i></i> OUTPOST COMMAND</span><button class="quiet" id="guide-button" aria-label="Field guide">${icon('book')}<span>Field guide</span></button><button class="icon-button" id="sound-button" aria-label="Toggle sound" aria-pressed="${!save.muted}">${icon('sound')}</button><button class="icon-button settings-button" id="settings-button" aria-label="Settings">⚙</button></nav>
   </header>
   <main>
-    <section class="heading"><div><div class="eyebrow"><span class="tiny-square"></span> OUTPOST DEFENSE PROGRAM <span class="slash">/</span> VOL. 01</div><h1>The last outpost<span>.</span></h1><p>A little metal. A lot of courage. An entire planet to defend.</p></div><div class="record"><span>PERSONAL BEST</span><strong id="best-score">${save.best.toLocaleString()}</strong><small>COMMANDER RECORD</small></div></section>
     <section class="console" aria-label="Defense console">
-      <div class="console-top"><div class="sector-status"><span class="live-dot"></span><span id="sector-label">SECTOR 01</span><span class="separator">/</span><span id="mission-label">FIRST CONTACT</span></div><div class="console-tags"><span>KEPLER-186F</span><span class="weather">◌ &nbsp; 18°C</span></div></div>
+      <div class="console-top"><div class="sector-status"><span class="live-dot"></span><span id="sector-label">SECTOR 01</span><span class="separator">/</span><span id="mission-label">FIRST CONTACT</span></div><div class="console-tags"><span>PERSONAL BEST &nbsp;<b id="best-score">${save.best.toLocaleString()}</b></span></div></div>
       <div class="console-body">
         <div class="battle-column">
           <div class="hud"><div class="energy-stat">${icon('bolt')}<strong id="energy">325</strong><span>ENERGY</span></div><div class="integrity">${icon('shield')}<div><span>CORE INTEGRITY</span><div id="hearts" aria-label="5 core integrity">${'<i></i>'.repeat(5)}</div></div></div><div class="wave-stat"><span id="wave-label">PREPARE YOUR SQUAD</span><strong id="wave-count">00 <small>/ 04</small></strong></div><button class="icon-button" id="pause-button" aria-label="Pause game" disabled>${icon('pause')}</button></div>
           <div class="arena" id="arena">
             <canvas id="battlefield" aria-label="Animated alien landscape and tactical battlefield"></canvas>
             <div id="battle-grid" class="battle-grid" role="group" aria-label="Battlefield: 5 lanes and 9 columns" hidden>${Array.from({ length: 45 }, (_, i) => `<button class="cell" data-row="${Math.floor(i / 9)}" data-col="${i % 9}" aria-label="Lane ${Math.floor(i / 9) + 1}, column ${(i % 9) + 1}, empty" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}</div>
-            <div class="menu-cover" id="menu-cover"><div class="mission-chip"><i></i> INCOMING TRANSMISSION</div><h2>HOLD<br>THE <em>LINE.</em></h2><p>The aliens have arrived.<br>Build your squad. Protect our last light.</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button><div class="menu-meta"><span>5 ROBOTS</span><b>·</b><span>5 SECTORS</span><b>·</b><span>ONE LAST STAND</span></div></div>
-            <div class="arena-caption"><span><i></i> LIVE FEED <b>07</b></span><span id="arena-instruction">YOUR PLANET. YOUR LAST LINE OF DEFENSE.</span><span class="corners">⌜ ⌝</span></div>
+            <div class="menu-cover" id="menu-cover"><div class="mission-chip">KEPLER-186F / PERIMETER DEFENSE</div><h1>The last <em>outpost.</em></h1><p>Build your defense. Hold five lanes against the invasion.</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button></div>
+            <div class="arena-caption"><span>TACTICAL FEED</span><span id="arena-instruction">SELECT AN EMPTY TILE TO DEPLOY PULSE</span></div>
             <div class="toast" id="toast" role="status" aria-live="polite"></div>
             <div class="wave-banner" id="wave-banner" aria-hidden="true"></div>
           </div>
           <div class="battle-toolbar"><div class="tactical-status"><span class="pulse-dot"></span><span id="tactical-status">Awaiting your command</span></div><div class="battle-actions"><button id="collect-button" class="tool-button" disabled>${icon('bolt')} Collect <span id="pickup-count">0</span></button><button id="speed-button" class="tool-button" aria-label="Toggle double speed" aria-pressed="false">1×</button><button id="wave-button" class="tool-button next-wave" disabled>Send wave ${icon('arrow')}</button></div></div>
         </div>
-        <aside class="deck"><div class="deck-heading"><div><span class="eyebrow">YOUR LOADOUT</span><h2>Meet the squad</h2></div><span class="count">05</span></div><div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card ${i === 0 ? 'selected' : ''}" data-bot="${kind}" aria-pressed="${i === 0}" aria-label="Select ${BOTS[kind].name}, ${BOTS[kind].cost} energy. ${BOTS[kind].description}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind)}" alt=""/><span class="bot-details"><strong>${BOTS[kind].name}</strong><small>${BOTS[kind].role}</small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div><div class="loadout-tip"><span id="selected-name">PULSE / BLASTER</span><p id="selected-description">${BOTS.pulse.description}</p></div><div class="abilities"><button id="beam-button" class="ability" aria-label="Select orbital strike, then select a lane" aria-pressed="false">${icon('target')}<span>Orbital strike<small id="beam-status">READY · Q</small></span></button><button id="recycle-button" class="recycle-button" aria-label="Recycle a robot for up to 50 percent energy" aria-pressed="false">${icon('recycle')}<span>R</span></button></div></aside>
+        <aside class="deck"><div class="deck-heading"><div><span class="eyebrow">ROBOT SYSTEMS</span><h2>Squad loadout</h2></div><span class="count">05</span></div><div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card ${i === 0 ? 'selected' : ''}" data-bot="${kind}" aria-pressed="${i === 0}" aria-label="Select ${BOTS[kind].name}, ${BOTS[kind].cost} energy. ${BOTS[kind].description}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind)}" alt=""/><span class="bot-details"><strong>${BOTS[kind].name}</strong><small>${BOTS[kind].role}</small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div><div class="loadout-tip"><span id="selected-name">PULSE / BLASTER</span><p id="selected-description">${BOTS.pulse.description}</p></div><div class="abilities"><button id="beam-button" class="ability" aria-label="Select orbital strike, then select a lane" aria-pressed="false">${icon('target')}<span>Orbital strike<small id="beam-status">READY · Q</small></span></button><button id="recycle-button" class="recycle-button" aria-label="Recycle a robot for up to 50 percent energy" aria-pressed="false">${icon('recycle')}<span>Recycle</span></button></div></aside>
       </div>
-      <div class="campaign"><div class="campaign-label"><span class="eyebrow">THE CAMPAIGN</span><strong>One planet. Five fronts.</strong></div><div class="sectors" id="sectors">${SECTORS.map((s, i) => `<button class="sector ${i === 0 ? 'active' : ''}" data-sector="${i}" ${i > save.unlocked ? 'disabled' : ''} aria-label="Sector ${i + 1}: ${s.name}${i > save.unlocked ? ', locked' : ''}"><span>0${i + 1}</span><div><strong>${s.name}</strong><small>${i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : i === 0 ? 'START HERE' : 'AVAILABLE'}</small></div>${i > save.unlocked ? '<b>⌑</b>' : '<b>↗</b>'}</button>`).join('')}</div></div>
+      <div class="campaign"><div class="campaign-label"><span class="eyebrow">CAMPAIGN</span><strong>Select sector</strong></div><div class="sectors" id="sectors">${SECTORS.map((s, i) => `<button class="sector ${i === 0 ? 'active' : ''}" data-sector="${i}" ${i > save.unlocked ? 'disabled' : ''} aria-label="Sector ${i + 1}: ${s.name}${i > save.unlocked ? ', locked' : ''}"><span>0${i + 1}</span><div><strong>${s.name}</strong><small>${i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : i === 0 ? 'START HERE' : 'AVAILABLE'}</small></div>${i > save.unlocked ? '<b>⌑</b>' : '<b>↗</b>'}</button>`).join('')}</div></div>
     </section>
-    <footer><span><span class="footer-mark">✳</span> BUILT FOR THE LAST LINE OF DEFENSE.</span><span>SELECT A ROBOT <b>→</b> TAP A TILE <b>→</b> HOLD THE LINE</span><button class="text-button" id="endless-button">Survival mode ↗</button></footer>
+    <footer><button class="text-button" id="endless-button">Survival mode ↗</button></footer>
   </main>
   <div id="modal-backdrop" class="modal-backdrop" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"></section></div>
 `;
 const renderer = new Renderer($('#battlefield'));
 renderer.reducedMotion =
   save.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
-const demo = new Game(0, false, 7);
-demo.place('pulse', 0, 5);
-demo.place('frost', 1, 4);
-demo.place('nova', 3, 4);
-demo.energy = 1000;
-demo.place('pulse', 4, 6);
-demo.spawn('scout', 0, 8.1);
-demo.spawn('runner', 2, 8.5);
-demo.spawn('scout', 4, 8.1);
-demo.drainEvents();
+document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
 
 function toast(message: string) {
   $('#toast').textContent = message;
@@ -157,6 +147,8 @@ function start(endless = false) {
   closeModal(false);
   game = new Game(sector, endless, undefined, save.difficulty);
   menu = false;
+  document.body.classList.add('in-mission');
+  window.scrollTo(0, 0);
   previousPhase = 'playing';
   speed = 1;
   accumulator = 0;
@@ -177,6 +169,7 @@ function start(endless = false) {
 function mainMenu() {
   closeModal(false);
   menu = true;
+  document.body.classList.remove('in-mission');
   game.phase = 'paused';
   $('#menu-cover').hidden = false;
   $('#battle-grid').hidden = true;
@@ -244,10 +237,8 @@ function updateHud() {
     const row = Number(b.dataset.row),
       col = Number(b.dataset.col);
     const bot = game.bots.find((b) => b.row === row && b.col === col);
-    b.setAttribute(
-      'aria-label',
-      `Lane ${row + 1}, column ${col + 1}, ${bot ? `${BOTS[bot.kind].name}, ${Math.ceil(bot.hp)} health` : 'empty'}`,
-    );
+    const label = `Lane ${row + 1}, column ${col + 1}, ${bot ? `${BOTS[bot.kind].name}, ${Math.ceil(bot.hp)} health` : 'empty'}`;
+    if (b.getAttribute('aria-label') !== label) b.setAttribute('aria-label', label);
   });
 }
 function openModal(title: string, contents: string) {
@@ -274,8 +265,8 @@ function pause() {
     return;
   }
   openModal(
-    'Take a breather.',
-    `<p>The outpost can wait. Your squad is standing by.</p><div class="modal-actions"><button class="primary" id="resume-button">Resume mission ${icon('arrow')}</button><button class="secondary" id="restart-button">Restart sector</button><button class="text-button" id="quit-button">Return to command</button></div>`,
+    'Mission paused',
+    `<p>Resume the defense, restart this sector, or return to command.</p><div class="modal-actions"><button class="primary" id="resume-button">Resume mission ${icon('arrow')}</button><button class="secondary" id="restart-button">Restart sector</button><button class="text-button" id="quit-button">Return to command</button></div>`,
   );
   $('#resume-button').onclick = () => closeModal();
   $('#restart-button').onclick = () => start(game.endless);
@@ -291,7 +282,7 @@ function finish() {
   }
   persist();
   openModal(
-    won ? 'The line holds.' : 'A brave last stand.',
+    won ? 'The line holds.' : 'Core lost.',
     `<div class="result-emblem">${won ? '✦' : '⌁'}</div><p>${won ? 'The outpost is safe. Your squad made the difference.' : 'The core has fallen. Rebuild your strategy and reclaim the outpost.'}</p>${won ? `<div class="stars" aria-label="${stars} out of 3 stars">${'★'.repeat(stars)}<span>${'★'.repeat(3 - stars)}</span></div>` : ''}<div class="result-stats"><div><strong>${game.score.toLocaleString()}</strong><span>SCORE</span></div><div><strong>${game.kills}</strong><span>ALIENS STOPPED</span></div><div><strong>${Math.floor(game.time / 60)}:${String(Math.floor(game.time % 60)).padStart(2, '0')}</strong><span>TIME HELD</span></div></div><div class="modal-actions">${won && sector < 4 ? '<button class="primary" id="next-sector">Deploy to next sector →</button>' : ''}<button class="${won && sector < 4 ? 'secondary' : 'primary'}" id="retry-button">${won ? 'Play again' : 'Try again'}</button><button class="text-button" id="quit-button">Return to command</button></div>`,
   );
   $('#retry-button').onclick = () => start(game.endless);
@@ -354,9 +345,9 @@ $('#sound-button').onclick = () => {
 };
 $('#settings-button').onclick = () => {
   openModal(
-    'Make it yours.',
+    'Command settings',
     `<label class="setting"><span>Campaign difficulty<small>Cadet gives you time to prepare. Veteran uses the original waves. Applies at deployment.</small></span><select id="difficulty-setting" aria-label="Campaign difficulty"><option value="cadet" ${save.difficulty === 'cadet' ? 'selected' : ''}>Cadet</option><option value="veteran" ${save.difficulty === 'veteran' ? 'selected' : ''}>Veteran</option></select></label>` +
-      `<p>Small adjustments for a better mission.</p><label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
+      `<label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
   );
   $('#difficulty-setting').onchange = (event) => {
     save.difficulty = (event.target as HTMLSelectElement).value === 'veteran' ? 'veteran' : 'cadet';
@@ -372,6 +363,7 @@ $('#settings-button').onclick = () => {
   };
   $('#motion-setting').onchange = (e) => {
     renderer.reducedMotion = (e.target as HTMLInputElement).checked;
+    document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
     save.reducedMotion = renderer.reducedMotion;
     persist();
   };
@@ -494,8 +486,7 @@ document.addEventListener('visibilitychange', () => {
 function frame(now: number) {
   const elapsed = last ? Math.min((now - last) / 1000, 0.1) : 0;
   last = now;
-  if (menu) demo.time += elapsed;
-  else {
+  if (!menu) {
     accumulator += elapsed * speed;
     while (accumulator >= 1 / 60) {
       game.update(1 / 60);
@@ -519,16 +510,19 @@ function frame(now: number) {
       if (game.phase === 'won' || game.phase === 'lost') finish();
     }
   }
-  renderer.draw(menu ? demo : game, menu);
-  toastTimer -= elapsed;
-  if (toastTimer <= 0) $('#toast').classList.remove('visible');
+  if (!menu) renderer.draw(game);
+  if (toastTimer > 0) {
+    toastTimer -= elapsed;
+    if (toastTimer <= 0) $('#toast').classList.remove('visible');
+  }
   hudClock += elapsed;
-  if (hudClock > 0.15) {
+  if (!menu && game.phase === 'playing' && hudClock > 0.15) {
     updateHud();
     hudClock = 0;
   }
   requestAnimationFrame(frame);
 }
+updateHud();
 requestAnimationFrame(frame);
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {

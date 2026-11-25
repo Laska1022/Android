@@ -6,13 +6,13 @@ Start with [HANDOFF.md](HANDOFF.md) for the current version, tested behavior and
 
 ## Where changes belong
 
-| Area                                           | Source                                                       | Contract                                                                                                                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Campaign, economy, difficulty, enemy schedules | `src/game/engine.ts`                                         | Cell-space coordinates, seeded randomness, fixed time steps. Cover balance with a normal-budget strategy in addition to combat stress tests.                     |
-| Saves and audio                                | `src/game/storage.ts`, `src/game/audio.ts`                   | Validate individual fields, load existing `rva-save-v1` progress and respect mute before playing any sound.                                                      |
-| Screens and controls                           | `src/main.ts`, `src/style.css`                               | Preserve keyboard focus, semantic touch targets, portrait, landscape and pause on visibility change.                                                             |
-| Artwork and feedback                           | `src/game/render.ts`, `public/`                              | Keep combat legible on small screens. Cache static scene work, bound effects and keep hitboxes independent of animation. Record art origins in `docs/ASSETS.md`. |
-| Offline and Android                            | `scripts/generate-sw.mjs`, `capacitor.config.ts`, `android/` | Bundle runtime assets locally, sync the built web app before Gradle, and retain the package ID `com.laska.robotvsaliens`.                                        |
+| Area                                           | Source                                                       | Contract                                                                                                                                                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Campaign, economy, difficulty, enemy schedules | `src/game/engine.ts`                                         | Cell-space coordinates, seeded randomness, fixed time steps. Cover balance with a normal-budget strategy in addition to combat stress tests.                                                                           |
+| Saves and audio                                | `src/game/storage.ts`, `src/game/audio.ts`                   | Validate individual fields, load existing `rva-save-v1` progress and respect mute before playing any sound.                                                                                                            |
+| Screens and controls                           | `src/main.ts`, `src/style.css`                               | Preserve keyboard focus, semantic touch targets, portrait, landscape and pause on visibility change.                                                                                                                   |
+| Artwork and feedback                           | `src/game/render.ts`, `src/assets/`, `public/`               | Use shared locally bundled WebP silhouettes for combat, cards and placement previews. Cache the static scene and lighting, keep effects bounded and preserve the logical grid. Record art origins in `docs/ASSETS.md`. |
+| Offline and Android                            | `scripts/generate-sw.mjs`, `capacitor.config.ts`, `android/` | Bundle runtime assets locally, sync the built web app before Gradle, and retain the package ID `com.laska.robotvsaliens`.                                                                                              |
 
 Design for adults who enjoy colorful science fiction. Use recognizable mechanical silhouettes, readable lane threats and a clear hierarchy for energy, core health and wave state. Give a new player time to choose and place a robot before the first Cadet attack. Keep Veteran and Survival challenging.
 
@@ -30,6 +30,8 @@ Design for adults who enjoy colorful science fiction. Use recognizable mechanica
 - Report the concrete change, validation results, and remaining limitations. Distinguish a debug APK from a signed store release.
 
 ## Publishing and handoff
+
+Use the [parallel cloud prompts](PROMPTS.md) and [work board](HANDOFF.md#assignments-for-parallel-codex-cloud-sessions) when continuing the release in separate Codex sessions.
 
 Fetch the target branch and check the working tree before a new iteration. Use a development branch for substantial changes. Update the app version in `package.json`, the root package entry in `package-lock.json`, and Android's `versionName` and increasing `versionCode` together. Record each tested release in [CHANGELOG.md](CHANGELOG.md) and leave the next developer a current [handoff](HANDOFF.md). Use descriptive commits and normal pushes when authorized.
 
