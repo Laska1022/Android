@@ -14,6 +14,8 @@ The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offli
 
 ## Gameplay decisions
 
+The hosted web and Android builds passed at `c213a6e`, which also finalized the two cloud prompts. Start new work from the latest `main`. [GitHub build and debug APK](https://github.com/Laska1022/Android/actions/runs/45652679628)
+
 The 1.1.0 Redmi run cleared First Contact at the real starting budget with three stars, 32 enemies stopped and 4,060 points. All 21 unit tests and seven applicable browser scenarios passed. The device and methods are recorded in [TESTING.md](TESTING.md).
 
 - Cadet is the default campaign setting. Its first mission lets the player place a squad before sending the first wave. Veteran preserves the original opening for experienced players. Survival uses Veteran combat.

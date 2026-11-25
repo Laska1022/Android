@@ -94,6 +94,7 @@ See [historical validation](docs/VALIDATION.md) for the October 2026 cloud runs.
 
 ### November 25, 2026 · 1.2.0
 
+- **GitHub Actions.** Commit `c213a6e` passed both the hosted web and Android jobs, including the corrected SDK setup, APK assembly and lint. The run includes browser evidence and a downloadable debug APK. The Redmi results below refer to the locally signed build of the same game. [Successful run and artifacts](https://github.com/Laska1022/Android/actions/runs/45652679628)
 - **Automated.** All 21 unit tests and 10 applicable browser scenarios passed. Two project-specific scenarios were intentionally skipped (desktop keyboard on mobile and phone touch on desktop). New browser checks load all ten unit images and the command and perimeter artwork offline, and exercise campaign and Survival controls after a viewport rotation. Android assembly passed. App lint reported zero errors and four warnings.
 - **Build artifact.** Version code 3. The 4,938,785-byte debug APK passed APK Signature Scheme v2 verification and contained all 12 WebP images (550,722 bytes in total). Tested APK SHA-256 `ada1b418777a73548952cc4795ed8a43b7b1c0cdfb0ee88ffed0f5602820e8b4`.
 - **Physical campaign and storage.** The debug APK installed on the Redmi Note 7. ADB initially reported a 2,319 ms Activity launch. A normal-budget Cadet First Contact run stopped all 32 enemies, scored 4,140 points and awarded three stars in 3:07 simulated time. A cold reopen measured 813 ms with `am start -W`; sector 2, best score and mute persisted.
