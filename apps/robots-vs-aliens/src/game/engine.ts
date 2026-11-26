@@ -175,6 +175,11 @@ export interface Sweep {
   x: number;
 }
 
+export interface IncomingThreat {
+  readonly row: number;
+  readonly kind: EnemyKind | null;
+}
+
 export class Game {
   phase: Phase = 'playing';
   bots: Bot[] = [];
@@ -200,6 +205,7 @@ export class Game {
   private energyTimer = 0;
   private pickupTimer = 7;
   private seed: number;
+  private nextSpawn: { kind: EnemyKind; warning: IncomingThreat } | null;
   readonly difficulty: CampaignDifficulty;
   constructor(
     public sector = 0,
@@ -210,6 +216,7 @@ export class Game {
     this.seed = seed >>> 0;
     this.difficulty = endless ? 'veteran' : difficulty;
     this.energy = startingEnergy(sector, this.difficulty);
+    this.nextSpawn = this.chooseSpawn(1, 0);
   }
   random() {
     this.seed = (Math.imul(1664525, this.seed) + 1013904223) >>> 0;
@@ -223,6 +230,25 @@ export class Game {
   }
   get awaitingLaunch() {
     return this.difficulty === 'cadet' && this.sector === 0 && this.wave === 0;
+  }
+  get incomingThreat(): IncomingThreat | null {
+    return this.nextSpawn?.warning ?? null;
+  }
+  private waveSize(wave: number) {
+    return 5 + wave * 2 + this.sector * 2 - cadetAllowance(this.sector, this.difficulty);
+  }
+  private firstPatrol(wave: number) {
+    return this.difficulty === 'cadet' && this.sector === 0 && wave === 1;
+  }
+  private chooseSpawn(wave: number, index: number) {
+    const roll = this.random();
+    let kind: EnemyKind = 'scout';
+    if (wave >= 2 && roll < 0.3) kind = 'runner';
+    if ((wave >= 3 || this.sector >= 1) && roll > 0.7) kind = 'brute';
+    if (this.sector >= 2 && roll > 0.45 && roll < 0.7) kind = 'spitter';
+    if (wave >= this.totalWaves && index === this.waveSize(wave) - 1) kind = 'overlord';
+    const row = this.firstPatrol(wave) ? FIRST_PATROL[index] : Math.floor(this.random() * ROWS);
+    return { kind, warning: { row, kind: this.difficulty === 'cadet' ? kind : null } };
   }
   private event(type: GameEvent['type'], kind?: string) {
     this.events.push({ type, kind });
@@ -300,8 +326,7 @@ export class Game {
     this.wave++;
     this.intermission = -1;
     this.spawned = 0;
-    this.spawnTotal =
-      5 + this.wave * 2 + this.sector * 2 - cadetAllowance(this.sector, this.difficulty);
+    this.spawnTotal = this.waveSize(this.wave);
     this.spawnTimer = 1.5;
     this.event('wave');
     return true;
@@ -382,22 +407,14 @@ export class Game {
         this.intermission = 0;
         this.startWave();
       }
-    } else if (this.spawned < this.spawnTotal) {
+    } else if (this.nextSpawn && this.spawned < this.spawnTotal) {
       this.spawnTimer -= dt;
       if (this.spawnTimer <= 0) {
-        const r = this.random();
-        let kind: EnemyKind = 'scout';
-        if (this.wave >= 2 && r < 0.3) kind = 'runner';
-        if ((this.wave >= 3 || this.sector >= 1) && r > 0.7) kind = 'brute';
-        if (this.sector >= 2 && r > 0.45 && r < 0.7) kind = 'spitter';
-        if (this.wave >= this.totalWaves && this.spawned === this.spawnTotal - 1) kind = 'overlord';
-        const firstPatrol = this.difficulty === 'cadet' && this.sector === 0 && this.wave === 1;
-        this.spawn(
-          kind,
-          firstPatrol ? FIRST_PATROL[this.spawned] : Math.floor(this.random() * ROWS),
-        );
+        this.spawn(this.nextSpawn.kind, this.nextSpawn.warning.row);
         this.spawned++;
-        this.spawnTimer = firstPatrol
+        this.nextSpawn =
+          this.spawned < this.spawnTotal ? this.chooseSpawn(this.wave, this.spawned) : null;
+        this.spawnTimer = this.firstPatrol(this.wave)
           ? 5
           : Math.max(1.1, 3.7 - this.wave * 0.2 - this.sector * 0.15);
       }
@@ -525,14 +542,17 @@ export class Game {
     }
     this.particles = this.particles.filter((p) => p.life > 0);
     if (this.lives <= 0) {
+      this.nextSpawn = null;
       this.phase = 'lost';
       this.event('lose');
     } else if (this.waveActive && this.spawned >= this.spawnTotal && !this.enemies.length) {
       if (!this.endless && this.wave >= this.totalWaves) {
+        this.nextSpawn = null;
         this.phase = 'won';
         this.score += this.lives * 250;
         this.event('win');
       } else {
+        this.nextSpawn = this.chooseSpawn(this.wave + 1, 0);
         this.intermission = 12;
         this.energy += 75;
         this.score += 100;

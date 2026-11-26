@@ -15,7 +15,14 @@ import {
   startingEnergy,
   type BotKind,
 } from './game/engine';
-import { BOARD, Renderer, botIcon } from './game/render';
+import { BOARD, Renderer, botIcon, alienIcon } from './game/render';
+import { LaneWarning } from './game/lane-warning';
+import { ROBOT_SKINS, ALIEN_SKINS, isRobotSkin, isAlienSkin } from './game/skins';
+import {
+  supportsNativeOrientation,
+  getOrientationMode,
+  setOrientationMode,
+} from './game/orientation';
 import { AudioEngine } from './game/audio';
 import { loadSave, storeSave } from './game/storage';
 
@@ -64,14 +71,14 @@ $('#app').innerHTML = `
           <div class="arena" id="arena">
             <canvas id="battlefield" aria-label="Animated alien landscape and tactical battlefield"></canvas>
             <div id="battle-grid" class="battle-grid" role="group" aria-label="Battlefield: 5 lanes and 9 columns" hidden>${Array.from({ length: 45 }, (_, i) => `<button class="cell" data-row="${Math.floor(i / 9)}" data-col="${i % 9}" aria-label="Lane ${Math.floor(i / 9) + 1}, column ${(i % 9) + 1}, empty" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}</div>
-            <div class="menu-cover" id="menu-cover"><div class="mission-chip">KEPLER-186F / PERIMETER DEFENSE</div><h1>The last <em>outpost.</em></h1><p>Build your defense. Hold five lanes against the invasion.</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button></div>
+            <div class="menu-cover" id="menu-cover"><div class="mission-chip" id="mission-location">${SECTORS[0].location}</div><h1>The last <em>outpost.</em></h1><p id="mission-brief">${SECTORS[0].description}</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button></div>
             <div class="arena-caption"><span>TACTICAL FEED</span><span id="arena-instruction">SELECT AN EMPTY TILE TO DEPLOY PULSE</span></div>
             <div class="toast" id="toast" role="status" aria-live="polite"></div>
             <div class="wave-banner" id="wave-banner" aria-hidden="true"></div>
           </div>
           <div class="battle-toolbar"><div class="tactical-status"><span class="pulse-dot"></span><span id="tactical-status">Awaiting your command</span></div><div class="battle-actions"><button id="collect-button" class="tool-button" disabled>${icon('bolt')} Collect <span id="pickup-count">0</span></button><button id="speed-button" class="tool-button" aria-label="Toggle double speed" aria-pressed="false">1×</button><button id="wave-button" class="tool-button next-wave" disabled>Send wave ${icon('arrow')}</button></div></div>
         </div>
-        <aside class="deck"><div class="deck-heading"><div><span class="eyebrow">ROBOT SYSTEMS</span><h2>Squad loadout</h2></div><span class="count">05</span></div><div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card ${i === 0 ? 'selected' : ''}" data-bot="${kind}" aria-pressed="${i === 0}" aria-label="Select ${BOTS[kind].name}, ${BOTS[kind].cost} energy. ${BOTS[kind].description}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind)}" alt=""/><span class="bot-details"><strong>${BOTS[kind].name}</strong><small>${BOTS[kind].role}</small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div><div class="loadout-tip"><span id="selected-name">PULSE / BLASTER</span><p id="selected-description">${BOTS.pulse.description}</p></div><div class="abilities"><button id="beam-button" class="ability" aria-label="Select orbital strike, then select a lane" aria-pressed="false">${icon('target')}<span>Orbital strike<small id="beam-status">READY · Q</small></span></button><button id="recycle-button" class="recycle-button" aria-label="Recycle a robot for up to 50 percent energy" aria-pressed="false">${icon('recycle')}<span>Recycle</span></button></div></aside>
+        <aside class="deck"><div class="deck-heading"><div><span class="eyebrow">ROBOT SYSTEMS</span><h2>Squad loadout</h2></div><span class="count">05</span></div><div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card ${i === 0 ? 'selected' : ''}" data-bot="${kind}" aria-pressed="${i === 0}" aria-label="Select ${BOTS[kind].name}, ${BOTS[kind].cost} energy. ${BOTS[kind].description}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span class="bot-details"><strong>${BOTS[kind].name}</strong><small>${BOTS[kind].role}</small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div><div class="loadout-tip"><span id="selected-name">PULSE / BLASTER</span><p id="selected-description">${BOTS.pulse.description}</p></div><div class="abilities"><button id="beam-button" class="ability" aria-label="Select orbital strike, then select a lane" aria-pressed="false">${icon('target')}<span>Orbital strike<small id="beam-status">READY · Q</small></span></button><button id="recycle-button" class="recycle-button" aria-label="Recycle a robot for up to 50 percent energy" aria-pressed="false">${icon('recycle')}<span>Recycle</span></button></div></aside>
       </div>
       <div class="campaign"><div class="campaign-label"><span class="eyebrow">CAMPAIGN</span><strong>Select sector</strong></div><div class="sectors" id="sectors">${SECTORS.map((s, i) => `<button class="sector ${i === 0 ? 'active' : ''}" data-sector="${i}" ${i > save.unlocked ? 'disabled' : ''} aria-label="Sector ${i + 1}: ${s.name}${i > save.unlocked ? ', locked' : ''}"><span>0${i + 1}</span><div><strong>${s.name}</strong><small>${i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : i === 0 ? 'START HERE' : 'AVAILABLE'}</small></div>${i > save.unlocked ? '<b>⌑</b>' : '<b>↗</b>'}</button>`).join('')}</div></div>
     </section>
@@ -80,6 +87,15 @@ $('#app').innerHTML = `
   <div id="modal-backdrop" class="modal-backdrop" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"></section></div>
 `;
 const renderer = new Renderer($('#battlefield'));
+const laneWarning = new LaneWarning($('#arena'));
+function applySkins() {
+  renderer.robotSkin = save.robotSkin;
+  renderer.alienSkin = save.alienSkin;
+  for (const card of document.querySelectorAll<HTMLElement>('[data-bot]')) {
+    card.querySelector('img')!.src = botIcon(card.dataset.bot as BotKind, save.robotSkin);
+  }
+}
+applySkins();
 renderer.reducedMotion =
   save.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
@@ -123,6 +139,8 @@ function select(choice: typeof selected) {
 }
 function setSector(i: number) {
   sector = i;
+  $('#mission-location').textContent = SECTORS[i].location;
+  $('#mission-brief').textContent = SECTORS[i].description;
   $('#sector-label').textContent = `SECTOR 0${i + 1}`;
   $('#mission-label').textContent = SECTORS[i].name.toUpperCase();
   document
@@ -343,12 +361,64 @@ $('#sound-button').onclick = () => {
   persist();
   if (!audio.muted) audio.play('energy');
 };
+function skinOptions(choices: Record<string, string>, selectedSkin: string) {
+  return Object.entries(choices)
+    .map(
+      ([id, name]) =>
+        `<option value="${id}" ${id === selectedSkin ? 'selected' : ''}>${name}</option>`,
+    )
+    .join('');
+}
+function wireOrientationSetting(select: HTMLSelectElement) {
+  const help = $('#orientation-help');
+  getOrientationMode()
+    .then((mode) => {
+      select.value = mode;
+      select.disabled = false;
+    })
+    .catch(() => {
+      help.textContent = 'Could not read the rotation preference. Reopen Settings to retry.';
+    });
+  select.onchange = async () => {
+    select.disabled = true;
+    try {
+      await setOrientationMode(select.value === 'follow' ? 'follow' : 'landscape');
+    } catch {
+      help.textContent = 'Could not apply rotation. Reopen Settings to retry.';
+      return;
+    }
+    select.disabled = false;
+  };
+}
 $('#settings-button').onclick = () => {
   openModal(
     'Command settings',
     `<label class="setting"><span>Campaign difficulty<small>Cadet gives you time to prepare. Veteran uses the original waves. Applies at deployment.</small></span><select id="difficulty-setting" aria-label="Campaign difficulty"><option value="cadet" ${save.difficulty === 'cadet' ? 'selected' : ''}>Cadet</option><option value="veteran" ${save.difficulty === 'veteran' ? 'selected' : ''}>Veteran</option></select></label>` +
+      (supportsNativeOrientation()
+        ? `<label class="setting"><span>Screen orientation<small id="orientation-help">Follow phone uses your device’s rotation setting.</small></span><select id="orientation-setting" aria-label="Screen orientation" disabled><option value="landscape">Landscape</option><option value="follow">Follow phone</option></select></label>`
+        : '') +
+      `<label class="setting"><span class="skin-label"><img id="robot-skin-preview" src="${botIcon('pulse', save.robotSkin)}" alt=""/><span>Robot skin</span></span><select id="robot-skin" aria-label="Robot skin">${skinOptions(ROBOT_SKINS, save.robotSkin)}</select></label>` +
+      `<label class="setting"><span class="skin-label"><img id="alien-skin-preview" src="${alienIcon('scout', save.alienSkin)}" alt=""/><span>Alien skin</span></span><select id="alien-skin" aria-label="Alien skin">${skinOptions(ALIEN_SKINS, save.alienSkin)}</select></label>` +
       `<label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
   );
+  const orientation = document.querySelector<HTMLSelectElement>('#orientation-setting');
+  if (orientation) wireOrientationSetting(orientation);
+  $<HTMLSelectElement>('#robot-skin').onchange = (event) => {
+    const value = (event.target as HTMLSelectElement).value;
+    if (!isRobotSkin(value)) return;
+    save.robotSkin = value;
+    applySkins();
+    $<HTMLImageElement>('#robot-skin-preview').src = botIcon('pulse', value);
+    persist();
+  };
+  $<HTMLSelectElement>('#alien-skin').onchange = (event) => {
+    const value = (event.target as HTMLSelectElement).value;
+    if (!isAlienSkin(value)) return;
+    save.alienSkin = value;
+    renderer.alienSkin = value;
+    $<HTMLImageElement>('#alien-skin-preview').src = alienIcon('scout', value);
+    persist();
+  };
   $('#difficulty-setting').onchange = (event) => {
     save.difficulty = (event.target as HTMLSelectElement).value === 'veteran' ? 'veteran' : 'cadet';
     persist();
@@ -372,7 +442,7 @@ $('#settings-button').onclick = () => {
 $('#guide-button').onclick = () => {
   openModal(
     'Know your squad.',
-    `<p>Aliens advance from the right. Place robots on empty tiles to protect the core on the left.</p><div class="guide-grid">${kinds.map((kind) => `<div><img src="${botIcon(kind)}" alt=""/><span><strong>${BOTS[kind].name} <small>· ${BOTS[kind].cost} ENERGY</small></strong><p>${BOTS[kind].description}</p></span></div>`).join('')}</div><div class="guide-notes"><p><strong>Build an economy.</strong> You gain 3 energy each second. Tap golden cells or press E to collect bonus energy. Start with Spark at the back and Pulse in threatened lanes.</p><p><strong>Your last resort.</strong> Each lane has one emergency sweeper. Orbital strike (Q) deals 320 damage to an entire lane and recharges in 42 seconds. Recycle (R) refunds up to half a robot’s cost.</p><p><strong>Stay sharp.</strong> Runners are fast. Brutes are tough. Spitters attack at range. An Overlord leads the final wave. Clear all waves to unlock the next sector.</p></div><div class="keyboard-guide"><kbd>1–5</kbd> Select robot <kbd>Q</kbd> Strike <kbd>R</kbd> Recycle <kbd>E</kbd> Collect <kbd>Space</kbd> Pause</div><p class="fine-print">Keyboard: Tab to the battlefield, use arrow keys to choose a tile, then Enter to deploy. On phones, tap a robot and a tile. Landscape gives you a wider view.</p>`,
+    `<p>Aliens advance from the right. The incoming marker shows the next lane. Cadet also identifies the alien. Place robots on empty tiles to protect the core on the left.</p><div class="guide-grid">${kinds.map((kind) => `<div><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span><strong>${BOTS[kind].name} <small>· ${BOTS[kind].cost} ENERGY</small></strong><p>${BOTS[kind].description}</p></span></div>`).join('')}</div><div class="guide-notes"><p><strong>Build an economy.</strong> You gain 3 energy each second. Tap golden cells or press E to collect bonus energy. Start with Spark at the back and Pulse in threatened lanes.</p><p><strong>Your last resort.</strong> Each lane has one emergency sweeper. Orbital strike (Q) deals 320 damage to an entire lane and recharges in 42 seconds. Recycle (R) refunds up to half a robot’s cost.</p><p><strong>Stay sharp.</strong> Runners are fast. Brutes are tough. Spitters attack at range. An Overlord leads the final wave. Clear all waves to unlock the next sector.</p></div><div class="keyboard-guide"><kbd>1–5</kbd> Select robot <kbd>Q</kbd> Strike <kbd>R</kbd> Recycle <kbd>E</kbd> Collect <kbd>Space</kbd> Pause</div><p class="fine-print">Keyboard: Tab to the battlefield, use arrow keys to choose a tile, then Enter to deploy. On phones, tap a robot and a tile. Landscape gives you a wider view.</p>`,
   );
 };
 document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
@@ -510,6 +580,7 @@ function frame(now: number) {
       if (game.phase === 'won' || game.phase === 'lost') finish();
     }
   }
+  laneWarning.update(menu ? null : game.incomingThreat);
   if (!menu) renderer.draw(game);
   if (toastTimer > 0) {
     toastTimer -= elapsed;

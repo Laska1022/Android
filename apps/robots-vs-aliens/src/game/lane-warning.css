@@ -1,0 +1,54 @@
+.incoming-lane-marker,
+.incoming-lane-label {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  color: #fff3d3;
+  background: #291e21ed;
+}
+
+.incoming-lane-marker {
+  left: 89%;
+  width: 6.5%;
+  max-width: 53px;
+  height: clamp(11px, 2.2vw, 17px);
+  transform: translateY(-50%);
+  clip-path: polygon(0 50%, 24% 0, 100% 0, 100% 100%, 24% 100%);
+  background: #ffb76e;
+}
+
+.incoming-lane-marker::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: #331e25;
+  clip-path: polygon(
+    8% 50%,
+    30% 0,
+    39% 0,
+    20% 50%,
+    39% 100%,
+    30% 100%,
+    8% 50%,
+    48% 50%,
+    70% 0,
+    100% 0,
+    100% 100%,
+    70% 100%,
+    48% 50%
+  );
+}
+
+.incoming-lane-label {
+  right: 4%;
+  bottom: 78%;
+  padding: 3px 7px;
+  border-inline-start: 3px solid #ffb76e;
+  font: 600 clamp(10px, 1.2vw, 13px) / 1.15 var(--mono, monospace);
+  white-space: nowrap;
+}
+
+.incoming-lane-label:empty {
+  padding: 0;
+  border: 0;
+}

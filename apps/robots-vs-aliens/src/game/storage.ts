@@ -1,4 +1,5 @@
 import type { CampaignDifficulty } from './engine';
+import { isRobotSkin, isAlienSkin, type RobotSkin, type AlienSkin } from './skins';
 
 export interface Save {
   unlocked: number;
@@ -7,6 +8,8 @@ export interface Save {
   muted: boolean;
   reducedMotion: boolean;
   difficulty: CampaignDifficulty;
+  robotSkin: RobotSkin;
+  alienSkin: AlienSkin;
 }
 const defaults = (): Save => ({
   unlocked: 0,
@@ -15,6 +18,8 @@ const defaults = (): Save => ({
   muted: false,
   reducedMotion: false,
   difficulty: 'cadet',
+  robotSkin: 'standard',
+  alienSkin: 'standard',
 });
 export function loadSave(): Save {
   try {
@@ -29,6 +34,8 @@ export function loadSave(): Save {
       muted: raw.muted === true,
       reducedMotion: raw.reducedMotion === true,
       difficulty: raw.difficulty === 'veteran' ? 'veteran' : 'cadet',
+      robotSkin: isRobotSkin(raw.robotSkin) ? raw.robotSkin : 'standard',
+      alienSkin: isAlienSkin(raw.alienSkin) ? raw.alienSkin : 'standard',
     };
   } catch {
     return defaults();

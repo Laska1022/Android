@@ -2012,6 +2012,16 @@ kbd {
   border-radius: 4px;
   padding: 8px;
 }
+.skin-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.skin-label img {
+  width: 46px;
+  height: 34px;
+  object-fit: contain;
+}
 .modal {
   max-height: 90vh;
   max-height: 90dvh;

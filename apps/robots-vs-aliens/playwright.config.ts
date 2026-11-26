@@ -1,14 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
+const port = Number(process.env.RVA_TEST_PORT ?? 4173);
+if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid RVA_TEST_PORT');
+const baseURL = `http://127.0.0.1:${port}`;
 export default defineConfig({
   testDir: './tests/e2e',
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL,
     trace: 'retain-on-failure',
     launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH },
   },
   webServer: {
-    command: 'npm run preview -- --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173',
+    command: `node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port ${port} --strictPort`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
   projects: [

@@ -28,6 +28,8 @@ describe('save data', () => {
       muted: false,
       reducedMotion: false,
       difficulty: 'cadet',
+      robotSkin: 'standard',
+      alienSkin: 'standard',
     });
   });
   it('keeps v1 progress while accepting only supported campaign difficulty values', () => {
@@ -43,6 +45,25 @@ describe('save data', () => {
       expect(loadSave()).toEqual({
         ...raw,
         difficulty: difficulty === 'veteran' ? 'veteran' : 'cadet',
+        robotSkin: 'standard',
+        alienSkin: 'standard',
+      });
+    }
+  });
+  it('restores supported cosmetics independently of corrupt or outdated choices', () => {
+    for (const [robotSkin, alienSkin, restoredRobot, restoredAlien] of [
+      ['cobalt', 'ember', 'cobalt', 'ember'],
+      ['unknown', 'ember', 'standard', 'ember'],
+      ['cobalt', 'toString', 'cobalt', 'standard'],
+    ]) {
+      vi.stubGlobal('localStorage', {
+        getItem: () => JSON.stringify({ best: 4242, muted: true, robotSkin, alienSkin }),
+      });
+      expect(loadSave()).toMatchObject({
+        best: 4242,
+        muted: true,
+        robotSkin: restoredRobot,
+        alienSkin: restoredAlien,
       });
     }
   });

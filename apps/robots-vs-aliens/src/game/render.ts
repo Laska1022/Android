@@ -3,30 +3,91 @@ import {
   COLS,
   ENEMIES,
   ROWS,
+  SECTORS,
   type BotKind,
   type EnemyKind,
   type Game,
   type Shot,
 } from './engine';
+import { unitArtwork, type AlienSkin, type RobotSkin, type UnitSkin } from './skins';
 
 export const BOARD = { x: 157, y: 170, cw: 100, ch: 82, width: 1200, height: 700 };
 type Ctx = CanvasRenderingContext2D;
 type UnitKind = BotKind | EnemyKind;
-const sprites = new Map<UnitKind, HTMLImageElement>();
+const sprites = new Map<string, HTMLImageElement>();
 const lightTextures = new Map<string, HTMLCanvasElement>();
 
-function sprite(kind: UnitKind) {
-  let image = sprites.get(kind);
+// Campaign order follows SECTORS. The deck lights tie each playable grid to its skyline.
+const sectorScenes = [
+  {
+    image: new URL('../assets/perimeter.webp', import.meta.url).href,
+    sky: '#0b223c',
+    horizon: '#34515a',
+    deckTint: '',
+    trim: '#779da2',
+    rift: '#df92db',
+  },
+  {
+    image: new URL('../assets/sectors/dust-and-echoes.webp', import.meta.url).href,
+    sky: '#39263a',
+    horizon: '#ac6e49',
+    deckTint: '#cd794429',
+    trim: '#dda474',
+    rift: '#ffab77',
+  },
+  {
+    image: new URL('../assets/sectors/the-hollow.webp', import.meta.url).href,
+    sky: '#162444',
+    horizon: '#4e6783',
+    deckTint: '#767cc026',
+    trim: '#94cded',
+    rift: '#c9a4ff',
+  },
+  {
+    image: new URL('../assets/sectors/iron-horizon.webp', import.meta.url).href,
+    sky: '#202d37',
+    horizon: '#657782',
+    deckTint: '#70838d26',
+    trim: '#e9ad65',
+    rift: '#ff975d',
+  },
+  {
+    image: new URL('../assets/sectors/last-light.webp', import.meta.url).href,
+    sky: '#221125',
+    horizon: '#854355',
+    deckTint: '#9a405331',
+    trim: '#e399a5',
+    rift: '#f77caa',
+  },
+];
+type SectorScene = (typeof sectorScenes)[number];
+
+function sprite(kind: UnitKind, skin: UnitSkin = 'standard') {
+  const key = `${skin}/${kind}`;
+  let image = sprites.get(key);
   if (!image) {
     image = new Image();
-    image.src = new URL(`../assets/units/${kind}.webp`, import.meta.url).href;
-    sprites.set(kind, image);
+    if (skin !== 'standard') {
+      image.addEventListener(
+        'error',
+        () => {
+          image!.src = unitArtwork(kind);
+        },
+        { once: true },
+      );
+    }
+    image.src = unitArtwork(kind, skin);
+    sprites.set(key, image);
   }
   return image;
 }
 
-export function botIcon(kind: BotKind) {
-  return sprite(kind).src;
+export function botIcon(kind: BotKind, skin: RobotSkin = 'standard') {
+  return sprite(kind, skin).src;
+}
+
+export function alienIcon(kind: EnemyKind, skin: AlienSkin = 'standard') {
+  return sprite(kind, skin).src;
 }
 
 function ellipse(c: Ctx, x: number, y: number, rx: number, ry: number, fill: string) {
@@ -98,8 +159,10 @@ function unit(
   feet: number,
   maxWidth: number,
   maxHeight: number,
+  skin: UnitSkin,
 ) {
-  const image = sprite(kind);
+  let image = sprite(kind, skin);
+  if (skin !== 'standard' && (!image.complete || !image.naturalWidth)) image = sprite(kind);
   if (!image.complete || !image.naturalWidth) {
     const color = kind in BOTS ? BOTS[kind as BotKind].color : ENEMIES[kind as EnemyKind].color;
     panel(c, x - 11, feet - 29, 22, 20, 5, '#253b47', color);
@@ -120,6 +183,7 @@ export function drawBot(
   t = 0,
   flash = 0,
   firing = false,
+  skin: RobotSkin = 'standard',
 ) {
   const color = BOTS[kind].color;
   const feet = y + size * 0.41;
@@ -127,7 +191,7 @@ export function drawBot(
   const lift = kind === 'frost' ? 3 + Math.sin(t * 3) * 1.5 : 0;
   if (kind === 'frost') glow(c, x, feet - 1, size * 0.4, 6, '#66d9ec72');
   const recoil = firing ? Math.min(1, flash * 5.6) * 3 : 0;
-  unit(c, kind, x - recoil, feet - lift, size * 1.09, size * 0.97);
+  unit(c, kind, x - recoil, feet - lift, size * 1.09, size * 0.97, skin);
   if (flash > 0) {
     const strength = Math.min(1, flash * 5.6);
     const barrel = firing;
@@ -147,6 +211,7 @@ export function drawAlien(
   t = 0,
   flash = 0,
   slow = false,
+  skin: AlienSkin = 'standard',
 ) {
   const feet = y + size * 0.35;
   const stride = Math.sin(t * (kind === 'runner' ? 13 : 6));
@@ -155,7 +220,7 @@ export function drawAlien(
     glow(c, x, feet - 2, size * 0.56, 8, '#89e2ffb2');
     line(c, x - size * 0.38, feet, x + size * 0.38, feet, '#a9ecff', 1.7);
   }
-  unit(c, kind, x + stride * 0.9, feet - Math.abs(stride) * 1.7, size * 1.16, size * 0.99);
+  unit(c, kind, x + stride * 0.9, feet - Math.abs(stride) * 1.7, size * 1.16, size * 0.99, skin);
   if (flash > 0) {
     const strength = Math.min(1, flash * 8);
     glow(c, x - size * 0.24, y, strength * 29, strength * 22, '#ffe8bba8');
@@ -181,30 +246,45 @@ function projectile(c: Ctx, shot: Shot) {
 export class Renderer {
   private c: Ctx;
   private background = document.createElement('canvas');
+  private sector = -1;
+  private sceneRequest = 0;
   hover: { row: number; col: number } | null = null;
   selection: BotKind | 'recycle' | 'beam' = 'pulse';
   reducedMotion = false;
+  robotSkin: RobotSkin = 'standard';
+  alienSkin: AlienSkin = 'standard';
 
   constructor(public canvas: HTMLCanvasElement) {
     this.c = canvas.getContext('2d')!;
     this.background.width = BOARD.width;
     this.background.height = BOARD.height;
-    this.drawBackground();
-    const perimeter = new Image();
-    perimeter.onload = () => this.drawBackground(perimeter);
-    perimeter.src = new URL('../assets/perimeter.webp', import.meta.url).href;
     for (const kind of [...Object.keys(BOTS), ...Object.keys(ENEMIES)]) sprite(kind as UnitKind);
   }
 
-  private drawBackground(perimeter?: HTMLImageElement) {
+  private selectSector(sector: number) {
+    this.sector = sector;
+    const scene = sectorScenes[sector] ?? sectorScenes[0];
+    const name = (SECTORS[sector] ?? SECTORS[0]).name;
+    this.canvas.setAttribute('aria-label', `${name} battlefield, five defense lanes`);
+    // This also covers missing or corrupt artwork. Units and controls use the same coordinates.
+    this.drawBackground(scene);
+    const request = ++this.sceneRequest;
+    const landscape = new Image();
+    landscape.onload = () => {
+      if (request === this.sceneRequest) this.drawBackground(scene, landscape);
+    };
+    landscape.src = scene.image;
+  }
+
+  private drawBackground(scene: SectorScene, landscape?: HTMLImageElement) {
     const c = this.background.getContext('2d')!;
     const sky = c.createLinearGradient(0, 0, 0, BOARD.height);
-    sky.addColorStop(0, '#0b223c');
-    sky.addColorStop(0.32, '#34515a');
+    sky.addColorStop(0, scene.sky);
+    sky.addColorStop(0.32, scene.horizon);
     sky.addColorStop(1, '#101e2c');
     c.fillStyle = sky;
     c.fillRect(0, 0, BOARD.width, BOARD.height);
-    if (perimeter) c.drawImage(perimeter, 0, 0, BOARD.width, BOARD.height);
+    if (landscape) c.drawImage(landscape, 0, 0, BOARD.width, BOARD.height);
     const vignette = c.createLinearGradient(0, 0, 0, BOARD.height);
     vignette.addColorStop(0, '#0b13281a');
     vignette.addColorStop(0.25, '#101b2b30');
@@ -215,7 +295,7 @@ export class Renderer {
 
     panel(c, 141, 160, 932, 429, 13, '#101d28', '#83a6ac');
     panel(c, 146, 164, 922, 421, 8, '#182c37', '#3f5860');
-    c.fillStyle = '#779da2';
+    c.fillStyle = scene.trim;
     c.fillRect(156, 162, 276, 2);
     for (let row = 0; row < ROWS; row++) {
       const y = BOARD.y + row * BOARD.ch;
@@ -245,14 +325,18 @@ export class Renderer {
       c.fillStyle = '#d0e1dc';
       c.fillText(String(row + 1).padStart(2, '0'), 67, center + 5);
       line(c, 99, center, 140, center, '#a2c4caac', 2);
-      line(c, 1076, center, 1102, center, '#d59be282', 1.5);
+      line(c, 1076, center, 1102, center, scene.rift + '82', 1.5);
+    }
+    if (scene.deckTint) {
+      c.fillStyle = scene.deckTint;
+      c.fillRect(BOARD.x, BOARD.y, COLS * BOARD.cw, ROWS * BOARD.ch);
     }
     for (let col = 0; col < COLS; col++) {
-      c.fillStyle = col % 3 ? '#54747b' : '#bedfd8';
+      c.fillStyle = col % 3 ? '#54747b' : scene.trim;
       c.fillRect(172 + col * 100, 588, 49, 2);
     }
-    glow(c, 1120, 375, 67, 228, '#d06fb73c');
-    c.strokeStyle = '#df92db8a';
+    glow(c, 1120, 375, 67, 228, scene.rift + '3c');
+    c.strokeStyle = scene.rift + '8a';
     c.lineWidth = 3;
     c.beginPath();
     c.ellipse(1120, 375, 25, 188, 0, 0, Math.PI * 2);
@@ -266,6 +350,7 @@ export class Renderer {
     const width = Math.round(this.canvas.clientWidth * dpr);
     const height = Math.round((width * BOARD.height) / BOARD.width);
     if (!width) return;
+    if (game.sector !== this.sector) this.selectSector(game.sector);
     if (this.canvas.width !== width || this.canvas.height !== height) {
       this.canvas.width = width;
       this.canvas.height = height;
@@ -296,7 +381,7 @@ export class Renderer {
         panel(c, x + 2, y + 2, 96, 78, 4, color + '20', color);
         if (empty && this.selection !== 'recycle') {
           c.globalAlpha = 0.5;
-          drawBot(c, this.selection, x + 50, y + 41, 72, t);
+          drawBot(c, this.selection, x + 50, y + 41, 72, t, 0, false, this.robotSkin);
           c.globalAlpha = 1;
         }
       }
@@ -317,6 +402,7 @@ export class Renderer {
           this.reducedMotion ? 0 : t + bot.id,
           this.reducedMotion ? 0 : bot.flash,
           firing,
+          this.robotSkin,
         );
         if (bot.hp < BOTS[bot.kind].hp)
           this.health(x, y + 32, bot.hp / BOTS[bot.kind].hp, '#a8f570');
@@ -347,6 +433,7 @@ export class Renderer {
           this.reducedMotion ? 0 : t + enemy.id,
           this.reducedMotion ? 0 : enemy.flash,
           enemy.slow > 0,
+          this.alienSkin,
         );
         if (enemy.hp < enemy.maxHp || enemy.kind === 'overlord')
           this.health(x, y - size * 0.66, enemy.hp / enemy.maxHp, '#f0a3d4');

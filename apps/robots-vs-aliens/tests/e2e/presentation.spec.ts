@@ -4,7 +4,20 @@ const artwork = [
   'bastion',
   'brute',
   'command',
+  'cobalt-pulse',
+  'cobalt-spark',
+  'cobalt-frost',
+  'cobalt-nova',
+  'cobalt-bastion',
+  'ember-scout',
+  'ember-runner',
+  'ember-brute',
+  'ember-spitter',
+  'ember-overlord',
+  'dust-and-echoes',
   'frost',
+  'iron-horizon',
+  'last-light',
   'nova',
   'overlord',
   'perimeter',
@@ -13,9 +26,10 @@ const artwork = [
   'scout',
   'spark',
   'spitter',
+  'the-hollow',
 ];
 
-test('command, battlefield and all ten unit illustrations decode after an offline reload', async ({
+test('command, five sector scenes and ten unit illustrations decode after an offline reload', async ({
   page,
   context,
 }) => {
@@ -33,33 +47,27 @@ test('command, battlefield and all ten unit illustrations decode after an offlin
   await context.setOffline(true);
   await page.reload();
   await expect(page.locator('#arena')).toHaveCSS('background-image', /command-[^/]+\.webp/);
-  // Use the actual files requested by this build; their Vite hashes change with the art.
-  const artworkUrls = () =>
-    page.evaluate(() =>
-      [...new Set(performance.getEntriesByType('resource').map((entry) => entry.name))].filter(
-        (url) => new URL(url).pathname.endsWith('.webp'),
-      ),
+  // The service worker caches every campaign scene. The renderer requests them as needed.
+  const decoded = await page.evaluate(async (expectedNames) => {
+    const requests = (
+      await Promise.all((await caches.keys()).map(async (key) => (await caches.open(key)).keys()))
+    ).flat();
+    const urls = [...new Set(requests.map((request) => request.url))].filter((url) =>
+      new URL(url).pathname.endsWith('.webp'),
     );
-  await expect
-    .poll(async () => (await artworkUrls()).length)
-    .toBeGreaterThanOrEqual(artwork.length);
-  const decoded = await page.evaluate(
-    async (urls) => {
-      return Promise.all(
-        urls.map(async (url) => {
-          const response = await fetch(url, { cache: 'reload' });
-          if (!response.ok) throw new Error(`Artwork fetch failed: ${response.status} ${url}`);
-          const bitmap = await createImageBitmap(await response.blob());
-          const size = Math.min(bitmap.width, bitmap.height);
-          bitmap.close();
-          const filename = new URL(url).pathname.split('/').pop()!;
-          return { name: filename.split('-')[0], size };
-        }),
-      );
-    },
-    await artworkUrls(),
-  );
-  expect(decoded.map((image) => image.name).sort()).toEqual(artwork);
+    return Promise.all(
+      urls.map(async (url) => {
+        const response = await fetch(url, { cache: 'reload' });
+        if (!response.ok) throw new Error(`Artwork fetch failed: ${response.status} ${url}`);
+        const bitmap = await createImageBitmap(await response.blob());
+        const size = Math.min(bitmap.width, bitmap.height);
+        bitmap.close();
+        const filename = new URL(url).pathname.split('/').pop()!;
+        return { name: expectedNames.find((name) => filename.startsWith(name + '-')), size };
+      }),
+    );
+  }, artwork);
+  expect(decoded.map((image) => image.name)).toEqual(expect.arrayContaining(artwork));
   for (const image of decoded) expect(image.size, image.name).toBeGreaterThan(0);
   for (const cardImage of await page.locator('.bot-card img').all()) {
     expect(
