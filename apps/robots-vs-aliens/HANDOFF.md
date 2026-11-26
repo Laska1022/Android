@@ -8,7 +8,9 @@ The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offli
 
 GitHub Releases has the verified 1.5.1 debug APK. The release certificates differ between 1.5.0 and 1.5.1. Android blocks an in-place update between these two downloads. Uninstalling a previous build erases its local campaign. [Download the APK](https://github.com/Laska1022/Android/releases/download/robots-vs-aliens-v1.5.1/robots-vs-aliens-1.5.1-debug.apk) · [Hosted build and tests](https://github.com/Laska1022/Android/actions/runs/45901475391)
 
-Foundry and Riftborn remain independently selectable alongside both earlier finishes for each faction. Saves retain their existing format. The Android host opens in landscape, supports Follow phone and keeps the battle during rotation. The most recent physical evidence applies to 1.4.0. The next phone check is 1.5.1 at the opening Scout and a later Spitter, followed by a dense wave with both loadouts.
+Foundry and Riftborn remain independently selectable alongside both earlier finishes for each faction. Saves retain their existing format. The Android host opens in landscape, supports Follow phone and keeps the battle during rotation.
+
+The first AI integrated Android Back in main at `9be2de4` and published the physical Redmi record at `51f3811`. That local 1.5.1 build retained preferences and campaign stars and passed Android Back checks. The public alien-animation tag and the local hardware build had different source revisions. [Redmi results](TESTING.md#redmi-integration-build-at-9be2de4)
 
 The 1.3.0 sector art and mission briefings are included in this checkout. The local 1.3.0 APK cleared sectors 2–5 on the muted Redmi. Version 1.4.0 preserved all five three-star ratings across the upgrade. The external sector-art branch contains a parallel implementation. Use the shipped renderer and asset conventions here when merging artwork. [Versioned verification record](TESTING.md)
 
@@ -21,6 +23,8 @@ The 1.3.0 sector art and mission briefings are included in this checkout. The lo
 | `c6faa3a` | Version 1.2.0 on main. Command-screen and perimeter art, ten unit sprites, combat effects and updated controls.  |
 | `e15908a` | Starting revision for the 1.3.0 sector artwork iteration. Records the preceding hosted Android build.            |
 | `d7a7f9e` | 1.4.0 game code tested on Redmi. Landscape preference, truthful lane warnings, sector scenery and skin support. |
+| `0176911` | Published art assignment and Redmi evidence. Both hosted web and Android jobs passed, with a downloadable [debug APK](https://github.com/Laska1022/Android/actions/runs/45813582262/artifacts/15114865206). |
+| `9be2de4` | Integrated Back and both 1.5.0 skin families. The local APK passed Redmi campaign and system navigation tests. Both hosted jobs passed. [Build and APK](https://github.com/Laska1022/Android/actions/runs/45900000216) |
 
 ## Gameplay decisions
 
@@ -44,7 +48,7 @@ The tactical UI highlights the opening patrol lane and places mission and loadou
 
 ## Assignments for parallel Codex Cloud sessions
 
-The active art assignment is [animation and skins](ART_HANDOFF.md). The older RVA-01 balance branch already has a published test implementation at `3397ec1`. Review and rerun it against the current spawn scheduler before proposing tuning. The parallel sector-art branch had reached `2d35444` when this integration started. Keep those contributors' branches and work intact.
+The active art assignment is [animation and skins](ART_HANDOFF.md). The separate RVA-01 balance suite at `3397ec1` passed all 48 cases when exercised against the 1.4.0 engine. The suite remains on its owning branch. The parallel sector-art branch had reached `2d35444` when this integration started. Keep those contributors' branches and work intact.
 
 Copy the [standalone prompt for Codex A or Codex B](PROMPTS.md) into the corresponding cloud session. Fetch the latest `origin/main` with 1.3.0 or later, record its SHA and target `main` in each PR.
 

@@ -2,8 +2,15 @@
 
 ## 1.5.1 · November 27, 2026
 
+**Public animation build.**
+
 - Scouts snap their jaws, Runners rake with their forelimbs, Brutes ram, Spitters draw back to launch acid, and Overlords sweep their claws. All three alien skins animate while walking and while attacking a defender. Frost slows their stride, 2× speeds up combat and pause holds the current pose. [Watch the animations](docs/screenshots/alien-motion.webp)
 - Moved the incoming-lane chevron to the outer edge so it clears a Scout entering the last column.
+
+**Redmi integration build at `9be2de4`.**
+
+- Integrated the second developer’s 1.5.0 Foundry and Riftborn work with Android Back navigation. Both skin families, their animations and their original commits are included.
+- Android Back pauses and resumes missions, dismisses dialogs and returns from a completed mission to command. The command screen delegates Back to Android. Holding Escape on a keyboard performs one action per press.
 
 ## 1.5.0 · November 26, 2026
 

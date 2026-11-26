@@ -98,6 +98,20 @@ node scripts/measure-render.mjs "$baseline_src" alternate
 node scripts/measure-render.mjs . alternate
 ```
 
+#### Redmi integration build at 9be2de4
+
+- **Hosted.** The web and Android jobs passed for `9be2de4` on main. [GitHub Actions run](https://github.com/Laska1022/Android/actions/runs/45900000216) · [Downloadable debug APK artifact](https://github.com/Laska1022/Android/actions/runs/45900000216/artifacts/15155930507)
+
+- **Build and cloud-compatible tests.** All 28 unit tests and 30 browser cases passed. Four platform-specific browser cases were skipped as designed. The browser suite invokes the cancelable Back event and exercises an actual loss result, a held Escape key, pause/resume, offline equipment changes and missing-atlas fallback. Capacitor sync, debug assembly and Android lint passed with zero app errors and four warnings.
+- **Tested APK.** The local debug APK was 7,680,477 bytes, SHA-256 `02a64104a85cbcc296960bf630d38a7c087f442f6044ca8246d9ebb450b6155c`. All 67 production files, including the 39 WebP images and generated service worker, matched the APK entries byte for byte.
+- **Redmi upgrade and Back.** Installed over 1.4.0 on the Redmi Note 7 without clearing data. The first screen opened at 775 × 364 CSS pixels. Five three-star ratings, best score of 12,510, Cobalt ceramic, Ember brood and in-game mute persisted. Real Android Back events dismissed Settings and the field guide in command, paused and resumed live combat, and retained the squad. With a native selector open, the first Back dismissed the picker and the next dismissed Settings. From bare command, Android handled Back normally. Newer Android predictive gestures require another device. The app-filtered error log and package crash buffer had zero matching runtime or crash entries. The game was left muted at command.
+
+**Physical art and campaign check.** On the same Redmi, select Foundry and Riftborn in Settings, close the app process, reopen and check both selectors. Both new selections and all campaign progress survived. At the normal Cadet budget the Badlands cleared five waves with 60 aliens stopped and 6,640 points. The Nest cleared six waves with 120 stopped and 12,710 points. System Back returned directly from both victory dialogs to command. A separate short canvas observation at 2× during wave four of the Nest recorded all twelve Runner gait frames and 228 Pulse upper-carriage recoil draws. [Badlands screenshot](docs/screenshots/redmi-foundry-badlands.webp) · [Nest screenshot](docs/screenshots/redmi-riftborn-nest.webp)
+
+**Installed-game performance.** Wave-two samples covered each combination of 1×/2× and full/reduced motion in both sectors with the alternate finishes. Each sample tracked 180 WebView animation intervals. The eight samples measured 59.6–60.0 callbacks/s and approximately 16.68 ms at p95. Separate memory snapshots measured 137,697–139,603 KiB PSS for the app and 70,697–82,670 KiB PSS for the game-bound WebView renderer. The battery sensor read 27–28 °C. Combat continued between samples, so the live scenes differed. [Individual measurements](docs/benchmarks/redmi-1.5.1.json)
+
+**Controlled physical Chrome comparison.** A USB-loopback QA page on the same device replayed the published Last Light renderer fixture with 30 robots, 30 aliens, 20 shots and 120 particles. The canvas backing was 1440 × 840, scaled to fit a 393 × 719 CSS-pixel Chrome 101 viewport. Each pass warmed up for 60 callbacks and recorded the next 360. The order was 1.4.0 standard, 1.5.1 standard, 1.5.1 alternate, then the reverse. All six samples delivered 59.97–59.98 callbacks/s. The p95 CPU draw submission times were 7.0/7.5 ms for the baseline, 7.4/7.5 ms for integrated standard art, and 7.8/7.5 ms for Foundry/Riftborn. These short runs do not measure sustained thermal throttling. The Android APK measurements above used actual combat. [Six controlled samples](docs/benchmarks/redmi-1.5.1.json)
+
 ### November 26, 2026 · 1.5.0, Android code 6
 
 Tested game commit `a3b1e24` on `codex/rva-foundry-riftborn` against `0176911`, the 1.4.0 release handover. Node 24.22.3, Chromium 156.0.8078.79 and Java 21 were used in the cloud checkout.
@@ -129,9 +143,12 @@ node scripts/measure-render.mjs . alternate
 
 **Published APK.** The hosted runner built `robots-vs-aliens-1.5.0-debug.apk` from tag `robots-vs-aliens-v1.5.0` at `0a7ee06`. The public download measured 7,678,121 bytes. Its SHA-256 matched the release notes (`410abf6c4a837678473dd3e289cbc4fedcc67bf352a1519ea69d7cee97ea3aee`). The downloaded package passed v2 signature verification, reported version code 6 and contained all 67 verified web build files. [GitHub Release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.0) · [Hosted checks](https://github.com/Laska1022/Android/actions/runs/45862945062)
 
-ADB listed zero attached devices. The muted Redmi upgrade, physical frame delivery, memory and cold-reopen checks for this build remain with the device owner. [Hardware task](ART_HANDOFF.md#delivered-on-november-26-2026)
+The cloud run had no attached Android device. The integrated 1.5.1 release was subsequently tested on the Redmi with both new skin families, as recorded in the November 27 section above.
 
 ### November 26, 2026 · 1.4.0, Android code 5
+
+- **Hosted verification.** Both GitHub Actions jobs passed for `0176911`. The run published the production web build, browser evidence and Android debug package. [Hosted run](https://github.com/Laska1022/Android/actions/runs/45813582262) · [Debug APK artifact](https://github.com/Laska1022/Android/actions/runs/45813582262/artifacts/15114865206)
+- **Cross-branch balance verification.** Separately ran the RVA-01 suite from `3397ec1` against the 1.4.0 engine. All 48 cases passed across four sectors, three seeds, two difficulties and two squad strategies. Each mixed-squad Cadet case won on its normal budget. The suite remains owned by its source branch and is additional to the integrated unit count.
 
 - **Automated.** 28 unit tests passed. The desktop Chromium and Pixel 7 browser projects passed 18 scenarios with two platform-specific skips. Tests exercise actual queued spawns including the Overlord, difficulty disclosure, pause, 2×, old saves, independent skin choices, offline reload, all 26 WebPs and late scene loading. Set `RVA_TEST_PORT` to use a different loopback port if another local checkout owns 4173.
 - **Native build.** TypeScript and production build, Capacitor sync, Java 21 debug assembly and lint passed. App lint reported zero errors and four warnings. All 54 production files, including the generated worker, matched their APK entries byte for byte. Tested local debug APK SHA-256 `def902e7f4e0749825b9dfa891964cae50b3698d5b7216b1857bb41d6b5669fe`, 5,752,272 bytes. Hosted debug signing can produce a different hash.
@@ -139,6 +156,7 @@ ADB listed zero attached devices. The muted Redmi upgrade, physical frame delive
 - **Mode and frame checks.** Veteran and Survival both showed the next lane only. During a 2× Cadet wave-two sample with 11 defenders using the alternate finishes, 180 WebView animation intervals gave 60.0 callbacks/s, 16.674 ms median and 16.676 ms p95. The app-process PSS sample was 125,521 kB. [Cadet lane cue](docs/screenshots/redmi-incoming-lane.webp) · [Veteran combat](docs/screenshots/redmi-veteran-warning.webp) · [Android settings](docs/screenshots/redmi-loadout-settings.webp)
 - **Remaining physical coverage.** Both landscape grips are enabled by Android policy. Reverse-grip rotation, prolonged Survival, current Android tablet policies and API 24 remain device follow-ups. Browser emulation alone cannot establish these outcomes.
 - **Campaign and stability.** A normal-budget Cadet First Contact run with both alternate finishes beat all four waves, stopped 32 aliens, earned three stars and scored 4,300. The tested game PID returned zero matching AndroidRuntime, uncaught WebView or orientation-plugin error lines. The crash buffer contained zero matches for the package.
+- **Capture observation.** During one automated landscape playthrough, input continued into another first wave before the harness recorded the prior result. A dedicated observer captured the subsequent victory dialog. The cause of the first transition was not isolated. Recheck the finish dialog during rapid tapping.
 
 ### November 26, 2026 · 1.3.0, Android code 4
 

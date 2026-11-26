@@ -51,6 +51,8 @@ All placement cells and loadout cards are actual buttons. The battlefield uses r
 
 ## Player preferences and incoming attacks in 1.4
 
+In 1.5.1, `GameNavigationPlugin` registers a lifecycle-bound AndroidX Back callback. The game claims it during a mission or dialog. A cancelable `rvaBack` event calls the same screen navigation as Escape. A page navigation clears the native claim, and an unhandled event delegates to the Android dispatcher. The bare command screen leaves system Back available.
+
 The game queues the actual next spawn in `Game`. Its `incomingThreat` view exposes the row and optionally the kind, depending on the active mission difficulty. The DOM warning reads that view without consuming RNG. Preparation, pause, speed changes and the subsequent arrival share one queued decision. The warning clears after the last spawn, defeat or victory. Skin code receives no private spawn information.
 
 Robot and alien finish IDs belong to the existing web save. Both the renderer and the interface resolve locally bundled art through `src/game/skins.ts`. The Android orientation preference belongs to the native activity's private preferences because it is needed before the WebView starts. `GameOrientationPlugin` and `src/game/orientation.ts` expose the setting to the Android UI. Browser builds use their responsive layout. [Animation and skins handover](../ART_HANDOFF.md)

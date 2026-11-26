@@ -58,6 +58,8 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 
 On phones, tap the cards and tiles. Android opens in landscape. Choose **Settings → Screen orientation → Follow phone** to use the phone’s rotation preference. Ordinary browser tabs adapt to the viewport.
 
+On Android, press the system **Back** button during a mission to pause. Press it again to resume with your squad in place. Back closes Settings and the field guide, returns to command from a mission result, and uses ordinary Android navigation on the command screen. On a keyboard, Escape performs the same in-game actions.
+
 Watch the amber arrow on the right of the board to see where the next alien will enter. Cadet also names the alien. In Settings, select robot and alien skins independently. Choose Foundry ceramic for ivory plating and copper joints, or Riftborn obsidian for bone-crested alien silhouettes. Settings previews, robot cards, the field guide and the battlefield reflect your choices. Choices save on this device. [Redmi landscape screenshot](docs/screenshots/redmi-incoming-lane.webp)
 
 ## Android
