@@ -162,6 +162,7 @@ function updateSectors() {
   });
 }
 function start(endless = false) {
+  renderer.prepareBattle();
   audio.unlock();
   menu = false;
   closeModal(false);

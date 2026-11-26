@@ -2,6 +2,7 @@ name: Robots vs Aliens - build and test
 on:
   push:
     branches: [main]
+    tags: ['robots-vs-aliens-v*']
     paths:
       - 'apps/robots-vs-aliens/**'
       - '.github/workflows/ci.yml'
@@ -61,8 +62,65 @@ jobs:
       - run: npm run android:sync
       - run: ./gradlew --no-daemon --max-workers=2 assembleDebug lintDebug
         working-directory: apps/robots-vs-aliens/android
+      - name: Verify tagged Android build
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/robots-vs-aliens-v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          build_tools="$ANDROID_HOME/build-tools/35.0.0"
+          "$build_tools/apksigner" verify --verbose "$apk"
+          version=$("$build_tools/aapt2" dump badging "$apk" |
+            sed -n "s/^package: name='com\.laska\.robotvsaliens' .*versionName='\([^']*\)'.*/\1/p")
+          if [[ -z "$version" || "$RELEASE_TAG" != "robots-vs-aliens-v$version" ]]; then
+            echo "APK version '$version' does not match tag '$RELEASE_TAG'" >&2
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: robots-vs-aliens-debug-apk
           path: apps/robots-vs-aliens/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/robots-vs-aliens-v')
+    needs: [web, android]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: robots-vs-aliens-debug-apk
+          path: apk
+      - name: Publish Android APK
+        working-directory: apk
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="${RELEASE_TAG#robots-vs-aliens-v}"
+          asset="robots-vs-aliens-${version}-debug.apk"
+          mv app-debug.apk "$asset"
+          digest=$(sha256sum "$asset" | cut -d ' ' -f 1)
+          notes="$RUNNER_TEMP/game-release.md"
+          printf 'Android debug APK for **Robots vs Aliens %s**. An existing installation can be updated when its signing certificate matches.\n\nSHA-256 for `%s` is `%s`.\n' "$version" "$asset" "$digest" > "$notes"
+
+          # A retry may find the draft created before an interrupted upload.
+          state="$RUNNER_TEMP/game-release.json"
+          if gh release view "$RELEASE_TAG" --json isDraft,assets > "$state"; then
+            if jq -e --arg file "$asset" 'any(.assets[]; .name == $file)' "$state" > /dev/null; then
+              gh release download "$RELEASE_TAG" --pattern "$asset" --dir "$RUNNER_TEMP/existing"
+              cmp "$asset" "$RUNNER_TEMP/existing/$asset"
+            else
+              gh release upload "$RELEASE_TAG" "$asset"
+            fi
+            if jq -e '.isDraft' "$state" > /dev/null; then
+              gh release edit "$RELEASE_TAG" --draft=false --notes-file "$notes"
+            fi
+          else
+            gh release create "$RELEASE_TAG" "$asset" --verify-tag --title "Robots vs Aliens $version" --notes-file "$notes"
+          fi

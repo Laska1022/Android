@@ -67,6 +67,45 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 27, 2026 · 1.5.1, Android code 7
+
+- **Build and cloud-compatible tests.** All 28 unit tests and 30 browser cases passed. Four platform-specific browser cases were skipped as designed. The browser suite invokes the cancelable Back event and exercises an actual loss result, a held Escape key, pause/resume, offline equipment changes and missing-atlas fallback. Capacitor sync, debug assembly and Android lint passed with zero app errors and four warnings.
+- **Tested APK.** The local debug APK was 7,680,477 bytes, SHA-256 `02a64104a85cbcc296960bf630d38a7c087f442f6044ca8246d9ebb450b6155c`. All 67 production files, including the 39 WebP images and generated service worker, matched the APK entries byte for byte.
+- **Redmi upgrade and Back.** Installed over 1.4.0 on the Redmi Note 7 without clearing data. The first screen opened at 775 × 364 CSS pixels. Five three-star ratings, best score of 12,510, Cobalt ceramic, Ember brood and in-game mute persisted. Real Android Back events dismissed Settings and the field guide in command, paused and resumed live combat, and retained the squad. With a native selector open, the first Back dismissed the picker and the next dismissed Settings. From bare command, Android handled Back normally. Newer Android predictive gestures require another device.
+
+### November 26, 2026 · 1.5.0, Android code 6
+
+Tested game commit `a3b1e24` on `codex/rva-foundry-riftborn` against `0176911`, the 1.4.0 release handover. Node 24.22.3, Chromium 156.0.8078.79 and Java 21 were used in the cloud checkout.
+
+- `npm ci` and `npm run check` passed. All 28 unit tests and 24 desktop/Pixel 7 browser scenarios passed. Two tests are specific to the opposite input mode and were skipped. Strict TypeScript, the production build and its 66-file service worker precache passed.
+- Offline checks decoded all ten new portraits and all three stride atlases. Each sheet contains twelve poses for each of five species. Pixel checks found different front and rear leg silhouettes in opposing poses for every row. Tests exercised independent selectors, original and unsupported save IDs, previews, cards, the guide, placement ghosts, firing, 1×, 2×, pause and reduced motion. Blocking the atlas request drew the selected static Scout and kept the Cadet lane warning.
+- The same Veteran replay in Last Light produced identical serialized simulation state at 1,200 fixed steps with standard skins at 1× and Foundry/Riftborn at 2×. This compares queued threats, RNG, units, projectiles, health, timers and economy. Seed 1154 starts with Pulse, Frost, Spark, a Runner and a Spitter. The replay is included in the render measurement script.
+- Captures compare the same five defenders and five threats in the Badlands and the Nest on both revisions. The canvas occupied 583 × 241 CSS pixels in a 775 × 364 emulated landscape viewport. The two-second motion sample shows staged firing, recovery and footfalls at 18 captured frames/s. Settings was also inspected at 1440 × 960 and 393 × 719. [Before and after](docs/screenshots/unit-motion.webp) · [Motion sample](docs/screenshots/foundry-riftborn.webp) · [Settings](docs/screenshots/foundry-settings.webp)
+
+**Crowded battle benchmark.** A headless Chromium window drew a 720 × 420 CSS-pixel canvas at DPR 2. The fixture keeps 30 robots, 30 aliens, 20 shots and 120 particles visible on the Last Light platform. It warms up for 60 frames and measures the next 360 callback intervals. Three runs per configuration were interleaved on the same machine. The table reports the median of the three per-run results. Draw submission measures time spent inside `renderer.draw` on the main thread. GPU completion and physical display timing require device measurements.
+
+| Renderer and loadout | Callbacks/s | p95 callback interval | p95 draw submission |
+| --- | ---: | ---: | ---: |
+| 1.4.0 Factory alloy / Native carapace | 60.0 | 16.7 ms | 0.6 ms |
+| 1.5.0 Factory alloy / Native carapace | 60.0 | 16.7 ms | 0.7 ms |
+| 1.5.0 Foundry ceramic / Riftborn obsidian | 60.0 | 16.7 ms | 0.6 ms |
+
+To repeat on the same browser, run from the app directory. The temporary baseline contains only the original source and assets. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` if using system Chromium.
+
+```sh
+baseline_src=$(mktemp -d)
+git archive 0176911:apps/robots-vs-aliens src | tar -x -C "$baseline_src"
+node scripts/measure-render.mjs "$baseline_src"
+node scripts/measure-render.mjs .
+node scripts/measure-render.mjs . alternate
+```
+
+**Android.** Capacitor sync, `assembleDebug` and `lintDebug` passed. App lint reported zero errors and four warnings. The 7,678,121-byte APK passed v2 signature verification and identified itself as `com.laska.robotvsaliens`, code 6. All 67 production files, including all 39 WebPs and the service worker, matched their APK entries byte for byte. SHA-256 `1c46d9607993273ea959c87edea6ddc5fa6e3f8577e808715d41347734dc1bf7`.
+
+**Published APK.** The hosted runner built `robots-vs-aliens-1.5.0-debug.apk` from tag `robots-vs-aliens-v1.5.0` at `0a7ee06`. The public download measured 7,678,121 bytes. Its SHA-256 matched the release notes (`410abf6c4a837678473dd3e289cbc4fedcc67bf352a1519ea69d7cee97ea3aee`). The downloaded package passed v2 signature verification, reported version code 6 and contained all 67 verified web build files. [GitHub Release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.0) · [Hosted checks](https://github.com/Laska1022/Android/actions/runs/45862945062)
+
+ADB listed zero attached devices. The muted Redmi upgrade, physical frame delivery, memory and cold-reopen checks for this build remain with the device owner. [Hardware task](ART_HANDOFF.md#delivered-on-november-26-2026)
+
 ### November 26, 2026 · 1.4.0, Android code 5
 
 - **Hosted verification.** Both GitHub Actions jobs passed for `0176911`. The run published the production web build, browser evidence and Android debug package. [Hosted run](https://github.com/Laska1022/Android/actions/runs/45813582262) · [Debug APK artifact](https://github.com/Laska1022/Android/actions/runs/45813582262/artifacts/15114865206)

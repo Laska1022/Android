@@ -62,7 +62,35 @@ Use case: stylized-concept. Asset type: transparent master sprite sheet for a ma
 
 ## Robot and alien finish variants
 
-The examples in `src/assets/skins/` derive from this project's ten original transparent unit illustrations. Cobalt ceramic remaps the armor to a blue material while retaining bright emitters. Ember brood remaps the alien carapaces to warm reds and amber. [The offline generator](../scripts/generate-skins.mjs) preserves the input dimensions and transparent silhouettes. The ten WebPs add 361,284 compressed bytes. Future original art and frame atlases belong to the [animation and skins assignment](../ART_HANDOFF.md).
+The examples in `src/assets/skins/` derive from this project's ten original transparent unit illustrations. Cobalt ceramic remaps the armor to a blue material while retaining bright emitters. Ember brood remaps the alien carapaces to warm reds and amber. [The offline generator](../scripts/generate-skins.mjs) preserves the input dimensions and transparent silhouettes. The ten WebPs add 361,284 compressed bytes. Subsequent art work is tracked in the [animation and skins handover](../ART_HANDOFF.md).
+
+## Foundry and Riftborn artwork in 1.5.0
+
+An original 1983 × 793 transparent sheet was generated for this game with OpenAI ImageGen. The prompt called for five right-facing machines in graphite, worn ivory ceramic and burnished copper above five left-facing organisms in obsidian chitin, pale bone and coral light. It specified a horizontal rifle, amber radiator, swept cryo fins, elevated mortar and ballistic shield for the robots. The alien references called for a split sensory crest, a needle-snouted sprinter, a plated ram, a phosphor throat sac and a horned apex predator. The ten portraits and their animation derivatives use this project's own artwork. There are no external stock assets or third-party character licenses in these families. [Full lineup](screenshots/foundry-lineup.webp)
+
+Each silhouette was bounded at alpha above 13/255, padded by four source pixels, then Lanczos-resized to a longest edge of 224 px. Transparent WebP portraits use quality 89. The pairs below follow the rows of the master. Filenames under `src/assets/skins/` use the faction ID followed by the unit key.
+
+| Foundry unit | Pixels | Bytes | Riftborn unit | Pixels | Bytes |
+| --- | ---: | ---: | --- | ---: | ---: |
+| Pulse | 224 × 168 | 17,716 | Scout | 224 × 130 | 18,730 |
+| Spark | 224 × 211 | 24,702 | Runner | 224 × 114 | 14,040 |
+| Frost | 224 × 108 | 12,386 | Brute | 224 × 148 | 19,490 |
+| Nova | 224 × 183 | 17,988 | Spitter | 224 × 123 | 14,924 |
+| Bastion | 201 × 224 | 19,810 | Overlord | 224 × 189 | 26,186 |
+
+### Alien stride atlases
+
+Run `node scripts/generate-strides.mjs` from the app directory with Playwright Chromium installed, or set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to a compatible browser. The offline exporter holds the upper carapace rigid and articulates opposing foot groups below the hips. It exports transparent WebPs at quality 84. [Rig and species parameters](../src/game/gaits.json)
+
+Each atlas measures 2016 × 720 px. Twelve 168 × 144 cells run left to right through one stride. Rows from top to bottom are Scout, Runner, Brute, Spitter and Overlord. The foot anchor is (84, 139) inside every cell at reference size 136. A cycle spans 0.24, 0.29, 0.28, 0.25 or 0.32 traveled cells respectively. Slowing or blocking a unit slows or holds its feet. Shot recovery, attack compression, hover and lift are applied when drawing. The resting portrait supplies UI art, reduced-motion units and loading/error fallback.
+
+| File under `src/assets/motion/` | Compressed bytes |
+| --- | ---: |
+| `standard-stride.webp` | 708,200 |
+| `ember-stride.webp` | 611,520 |
+| `riftborn-stride.webp` | 416,534 |
+
+The ten portraits add 185,972 bytes and the three atlases add 1,736,254 bytes. The renderer references one active gait sheet, about 5.54 MiB of RGBA pixels. It prepares that sheet at deployment or when a combat preference changes. Each walking alien uses one sprite draw. [Phone-size comparison](screenshots/unit-motion.webp) · [Animation sample](screenshots/foundry-riftborn.webp)
 
 ## Launcher and interface
 

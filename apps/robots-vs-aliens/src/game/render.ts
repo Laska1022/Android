@@ -4,12 +4,16 @@ import {
   ENEMIES,
   ROWS,
   SECTORS,
+  type Bot,
   type BotKind,
+  type Enemy,
   type EnemyKind,
   type Game,
   type Shot,
 } from './engine';
 import { unitArtwork, type AlienSkin, type RobotSkin, type UnitSkin } from './skins';
+
+import gaits from './gaits.json';
 
 export const BOARD = { x: 157, y: 170, cw: 100, ch: 82, width: 1200, height: 700 };
 type Ctx = CanvasRenderingContext2D;
@@ -76,7 +80,9 @@ function sprite(kind: UnitKind, skin: UnitSkin = 'standard') {
         { once: true },
       );
     }
+    image.decoding = 'async';
     image.src = unitArtwork(kind, skin);
+    void image.decode().catch(() => {});
     sprites.set(key, image);
   }
   return image;
@@ -154,75 +160,142 @@ function glow(c: Ctx, x: number, y: number, rx: number, ry: number, color: strin
 
 function unit(
   c: Ctx,
+  image: HTMLImageElement,
   kind: UnitKind,
   x: number,
   feet: number,
   maxWidth: number,
   maxHeight: number,
-  skin: UnitSkin,
+  kick = 0,
+  brace = 0,
 ) {
-  let image = sprite(kind, skin);
-  if (skin !== 'standard' && (!image.complete || !image.naturalWidth)) image = sprite(kind);
   if (!image.complete || !image.naturalWidth) {
     const color = kind in BOTS ? BOTS[kind as BotKind].color : ENEMIES[kind as EnemyKind].color;
     panel(c, x - 11, feet - 29, 22, 20, 5, '#253b47', color);
     return;
   }
   const scale = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
-  const w = image.naturalWidth * scale;
-  const h = image.naturalHeight * scale;
+  const w = image.naturalWidth * scale * (1 + brace * 0.045);
+  const h = image.naturalHeight * scale * (1 - brace * 0.075);
+  if (kick > 0.02) {
+    // The carriage travels back about its mount while the tracks or feet stay planted.
+    const joint = Math.round(image.naturalHeight * 0.64);
+    const top = joint * scale;
+    const pivot = feet - h + top;
+    c.drawImage(
+      image,
+      0,
+      joint,
+      image.naturalWidth,
+      image.naturalHeight - joint,
+      x - w / 2,
+      pivot,
+      w,
+      h - top,
+    );
+    c.save();
+    c.translate(x, pivot);
+    c.transform(1, 0, kick / top, 1 - kick * 0.009, 0, 0);
+    c.drawImage(image, 0, 0, image.naturalWidth, joint, -w / 2, -top, w, top);
+    c.restore();
+    return;
+  }
   c.drawImage(image, x - w / 2, feet - h, w, h);
 }
 
-export function drawBot(
+function drawBot(
   c: Ctx,
+  image: HTMLImageElement,
   kind: BotKind,
   x: number,
   y: number,
   size: number,
-  t = 0,
-  flash = 0,
-  firing = false,
-  skin: RobotSkin = 'standard',
+  clock: number,
+  motion: boolean,
+  bot?: Bot,
 ) {
   const color = BOTS[kind].color;
   const feet = y + size * 0.41;
   glow(c, x, feet - 1, size * 0.55, size * 0.12, '#010810ce');
-  const lift = kind === 'frost' ? 3 + Math.sin(t * 3) * 1.5 : 0;
+  const lift = kind === 'frost' ? 4 + (motion ? Math.sin(clock * 3.1) * 2.4 : 0) : 0;
   if (kind === 'frost') glow(c, x, feet - 1, size * 0.4, 6, '#66d9ec72');
-  const recoil = firing ? Math.min(1, flash * 5.6) * 3 : 0;
-  unit(c, kind, x - recoil, feet - lift, size * 1.09, size * 0.97, skin);
+  const flash = motion && bot ? bot.flash : 0;
+  const sinceShot = bot && BOTS[kind].damage ? BOTS[kind].rate - bot.timer : Infinity;
+  const recovery = kind === 'nova' ? 0.34 : 0.2;
+  const kick = motion ? Math.max(0, 1 - sinceShot / recovery) ** 2 : 0;
+  const brace = kind === 'bastion' ? Math.min(1, flash * 5.6) : 0;
+  unit(
+    c,
+    image,
+    kind,
+    x,
+    feet - lift,
+    size * 1.09,
+    size * 0.97,
+    kick * (kind === 'nova' ? 8 : 5),
+    brace,
+  );
+  if (motion && kind === 'spark' && bot) {
+    const charge = Math.max(0, 1 - bot.timer / 8);
+    if (charge > 0.55) {
+      c.globalAlpha = (charge - 0.55) * 1.5;
+      glow(c, x, y - size * 0.21, size * 0.34, size * 0.2, '#ffc464a6');
+      c.globalAlpha = 1;
+    }
+  }
   if (flash > 0) {
     const strength = Math.min(1, flash * 5.6);
-    const barrel = firing;
-    const px = barrel ? x + size * 0.45 : x;
-    const py = y - (kind === 'nova' ? size * 0.48 : 0);
+    const barrel = sinceShot < 0.18;
+    const px = barrel ? x + size * (kind === 'nova' ? 0.3 : 0.48) : x;
+    const py = y - (kind === 'nova' && barrel ? size * 0.43 : 0);
     glow(c, px, py, (barrel ? 25 : 32) * strength, (barrel ? 11 : 22) * strength, color + 'b0');
     if (barrel) line(c, px - 3, py, px + strength * 11, py, '#f6fff1', 2);
   }
 }
 
-export function drawAlien(
+function drawAlien(
   c: Ctx,
-  kind: EnemyKind,
+  image: HTMLImageElement,
+  sheet: HTMLImageElement | undefined,
+  enemy: Enemy,
   x: number,
   y: number,
   size: number,
-  t = 0,
-  flash = 0,
-  slow = false,
-  skin: AlienSkin = 'standard',
+  motion: boolean,
 ) {
+  const kind = enemy.kind;
   const feet = y + size * 0.35;
-  const stride = Math.sin(t * (kind === 'runner' ? 13 : 6));
   glow(c, x, feet - 1, size * 0.55, size * 0.13, '#010810ce');
-  if (slow) {
+  if (enemy.slow > 0) {
     glow(c, x, feet - 2, size * 0.56, 8, '#89e2ffb2');
     line(c, x - size * 0.38, feet, x + size * 0.38, feet, '#a9ecff', 1.7);
   }
-  unit(c, kind, x + stride * 0.9, feet - Math.abs(stride) * 1.7, size * 1.16, size * 0.99, skin);
-  if (flash > 0) {
-    const strength = Math.min(1, flash * 8);
+  if (motion && sheet?.complete && sheet.naturalWidth) {
+    const gait = gaits.species[kind];
+    const travel = (9.6 - enemy.x) / gait.strideCells + enemy.id * 0.347;
+    const phase = travel - Math.floor(travel);
+    const lift = (1 - Math.cos(phase * Math.PI * 4)) * 0.5 * gait.lift;
+    const attackAge = (kind === 'spitter' ? 1.8 : 0.9) - enemy.timer;
+    const strike = Math.max(0, 1 - attackAge / 0.28) ** 2;
+    const scale = size / gaits.referenceSize;
+    const height = (1 - strike * 0.055) * scale;
+    const reach = kind === 'spitter' ? 5 : kind === 'overlord' ? -8 : -5;
+    c.drawImage(
+      sheet,
+      Math.floor(phase * gaits.frames) * gaits.width,
+      gait.row * gaits.height,
+      gaits.width,
+      gaits.height,
+      x + strike * reach - (gaits.width * scale) / 2,
+      feet - lift - (gaits.height - gaits.footPadding) * height,
+      gaits.width * scale,
+      gaits.height * height,
+    );
+  } else {
+    unit(c, image, kind, x, feet, size * 1.16, size * 0.99);
+  }
+  if (motion && enemy.flash > 0) {
+    const strength = Math.min(1, enemy.flash * 8);
     glow(c, x - size * 0.24, y, strength * 29, strength * 22, '#ffe8bba8');
   }
 }
@@ -250,15 +323,69 @@ export class Renderer {
   private sceneRequest = 0;
   hover: { row: number; col: number } | null = null;
   selection: BotKind | 'recycle' | 'beam' = 'pulse';
-  reducedMotion = false;
-  robotSkin: RobotSkin = 'standard';
-  alienSkin: AlienSkin = 'standard';
+  private robots: RobotSkin = 'standard';
+  private aliens: AlienSkin = 'standard';
+  private motionReduced = false;
+  private battleStarted = false;
+  private strideSheet?: HTMLImageElement;
+  private portraits = {} as Record<UnitKind, HTMLImageElement>;
+  private standard = {} as Record<UnitKind, HTMLImageElement>;
 
   constructor(public canvas: HTMLCanvasElement) {
     this.c = canvas.getContext('2d')!;
     this.background.width = BOARD.width;
     this.background.height = BOARD.height;
-    for (const kind of [...Object.keys(BOTS), ...Object.keys(ENEMIES)]) sprite(kind as UnitKind);
+    for (const kind of [...Object.keys(BOTS), ...Object.keys(ENEMIES)] as UnitKind[]) {
+      this.portraits[kind] = this.standard[kind] = sprite(kind);
+    }
+  }
+
+  get robotSkin() {
+    return this.robots;
+  }
+  set robotSkin(skin: RobotSkin) {
+    if (this.robots === skin) return;
+    this.robots = skin;
+    for (const kind of Object.keys(BOTS) as BotKind[]) this.portraits[kind] = sprite(kind, skin);
+  }
+
+  get alienSkin() {
+    return this.aliens;
+  }
+  set alienSkin(skin: AlienSkin) {
+    if (this.aliens === skin) return;
+    this.aliens = skin;
+    for (const kind of Object.keys(ENEMIES) as EnemyKind[])
+      this.portraits[kind] = sprite(kind, skin);
+    this.strideSheet = undefined;
+    this.prepareStride();
+  }
+
+  get reducedMotion() {
+    return this.motionReduced;
+  }
+  set reducedMotion(value: boolean) {
+    this.motionReduced = value;
+    this.prepareStride();
+  }
+
+  prepareBattle() {
+    this.battleStarted = true;
+    this.prepareStride();
+  }
+
+  private prepareStride() {
+    if (!this.battleStarted || this.motionReduced || this.strideSheet) return;
+    const sheet = new Image();
+    sheet.decoding = 'async';
+    sheet.src = new URL(`../assets/motion/${this.aliens}-stride.webp`, import.meta.url).href;
+    this.strideSheet = sheet;
+    void sheet.decode().catch(() => {}); // Static portraits remain available while loading or after failure.
+  }
+
+  private portrait(kind: UnitKind) {
+    const selected = this.portraits[kind];
+    return selected.complete && selected.naturalWidth ? selected : this.standard[kind];
   }
 
   private selectSector(sector: number) {
@@ -381,7 +508,16 @@ export class Renderer {
         panel(c, x + 2, y + 2, 96, 78, 4, color + '20', color);
         if (empty && this.selection !== 'recycle') {
           c.globalAlpha = 0.5;
-          drawBot(c, this.selection, x + 50, y + 41, 72, t, 0, false, this.robotSkin);
+          drawBot(
+            c,
+            this.portrait(this.selection),
+            this.selection,
+            x + 50,
+            y + 41,
+            72,
+            t,
+            !this.reducedMotion,
+          );
           c.globalAlpha = 1;
         }
       }
@@ -392,17 +528,16 @@ export class Renderer {
       for (const bot of game.bots) {
         if (bot.row !== row) continue;
         const x = BOARD.x + (bot.col + 0.5) * BOARD.cw;
-        const firing = BOTS[bot.kind].damage > 0 && bot.timer > BOTS[bot.kind].rate - 0.18;
         drawBot(
           c,
+          this.portrait(bot.kind),
           bot.kind,
           x,
           y,
           73,
-          this.reducedMotion ? 0 : t + bot.id,
-          this.reducedMotion ? 0 : bot.flash,
-          firing,
-          this.robotSkin,
+          t + bot.id,
+          !this.reducedMotion,
+          bot,
         );
         if (bot.hp < BOTS[bot.kind].hp)
           this.health(x, y + 32, bot.hp / BOTS[bot.kind].hp, '#a8f570');
@@ -426,14 +561,13 @@ export class Renderer {
                 : 70;
         drawAlien(
           c,
-          enemy.kind,
+          this.portrait(enemy.kind),
+          this.strideSheet,
+          enemy,
           x,
           y,
           size,
-          this.reducedMotion ? 0 : t + enemy.id,
-          this.reducedMotion ? 0 : enemy.flash,
-          enemy.slow > 0,
-          this.alienSkin,
+          !this.reducedMotion,
         );
         if (enemy.hp < enemy.maxHp || enemy.kind === 'overlord')
           this.health(x, y - size * 0.66, enemy.hp / enemy.maxHp, '#f0a3d4');
