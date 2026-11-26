@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
         // Set the saved orientation before Capacitor creates and lays out the WebView.
         GameOrientationPlugin.applyMode(this, GameOrientationPlugin.readMode(this));
         registerPlugin(GameOrientationPlugin.class);
+        registerPlugin(GameNavigationPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

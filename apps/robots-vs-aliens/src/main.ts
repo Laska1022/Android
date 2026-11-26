@@ -17,6 +17,7 @@ import {
 } from './game/engine';
 import { BOARD, Renderer, botIcon, alienIcon } from './game/render';
 import { LaneWarning } from './game/lane-warning';
+import { GAME_BACK_EVENT, setGameBackHandled } from './game/navigation';
 import { ROBOT_SKINS, ALIEN_SKINS, isRobotSkin, isAlienSkin } from './game/skins';
 import {
   supportsNativeOrientation,
@@ -162,9 +163,9 @@ function updateSectors() {
 }
 function start(endless = false) {
   audio.unlock();
+  menu = false;
   closeModal(false);
   game = new Game(sector, endless, undefined, save.difficulty);
-  menu = false;
   document.body.classList.add('in-mission');
   window.scrollTo(0, 0);
   previousPhase = 'playing';
@@ -185,8 +186,8 @@ function start(endless = false) {
   $('.cell').focus({ preventScroll: true });
 }
 function mainMenu() {
-  closeModal(false);
   menu = true;
+  closeModal(false);
   document.body.classList.remove('in-mission');
   game.phase = 'paused';
   $('#menu-cover').hidden = false;
@@ -259,6 +260,11 @@ function updateHud() {
     if (b.getAttribute('aria-label') !== label) b.setAttribute('aria-label', label);
   });
 }
+function syncBackHandling() {
+  void setGameBackHandled(!menu || !$('#modal-backdrop').hidden).catch(() => {
+    console.warn('Android Back integration is unavailable.');
+  });
+}
 function openModal(title: string, contents: string) {
   returnFocus = document.activeElement as HTMLElement;
   resumeAfterDialog = !menu && game.phase === 'playing';
@@ -266,12 +272,14 @@ function openModal(title: string, contents: string) {
   $('#modal').innerHTML =
     `<button class="modal-close icon-button" aria-label="Close dialog">${icon('close')}</button><div class="eyebrow">OUTPOST COMMAND</div><h2 id="modal-title">${title}</h2>${contents}`;
   $('#modal-backdrop').hidden = false;
+  syncBackHandling();
   $('#modal').focus();
   $('.modal-close').onclick = () => closeModal();
   updateHud();
 }
 function closeModal(resume = true) {
   $('#modal-backdrop').hidden = true;
+  syncBackHandling();
   if (resume && resumeAfterDialog && game.phase === 'paused') game.phase = 'playing';
   resumeAfterDialog = false;
   returnFocus?.focus({ preventScroll: true });
@@ -314,6 +322,17 @@ function finish() {
   $('.modal-close').onclick = mainMenu;
 }
 
+function handleGameBack() {
+  if (menu && $('#modal-backdrop').hidden) return false;
+  if (!menu && (game.phase === 'won' || game.phase === 'lost')) mainMenu();
+  else if (!$('#modal-backdrop').hidden) closeModal();
+  else pause();
+  return true;
+}
+window.addEventListener(GAME_BACK_EVENT, (event) => {
+  if (handleGameBack()) event.preventDefault();
+});
+syncBackHandling();
 $('#start-button').onclick = () => start();
 $('#endless-button').onclick = () => {
   setSector(0);
@@ -391,6 +410,7 @@ function wireOrientationSetting(select: HTMLSelectElement) {
   };
 }
 $('#settings-button').onclick = () => {
+  if (!$('#modal-backdrop').hidden) return;
   openModal(
     'Command settings',
     `<label class="setting"><span>Campaign difficulty<small>Cadet gives you time to prepare. Veteran uses the original waves. Applies at deployment.</small></span><select id="difficulty-setting" aria-label="Campaign difficulty"><option value="cadet" ${save.difficulty === 'cadet' ? 'selected' : ''}>Cadet</option><option value="veteran" ${save.difficulty === 'veteran' ? 'selected' : ''}>Veteran</option></select></label>` +
@@ -440,6 +460,7 @@ $('#settings-button').onclick = () => {
   $('#settings-done').onclick = () => closeModal();
 };
 $('#guide-button').onclick = () => {
+  if (!$('#modal-backdrop').hidden) return;
   openModal(
     'Know your squad.',
     `<p>Aliens advance from the right. The incoming marker shows the next lane. Cadet also identifies the alien. Place robots on empty tiles to protect the core on the left.</p><div class="guide-grid">${kinds.map((kind) => `<div><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span><strong>${BOTS[kind].name} <small>· ${BOTS[kind].cost} ENERGY</small></strong><p>${BOTS[kind].description}</p></span></div>`).join('')}</div><div class="guide-notes"><p><strong>Build an economy.</strong> You gain 3 energy each second. Tap golden cells or press E to collect bonus energy. Start with Spark at the back and Pulse in threatened lanes.</p><p><strong>Your last resort.</strong> Each lane has one emergency sweeper. Orbital strike (Q) deals 320 damage to an entire lane and recharges in 42 seconds. Recycle (R) refunds up to half a robot’s cost.</p><p><strong>Stay sharp.</strong> Runners are fast. Brutes are tough. Spitters attack at range. An Overlord leads the final wave. Clear all waves to unlock the next sector.</p></div><div class="keyboard-guide"><kbd>1–5</kbd> Select robot <kbd>Q</kbd> Strike <kbd>R</kbd> Recycle <kbd>E</kbd> Collect <kbd>Space</kbd> Pause</div><p class="fine-print">Keyboard: Tab to the battlefield, use arrow keys to choose a tile, then Enter to deploy. On phones, tap a robot and a tile. Landscape gives you a wider view.</p>`,
@@ -503,12 +524,11 @@ document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
 });
 $('#battle-grid').onpointerleave = () => (renderer.hover = null);
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!e.repeat && !e.defaultPrevented && handleGameBack()) e.preventDefault();
+    return;
+  }
   if (!$('#modal-backdrop').hidden) {
-    if (e.key === 'Escape') {
-      if (game.phase === 'won' || game.phase === 'lost') mainMenu();
-      else closeModal();
-      e.preventDefault();
-    }
     if (e.key === 'Tab') {
       const focusables = [
         ...$('#modal').querySelectorAll<HTMLElement>(
@@ -538,11 +558,7 @@ document.addEventListener('keydown', (e) => {
   if (!menu && e.key.toLowerCase() === 'e') {
     for (const p of [...game.pickups]) game.collect(p.id);
   }
-  if (
-    !menu &&
-    (e.code === 'Space' || e.key === 'Escape') &&
-    !(e.code === 'Space' && (e.target as HTMLElement).tagName === 'BUTTON')
-  ) {
+  if (!menu && e.code === 'Space' && !e.repeat && (e.target as HTMLElement).tagName !== 'BUTTON') {
     e.preventDefault();
     pause();
   }
