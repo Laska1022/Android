@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.0 · November 26, 2026
+
+- Android opens horizontally by default in either landscape grip. Settings now offers a saved **Follow phone** option. Switching orientation keeps the current battle and placed robots.
+- An amber marker shows the lane of the next alien before it enters. Cadet also identifies the alien type. Veteran and Survival show only its lane. The opening Scout is visible during preparation.
+- Independent robot and alien skin selectors update the battlefield and the related interface art. Factory alloy and Native carapace remain the defaults. Cobalt ceramic and Ember brood provide ten alternate unit sprites. Earlier saves keep their progress.
+- Added offline selection, saved preference, native bridge and warning tests, plus a [dedicated handover](ART_HANDOFF.md) for the second AI developing animation and new skin families.
+
+## 1.3.0 · November 26, 2026
+
+- Added four campaign landscapes for Dust & Echoes, The Hollow, Iron Horizon and Last Light. Each has its own platform lighting and rift color. First Contact and Survival use the original perimeter.
+- Selecting an unlocked sector shows its location and mission briefing before deployment. The battlefield's accessible name identifies the deployed mission.
+- Bundled every sector image for Android and offline browser play. The renderer keeps one terrain canvas, shows a playable fallback while loading and ignores image responses from earlier missions.
+
 ## 1.2.0 · November 25, 2026
 
 - Replaced the original command and battlefield scenery with an illustrated industrial outpost. Ten transparent WebP sprites give each robot and enemy a distinct silhouette. Cards, the field guide and deployment previews share the battlefield art.

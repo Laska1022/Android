@@ -16,7 +16,11 @@ Start with [HANDOFF.md](HANDOFF.md) for the current version, tested behavior and
 
 Design for adults who enjoy colorful science fiction. Use recognizable mechanical silhouettes, readable lane threats and a clear hierarchy for energy, core health and wave state. Give a new player time to choose and place a robot before the first Cadet attack. Keep Veteran and Survival challenging.
 
+When changing a sector, keep its location and briefing in `SECTORS` and its visual treatment in the matching `sectorScenes` entry in `src/game/render.ts`. Preserve the 1200 × 700 board coordinate system across all landscapes. Test deployment after an offline reload and after switching away from a sector whose image is still loading.
+
 ## Working agreement
+
+The second AI owns new skins and combat animation. Start with [the art handover](ART_HANDOFF.md) for the renderer, registration, save compatibility, test fixtures, art direction and how to integrate work already in progress.
 
 - This is an original sci-fi lane-defense game. Preserve the original robot/alien identity, illustrated neon outpost, responsive UI, and offline play. Do not use Plants vs Zombies art, characters, branding, sounds, or source code.
 - Use the existing checkout. Cloud tasks already run in isolated environments; do not create a worktree unless the user asks for one.

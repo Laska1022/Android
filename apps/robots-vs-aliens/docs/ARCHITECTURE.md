@@ -8,7 +8,7 @@ Vite + strict TypeScript, Canvas 2D, semantic HTML controls, CSS, Web Audio, a g
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `src/game/engine.ts`         | Deterministic fixed-step simulation, content definitions, economy, collisions, wave lifecycle, combat events |
 | `src/game/render.ts`         | Composites unit sprites, cached landscape, projectiles and light effects on the tactical canvas              |
-| `src/assets/`                | Bundled WebP command scene, perimeter and ten class sprites. See [asset provenance](ASSETS.md).              |
+| `src/assets/`                | Bundled WebP command scene, five battlefields and ten class sprites. See [asset provenance](ASSETS.md).      |
 | `src/game/audio.ts`          | Gesture-unlocked synthesized effects, bounded transient voices, mute                                         |
 | `src/game/storage.ts`        | Versioned, validated, failure-tolerant local saves                                                           |
 | `src/main.ts`                | UI controller, input, focus management, lifecycle, modals, campaign progression, 60 Hz game loop             |
@@ -41,6 +41,16 @@ The service worker is registered in production only. Capacitor packages `dist` i
 
 ## Performance and accessibility
 
-The command screen uses a static CSS background. Combat draws against a cached 1200 × 700 perimeter, loading each class image once and sharing light textures. Particles are bounded at 600 and Canvas device pixel ratio is capped at 2. HUD updates are throttled and tile labels change when the occupant or its health changes.
+The command screen uses a static CSS background. Selecting a campaign sector updates the location and description from `SECTORS` in `src/game/engine.ts`. Deployment passes the same sector index into the simulation.
+
+The renderer uses `game.sector` to choose one of five panoramas, trim colors and rift colors. First Contact uses `src/assets/perimeter.webp`. Sectors 2–5 use the images in `src/assets/sectors/`. Survival starts in First Contact. Each sector change paints a playable platform and gradient sky onto the same 1200 × 700 backing canvas. When the image loads, a request counter allows only the current selection to repaint the canvas. A failed image leaves the sector's fallback board in place. Combat frames reuse the cached surface.
+
+The renderer loads each class image once and shares light textures. Particles are bounded at 600 and Canvas device pixel ratio is capped at 2. HUD updates are throttled and tile labels change when the occupant or its health changes.
 
 All placement cells and loadout cards are actual buttons. The battlefield uses roving focus and arrow keys. Modals trap keyboard focus and restore it. Touch and pointer inputs use the same command methods. Reduced motion disables ambience and particles. Full nonvisual gameplay, high-contrast options, and customizable input remain future accessibility work.
+
+## Player preferences and incoming attacks in 1.4
+
+The game queues the actual next spawn in `Game`. Its `incomingThreat` view exposes the row and optionally the kind, depending on the active mission difficulty. The DOM warning reads that view without consuming RNG. Preparation, pause, speed changes and the subsequent arrival share one queued decision. The warning clears after the last spawn, defeat or victory. Skin code receives no private spawn information.
+
+Robot and alien finish IDs belong to the existing web save. Both the renderer and the interface resolve locally bundled art through `src/game/skins.ts`. The Android orientation preference belongs to the native activity's private preferences because it is needed before the WebView starts. `GameOrientationPlugin` and `src/game/orientation.ts` expose the setting to the Android UI. Browser builds use their responsive layout. [Animation and skins handover](../ART_HANDOFF.md)

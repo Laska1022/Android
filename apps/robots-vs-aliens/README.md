@@ -8,7 +8,8 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 
 - Five robot classes: **Pulse** blaster, **Spark** generator, **Frost** disruptor, **Nova** artillery, and **Bastion** defender.
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
-- Original sci-fi artwork with a command outpost, industrial perimeter, ten robot and alien sprites, weapon trails, impact lighting and emergency sweepers.
+- Each sector has its own battlefield, from the Greenline perimeter and Badlands to the Crystal Basin, Relay Nine and the Nest. Selecting an unlocked sector reveals its location and briefing.
+- Ten robot and alien sprites share the battlefield with weapon trails, impact lighting and emergency sweepers. All sector art is bundled for offline play.
 - Energy pickups, health-based recycling, lane-wide orbital strikes, pause, and double speed.
 - Procedural sci-fi sound effects, reduced-motion settings, keyboard navigation, and touch controls.
 - Saved campaign unlocks, star ratings, preferences, and best score on the current device.
@@ -39,7 +40,7 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 
 ## How to play
 
-1. Choose a sector and **Deploy squad**. The default **Cadet** campaign lets you set up before the first attack in First Contact. Press **Send wave** when ready. For the original challenge, choose **Veteran** in Settings. Survival always uses Veteran rules.
+1. Select an unlocked sector, read its briefing and choose **Deploy squad**. The default **Cadet** campaign lets you set up before the first attack in First Contact. Press **Send wave** when ready. For the original challenge, choose **Veteran** in Settings. Survival always uses Veteran rules.
 2. Select a robot card, then an empty tile. Aliens enter from the right; defend the core on the left.
 3. Place Spark generators in the back. Cover threatened lanes with Pulse, then combine Frost and Nova. Put Bastion in front to buy time.
 4. Collect golden energy cells. Orbital strike clears a threatened lane; each lane also has one automatic emergency sweeper.
@@ -55,7 +56,9 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 | `Space`                  | Pause when focus is not on a button; activate a focused button |
 | Arrows + Enter           | Navigate battlefield tiles and deploy                          |
 
-On phones, tap the cards and tiles. Landscape provides larger battlefield tiles. Use the field guide and settings buttons for instructions, audio, and reduced motion.
+On phones, tap the cards and tiles. Android opens in landscape. Choose **Settings → Screen orientation → Follow phone** to use the phone’s rotation preference. Ordinary browser tabs adapt to the viewport.
+
+Watch the amber arrow on the right of the board to see where the next alien will enter. Cadet also names the alien. In Settings, select robot and alien skins independently. The preview, field guide and battlefield reflect the selection. Choices save on this device. [Redmi landscape screenshot](docs/screenshots/redmi-incoming-lane.webp)
 
 ## Android
 
@@ -88,6 +91,8 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run check
 Unit tests cover economy, combat, special attacks, wave progression, victory/defeat, and save validation. Browser tests cover desktop/mobile interaction, pause, offline reload, keyboard deployment, and dialog focus. Screenshots and failure traces are written to `test-results/`.
 
 ## Continue development
+
+The second AI’s assignment, integration branch, asset conventions and acceptance checks are in [ART_HANDOFF.md](ART_HANDOFF.md).
 
 Start with the [agent instructions](AGENTS.md), [development handoff](HANDOFF.md), [testing procedures and results](TESTING.md) and [changelog](CHANGELOG.md). Azure agents can also use the [Azure continuation guide](docs/AZURE_AI_HANDOFF.md).
 

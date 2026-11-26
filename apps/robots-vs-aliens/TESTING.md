@@ -67,6 +67,19 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 26, 2026 · 1.4.0, Android code 5
+
+- **Automated.** 28 unit tests passed. The desktop Chromium and Pixel 7 browser projects passed 18 scenarios with two platform-specific skips. Tests exercise actual queued spawns including the Overlord, difficulty disclosure, pause, 2×, old saves, independent skin choices, offline reload, all 26 WebPs and late scene loading. Set `RVA_TEST_PORT` to use a different loopback port if another local checkout owns 4173.
+- **Native build.** TypeScript and production build, Capacitor sync, Java 21 debug assembly and lint passed. App lint reported zero errors and four warnings. All 54 production files, including the generated worker, matched their APK entries byte for byte. Tested local debug APK SHA-256 `def902e7f4e0749825b9dfa891964cae50b3698d5b7216b1857bb41d6b5669fe`, 5,752,272 bytes. Hosted debug signing can produce a different hash.
+- **Physical Redmi Note 7.** Updated the existing 1.3.0 install while keeping saved progress and game mute. First 1.4.0 launch used 775 × 364 CSS pixels in landscape. During Cadet setup the incoming cue named the middle-lane Scout. Selected Cobalt ceramic and Ember brood, placed defenders, then selected Follow phone in Settings. The viewport changed to 393 × 775 in portrait, existing defenders remained and a new edge placement landed in the intended cell. Follow phone opened in portrait after force-stop. Selecting Landscape then force-stopping again reopened horizontally. Five three-star ratings, a best score of 12,510, both finishes and mute persisted.
+- **Mode and frame checks.** Veteran and Survival both showed the next lane only. During a 2× Cadet wave-two sample with 11 defenders using the alternate finishes, 180 WebView animation intervals gave 60.0 callbacks/s, 16.674 ms median and 16.676 ms p95. The app-process PSS sample was 125,521 kB. [Cadet lane cue](docs/screenshots/redmi-incoming-lane.webp) · [Veteran combat](docs/screenshots/redmi-veteran-warning.webp) · [Android settings](docs/screenshots/redmi-loadout-settings.webp)
+- **Remaining physical coverage.** Both landscape grips are enabled by Android policy. Reverse-grip rotation, prolonged Survival, current Android tablet policies and API 24 remain device follow-ups. Browser emulation alone cannot establish these outcomes.
+- **Campaign and stability.** A normal-budget Cadet First Contact run with both alternate finishes beat all four waves, stopped 32 aliens, earned three stars and scored 4,300. The tested game PID returned zero matching AndroidRuntime, uncaught WebView or orientation-plugin error lines. The crash buffer contained zero matches for the package.
+
+### November 26, 2026 · 1.3.0, Android code 4
+
+On the same Redmi in portrait, the muted, normal-budget Cadet exercise cleared all four later sectors with three stars. The test purchased a mixed squad, collected pickups and used 2×. Sector scores were 6,290 / 8,370 / 10,990 / 12,510. Separate wave-two samples of 180 WebView frame intervals measured 58.7 / 58.7 / 59.3 / 59.0 callbacks/s. These runs exercised the earlier spawn scheduler. Version 1.4.0 has separate warning tests and its own device samples above.
+
 ### Physical test device
 
 | Item               | November 25, 2026 measurement                                                                       |

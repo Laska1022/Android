@@ -2,7 +2,7 @@
 
 ## Game artwork
 
-The game bundles three pieces of original art made for Robots vs Aliens with the built-in OpenAI ImageGen tool. Each used a text prompt and no reference image. The shipped WebP files are the source assets for the game build. The prompts below preserve their design direction. Generating again can produce different artwork.
+The game bundles original artwork made for Robots vs Aliens with the built-in OpenAI ImageGen tool. Each generation used a text prompt. The shipped WebP files are the source assets for the game build.
 
 | Asset under `src/assets/` | Game use                                                                                                                                                         | Packaging                                                                                                         |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -17,6 +17,27 @@ The Canvas renderer draws lighting, recoil, hit flashes, shadows, projectiles, p
 Vite resolves these local images into the production build. The service worker precaches the emitted files for subsequent offline browser sessions. Capacitor packages the same build inside the Android app, so the first native launch can display art offline. The game never calls an image generator during play.
 
 ## Image generation prompts
+
+### Campaign landscapes added in 1.3.0
+
+Each landscape in `src/assets/sectors/` started as an individual 1774 × 887 raster. Each shipped image is 1200 × 600 pixels, encoded as WebP at quality 82. Together, the four files occupy 441,814 bytes. The renderer composites the active scene into one backing canvas. First Contact and Survival use the original perimeter.
+
+<details>
+<summary>Exact prompts for the four campaign sectors</summary>
+
+Each request started with the following shared text, followed by its scene description.
+
+Use case: stylized-concept. One panoramic 2:1 full-bleed environmental background for Robots vs Aliens: Last Outpost, a polished adult science-fiction lane defense game on Kepler-186f. Naturalistic cinematic matte painting with physically coherent side light, textured surfaces and layered atmospheric depth. A gameplay board will obscure the central rectangle from 13–88% across and 24–84% down; put the characteristic horizon and landmarks in the TOP QUARTER and the side margins, render quieter foreground terraces below. Straight, level horizon. Clean, strong large shapes that remain distinct at phone scale. The illustration alone contains no combat units, people, text, logos, UI, guns, grids or overlays.
+
+**dust-and-echoes** — The Badlands in a sprawling ochre dust storm: wind-eroded basalt mesas and collapsed radio dishes at the edges, one massive naturally eroded sandstone arch near the upper right, an amber sun peeking out behind drifting clouds of dust. The ground is swept rust-red stone and dry regolith scattered with fragments of a long-abandoned outpost. Heavy burnt-sienna shadows and pale gold light. Open-air and silent.
+
+**the-hollow** — Crystal Basin seen from inside a huge geological hollow, with an arched dark cavern ceiling opening into a glacial turquoise sinkhole across the top. Tall asymmetric mineral columns at the sides, irregular fractured quartz with lilac tips and real internal scattering, cold reflected blue light in shallow black water across the foreground. Restrained silver caustics, shafts of natural light through rock. Large clear mineral forms, an airless subterranean observatory mood.
+
+**iron-horizon** — Relay Nine, a monumental weather-beaten industrial relay yard after a squall. Strong graphic silhouette of one tilted giant rusted radar array high on the far LEFT, a line of small service towers and an overhead cable cutting across a pale steel-blue storm front. Warm sodium amber practical lights and rain-slanted streaks, dark weathered navy steel deck with rainwater and atmospheric steam along both sides. Use broad side light and industrial scale. Wide open ground, detailed and tangible materials.
+
+**last-light** — The Nest: an ominous alien basalt caldera at total eclipse, a thin brilliant copper eclipse corona high on the right, an enormous serrated obsidian rib formation at the left silhouetted in low crimson horizon glow. Magenta-red molten light threads between black, chitin-like basalt spires. Dark volcanic apron with subtle ash in the foreground. Surreal and geological; eerie, high contrast, restrained deep garnet and ember color, no gore and no living creatures.
+
+</details>
 
 <details>
 <summary>Command screen</summary>
@@ -38,6 +59,10 @@ Use case: stylized-concept. Asset type: environment backdrop for a tactical defe
 Use case: stylized-concept. Asset type: transparent master sprite sheet for a mature original science-fiction Android lane-defense game. Wide landscape 5:2 aspect ratio, exactly five equal columns by two equal rows, ten isolated full body side-profile units. Every unit entirely inside its own invisible square cell, centered, even scale, generous transparent gutter, no overlap, all feet approximately on same local baseline. This is usable game sprite artwork, not a design sheet: truly transparent background, no background, no panel borders, no grid lines, no page, no writing, no labels, no numerals, no swatches, no branding, no watermark. Art direction: layered gunmetal, worn ceramic alloy, etched armor, bright local practical lights, teal-white rimlight, rich colored accents, natural industrial and alien anatomy. Sharp three-quarter side silhouettes, high-value rim and readable color blocks for very small screen sizes; realistic sophisticated hand-painted science-fiction key art like a premium strategy game. Top row MUST have exactly five industrial robot emplacements all facing RIGHT: column 1 a squat angular biped sentry on articulated legs with a long horizontal lime-accented plasma gun and wedge sensor pod; column 2 three-legged amber fusion generator with raised paired dark-gold photovoltaic fins and luminous central coil; column 3 a cyan cryogenic skimmer with a fork-shaped cryo lance pointed right and white coolant tanks; column 4 heavy purple artillery tracked chassis with a large elevated oblique mortar barrel pointing upper-right; column 5 a broad burnt-orange faceted shield wall robot with forearm barricade, wedge armored plating, and chunky anchor feet. Bottom row MUST have exactly five dangerous non-humanoid alien organisms all facing LEFT: column 1 a lean violet four-legged blade-backed predator with a pointed head and hooked mandibles; column 2 a fast coral-magenta low-slung sprinting mantis beast with sweeping scythe limbs and trailing spines; column 3 stout armored purple rhinoceros arthropod with ivory wedge ram crest, weight-bearing forelegs and layered shell armor; column 4 jade poison-spitting insect-beast with green aerosol sacs and a tubular narrow head pointing left; column 5 taller domineering crimson alien with armored crown horns, sabre foreclaws and rose bioluminescent channels. No cute faces or bulging round eyes, no humanoid faces, no toy proportions. All units complete and unobscured. No separate floating rocks, no smoke, no shadows outside silhouettes, no detached projectiles, no fighting between cells. Exactly ten sprites total.
 
 </details>
+
+## Robot and alien finish variants
+
+The examples in `src/assets/skins/` derive from this project's ten original transparent unit illustrations. Cobalt ceramic remaps the armor to a blue material while retaining bright emitters. Ember brood remaps the alien carapaces to warm reds and amber. [The offline generator](../scripts/generate-skins.mjs) preserves the input dimensions and transparent silhouettes. The ten WebPs add 361,284 compressed bytes. Future original art and frame atlases belong to the [animation and skins assignment](../ART_HANDOFF.md).
 
 ## Launcher and interface
 

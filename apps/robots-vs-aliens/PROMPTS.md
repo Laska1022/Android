@@ -1,16 +1,29 @@
 # Codex Cloud assignments for Robots vs Aliens
 
-Start one agent per assignment in the GitHub repository `Laska1022/Android`. Both sessions use the integrated 1.2.0 game and work on separate branches and files. Each block is a complete starting prompt. See the [handoff](HANDOFF.md), [agent guide](AGENTS.md) and [testing guide](TESTING.md).
+## Second AI · Animation and skins
+
+```text
+Continue your existing animation and skin work in Laska1022/Android. Fetch origin.
+Read apps/robots-vs-aliens/ART_HANDOFF.md from main if present, or from
+codex/rva-landscape-loadouts. Keep your existing art commits. Follow the handover
+to integrate your work with the 1.4 skin registry and saved Settings choices.
+Implement and test new artwork and animations, document sources and evidence,
+then push your branch and open a PR. Leave physical Redmi testing to the local developer.
+```
+
+## Other independent assignments
+
+Start one agent per assignment in the GitHub repository `Laska1022/Android`. Both sessions start from the integrated 1.3.0 game or later and work on separate branches and files. Each block is a complete starting prompt. See the [handoff](HANDOFF.md), [agent guide](AGENTS.md) and [testing guide](TESTING.md).
 
 ## Codex A · RVA-01 · Later-sector balance
 
 ```text
 Work independently in Laska1022/Android on RVA-01, later-sector campaign balance
-tests for Robots vs Aliens 1.2.0. Fetch origin in the existing cloud checkout.
+tests for Robots vs Aliens. Fetch origin in the existing cloud checkout.
 Read root AGENTS.md, then apps/robots-vs-aliens/{AGENTS,HANDOFF,TESTING}.md.
 Work only in apps/robots-vs-aliens/.
 
-Start from the latest origin/main, which includes release c6faa3a. Target main
+Start from the latest origin/main with version 1.3.0 or later. Target main
 in your PR and record the base SHA. Check for existing work, then use branch
 codex/rva-campaign-balance. Own tests/unit/campaign-strategy.test.ts and any
 evidence-based Cadet tuning in src/game/engine.ts. Codex B owns mobile input.
@@ -37,18 +50,18 @@ validation belongs to RVA-04.
 
 ```text
 Work independently in Laska1022/Android on RVA-02, mobile touch regression
-coverage for Robots vs Aliens 1.2.0. Fetch origin in the existing cloud
+coverage for Robots vs Aliens. Fetch origin in the existing cloud
 checkout. Read root AGENTS.md, then apps/robots-vs-aliens/{AGENTS,HANDOFF,TESTING}.md.
 Work only in apps/robots-vs-aliens/.
 
-Start from the latest origin/main, which includes release c6faa3a. Target main
+Start from the latest origin/main with version 1.3.0 or later. Target main
 in your PR and record the base SHA. Check for existing work, then use branch
 codex/rva-mobile-layout. Own tests/e2e/viewport.spec.ts and any touch or layout
 fixes in src/main.ts and src/style.css. Codex A owns campaign balance.
 If you reproduce a missed tap or obscured control, fix it, keep the regression
 test, and include the failing and corrected behavior in your PR.
 
-Read tests/e2e/presentation.spec.ts and game.spec.ts first. Version 1.2.0
+Read tests/e2e/presentation.spec.ts and tests/e2e/game.spec.ts first. The existing suite
 already tests offline art, center placement, rotation, accessible controls,
 pause and Survival. Add touch tests for all four corner cells, in a short
 landscape layout and a tall portrait layout. Use normal Cadet preparation,
