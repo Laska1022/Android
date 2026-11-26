@@ -96,6 +96,8 @@ node scripts/measure-render.mjs . alternate
 
 **Android.** Capacitor sync, `assembleDebug` and `lintDebug` passed. App lint reported zero errors and four warnings. The 7,678,121-byte APK passed v2 signature verification and identified itself as `com.laska.robotvsaliens`, code 6. All 67 production files, including all 39 WebPs and the service worker, matched their APK entries byte for byte. SHA-256 `1c46d9607993273ea959c87edea6ddc5fa6e3f8577e808715d41347734dc1bf7`.
 
+**Published APK.** The hosted runner built `robots-vs-aliens-1.5.0-debug.apk` from tag `robots-vs-aliens-v1.5.0` at `0a7ee06`. The public download measured 7,678,121 bytes. Its SHA-256 matched the release notes (`410abf6c4a837678473dd3e289cbc4fedcc67bf352a1519ea69d7cee97ea3aee`). The downloaded package passed v2 signature verification, reported version code 6 and contained all 67 verified web build files. [GitHub Release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.0) · [Hosted checks](https://github.com/Laska1022/Android/actions/runs/45862945062)
+
 ADB listed zero attached devices. The muted Redmi upgrade, physical frame delivery, memory and cold-reopen checks for this build remain with the device owner. [Hardware task](ART_HANDOFF.md#delivered-on-november-26-2026)
 
 ### November 26, 2026 · 1.4.0, Android code 5
