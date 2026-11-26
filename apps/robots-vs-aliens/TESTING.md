@@ -67,6 +67,35 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 27, 2026 · 1.5.1, Android code 7
+
+- **Web and combat.** All 28 unit tests passed. Desktop Chromium and Pixel 7 emulation passed 26 browser scenarios, with two input-specific skips. In the ordinary Cadet UI, a player bought a Bastion in lane 3, column 9. The first Scout walked to it, dealt damage through repeated attack frames at one fixed position at both speeds, paused on an identical canvas and resumed walking after recycling. The warning remained visible beyond the incoming Scout. Reduced motion, a failed sheet, skin switching and an offline reload are covered. [First Contact at 775 × 364](docs/screenshots/alien-contact-phone.webp)
+- **Visible movement.** At a 583 × 241 CSS-pixel battlefield, opposite 1.5.0 walk frames changed zero upper-body silhouette pixels for each of the 15 species and skin combinations. The same alpha-mask comparison in 1.5.1 changed 28–189 upper-body pixels when walking and 55–359 between anticipation and contact. The browser suite checks both halves of all 30 walk and attack silhouettes offline. Baking every atlas twice produced identical bytes. The clip shows five real game simulations per column per finish, sampled at 20 fps. The left side advances and the right actually damages a Bastion. [8-second motion comparison](docs/screenshots/alien-motion.webp)
+- **Android.** Capacitor sync, Gradle `assembleDebug` and `lintDebug` passed. Android app lint reported zero errors and four warnings. The local v2-signed debug APK reported `com.laska.robotvsaliens`, version 1.5.1, code 7. All 67 production files, including the 39 WebPs, matched the APK byte for byte.
+- **Physical device.** ADB listed zero attached devices. Phone frame delivery, process memory, thermal behavior and upgrade persistence on the Redmi remain open. [Hardware scenario](ART_HANDOFF.md#delivered-on-november-27-2026)
+
+The renderer comparison uses 30 aliens (15 walking, 15 attacking), 30 robots, 20 projectiles and 120 particles at DPR 2. Each trial discards 60 warm-up frames and measures 360 callbacks. The table gives the median of three interleaved trials on Linux Chromium 156.0.8078.79. Replaying 1,200 fixed steps with standard skins at 1× and alternate skins at 2× produced identical serialized game states.
+
+| Version and brood | Animation callbacks/s | p95 frame interval | p95 draw submission |
+| --- | ---: | ---: | ---: |
+| 1.5.0 Native | 60.0 | 16.7 ms | 0.7 ms |
+| 1.5.1 Native | 60.0 | 16.7 ms | 0.7 ms |
+| 1.5.0 Riftborn | 59.8 | 16.7 ms | 0.6 ms |
+| 1.5.1 Riftborn | 60.0 | 16.7 ms | 0.7 ms |
+
+Run the same fixture against the released source from the app directory.
+
+```sh
+baseline_src=$(mktemp -d)
+repo_root=$(git rev-parse --show-toplevel)
+git -C "$repo_root" archive robots-vs-aliens-v1.5.0 apps/robots-vs-aliens/src |
+  tar -x -C "$baseline_src" --strip-components=2
+node scripts/measure-render.mjs "$baseline_src"
+node scripts/measure-render.mjs .
+node scripts/measure-render.mjs "$baseline_src" alternate
+node scripts/measure-render.mjs . alternate
+```
+
 ### November 26, 2026 · 1.5.0, Android code 6
 
 Tested game commit `a3b1e24` on `codex/rva-foundry-riftborn` against `0176911`, the 1.4.0 release handover. Node 24.22.3, Chromium 156.0.8078.79 and Java 21 were used in the cloud checkout.

@@ -61,8 +61,11 @@ try {
     window.drawSample = (i) => {
       game.time = i / 60;
       for (let n = 0; n < game.enemies.length; n++) {
-        game.enemies[n].x = starts[n] - (i % 120) * 0.003;
-        game.enemies[n].timer = 0.9 - ((n + i) % 54) / 60;
+        const enemy = game.enemies[n];
+        // Half the field walks and half attacks a fixed position.
+        if (n % 2 === 0) enemy.x = starts[n] - (i % 120) * 0.003;
+        const cooldownSteps = enemy.kind === 'spitter' ? 108 : 54;
+        enemy.timer = (cooldownSteps - ((n + i) % cooldownSteps)) / 60;
       }
       for (const bot of game.bots) {
         const rate = BOTS[bot.kind].rate;

@@ -14,6 +14,7 @@ import {
 import { unitArtwork, type AlienSkin, type RobotSkin, type UnitSkin } from './skins';
 
 import gaits from './gaits.json';
+import alienFrames from '../assets/motion/poses.json';
 
 export const BOARD = { x: 157, y: 170, cw: 100, ch: 82, width: 1200, height: 700 };
 type Ctx = CanvasRenderingContext2D;
@@ -257,11 +258,13 @@ function drawAlien(
   c: Ctx,
   image: HTMLImageElement,
   sheet: HTMLImageElement | undefined,
+  cells: number[][],
   enemy: Enemy,
   x: number,
   y: number,
   size: number,
   motion: boolean,
+  holding: boolean,
 ) {
   const kind = enemy.kind;
   const feet = y + size * 0.35;
@@ -270,31 +273,39 @@ function drawAlien(
     glow(c, x, feet - 2, size * 0.56, 8, '#89e2ffb2');
     line(c, x - size * 0.38, feet, x + size * 0.38, feet, '#a9ecff', 1.7);
   }
-  if (motion && sheet?.complete && sheet.naturalWidth) {
-    const gait = gaits.species[kind];
-    const travel = (9.6 - enemy.x) / gait.strideCells + enemy.id * 0.347;
-    const phase = travel - Math.floor(travel);
-    const lift = (1 - Math.cos(phase * Math.PI * 4)) * 0.5 * gait.lift;
-    const attackAge = (kind === 'spitter' ? 1.8 : 0.9) - enemy.timer;
-    const strike = Math.max(0, 1 - attackAge / 0.28) ** 2;
-    const scale = size / gaits.referenceSize;
-    const height = (1 - strike * 0.055) * scale;
-    const reach = kind === 'spitter' ? 5 : kind === 'overlord' ? -8 : -5;
-    c.drawImage(
-      sheet,
-      Math.floor(phase * gaits.frames) * gaits.width,
-      gait.row * gaits.height,
-      gaits.width,
-      gaits.height,
-      x + strike * reach - (gaits.width * scale) / 2,
-      feet - lift - (gaits.height - gaits.footPadding) * height,
-      gaits.width * scale,
-      gaits.height * height,
-    );
-  } else {
+  if (!motion) {
     unit(c, image, kind, x, feet, size * 1.16, size * 0.99);
+    return;
   }
-  if (motion && enemy.flash > 0) {
+
+  const gait = gaits.species[kind];
+  const travel = (9.6 - enemy.x) / gait.strideCells + enemy.id * 0.347;
+  const cooldown = kind === 'spitter' ? 1.8 : 0.9;
+  // Frame zero of the attack is the bite, ram, slash or acid release.
+  const phase = holding
+    ? 1 - Math.min(1, Math.max(0, enemy.timer / cooldown))
+    : travel - Math.floor(travel);
+  if (sheet?.complete && sheet.naturalWidth) {
+    const frame = Math.min(gaits.frames - 1, Math.floor(phase * gaits.frames));
+    const clip = gait.row * 2 + Number(holding);
+    const [sx, sy, w, h, dx, dy] = cells[clip * gaits.frames + frame];
+    const scale = size / gaits.referenceSize;
+    c.drawImage(sheet, sx, sy, w, h, x + dx * scale, feet + dy * scale, w * scale, h * scale);
+  } else {
+    // Keep the equipped portrait readable while its sheet decodes or if it fails.
+    const beat = Math.sin(phase * Math.PI * 2);
+    const reach = holding ? Math.max(0, 1 - phase * 4) * (kind === 'spitter' ? 5 : -8) : 0;
+    c.save();
+    c.translate(x + reach, feet);
+    c.rotate(holding ? -beat * 0.09 : beat * 0.075);
+    unit(c, image, kind, 0, 0, size * 1.16, size * 0.99);
+    c.restore();
+  }
+  if (holding && kind === 'spitter' && phase > 0.58) {
+    const charge = (phase - 0.58) / 0.42;
+    glow(c, x - size * 0.4, y, 3 + 9 * charge, 2 + 5 * charge, '#cbff7aab');
+  }
+  if (enemy.flash > 0) {
     const strength = Math.min(1, enemy.flash * 8);
     glow(c, x - size * 0.24, y, strength * 29, strength * 22, '#ffe8bba8');
   }
@@ -328,6 +339,7 @@ export class Renderer {
   private motionReduced = false;
   private battleStarted = false;
   private strideSheet?: HTMLImageElement;
+  private steps = new WeakMap<Enemy, { time: number; x: number; holding: boolean }>();
   private portraits = {} as Record<UnitKind, HTMLImageElement>;
   private standard = {} as Record<UnitKind, HTMLImageElement>;
 
@@ -381,6 +393,23 @@ export class Renderer {
     sheet.src = new URL(`../assets/motion/${this.aliens}-stride.webp`, import.meta.url).href;
     this.strideSheet = sheet;
     void sheet.decode().catch(() => {}); // Static portraits remain available while loading or after failure.
+  }
+
+  // The simulation advances every mobile alien, including slowed ones. A fixed x
+  // across two distinct simulation times means it is engaging a blocker. Repeated
+  // paints of a paused frame keep the last pose without duplicating targeting rules.
+  private isHolding(enemy: Enemy, time: number) {
+    const last = this.steps.get(enemy);
+    if (!last) {
+      this.steps.set(enemy, { time, x: enemy.x, holding: false });
+      return false;
+    }
+    if (last.time !== time) {
+      last.holding = last.x === enemy.x;
+      last.x = enemy.x;
+      last.time = time;
+    }
+    return last.holding;
   }
 
   private portrait(kind: UnitKind) {
@@ -563,11 +592,13 @@ export class Renderer {
           c,
           this.portrait(enemy.kind),
           this.strideSheet,
+          alienFrames[this.aliens].cells,
           enemy,
           x,
           y,
           size,
           !this.reducedMotion,
+          this.isHolding(enemy, game.time),
         );
         if (enemy.hp < enemy.maxHp || enemy.kind === 'overlord')
           this.health(x, y - size * 0.66, enemy.hp / enemy.maxHp, '#f0a3d4');

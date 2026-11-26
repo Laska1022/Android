@@ -1,14 +1,14 @@
 {
-  "frames": 12,
-  "width": 168,
+  "frames": 24,
+  "width": 158,
   "height": 144,
-  "referenceSize": 136,
-  "footPadding": 5,
+  "referenceSize": 88,
+  "footPadding": 26,
   "species": {
-    "scout": { "row": 0, "strideCells": 0.24, "lift": 1.8, "swing": 0.042, "footLift": 0.065 },
-    "runner": { "row": 1, "strideCells": 0.29, "lift": 3.5, "swing": 0.075, "footLift": 0.095 },
-    "brute": { "row": 2, "strideCells": 0.28, "lift": 1.4, "swing": 0.035, "footLift": 0.048 },
-    "spitter": { "row": 3, "strideCells": 0.25, "lift": 1.9, "swing": 0.048, "footLift": 0.075 },
-    "overlord": { "row": 4, "strideCells": 0.32, "lift": 2.2, "swing": 0.04, "footLift": 0.06 }
+    "scout": { "row": 0, "strideCells": 0.18 },
+    "runner": { "row": 1, "strideCells": 0.21 },
+    "brute": { "row": 2, "strideCells": 0.18 },
+    "spitter": { "row": 3, "strideCells": 0.16 },
+    "overlord": { "row": 4, "strideCells": 0.17 }
   }
 }

@@ -78,19 +78,19 @@ Each silhouette was bounded at alpha above 13/255, padded by four source pixels,
 | Nova | 224 × 183 | 17,988 | Spitter | 224 × 123 | 14,924 |
 | Bastion | 201 × 224 | 19,810 | Overlord | 224 × 189 | 26,186 |
 
-### Alien stride atlases
+### Alien walks and attacks
 
-Run `node scripts/generate-strides.mjs` from the app directory with Playwright Chromium installed, or set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to a compatible browser. The offline exporter holds the upper carapace rigid and articulates opposing foot groups below the hips. It exports transparent WebPs at quality 84. [Rig and species parameters](../src/game/gaits.json)
+Each species has 24 walking poses and 24 attack poses for each of the three finishes. All frames derive from the existing illustrated portraits. Two hand-authored sets of joint positions fit the Native and Riftborn silhouettes. Ember shares Native anatomy. The offline exporter bends each leg at its knee, holds or lifts the toe, and articulates the chest, jaw, crest and tail. The Spitter also expands its throat before releasing acid. [Anatomy and keyframes](../scripts/alien-rigs.mjs)
 
-Each atlas measures 2016 × 720 px. Twelve 168 × 144 cells run left to right through one stride. Rows from top to bottom are Scout, Runner, Brute, Spitter and Overlord. The foot anchor is (84, 139) inside every cell at reference size 136. A cycle spans 0.24, 0.29, 0.28, 0.25 or 0.32 traveled cells respectively. Slowing or blocking a unit slows or holds its feet. Shot recovery, attack compression, hover and lift are applied when drawing. The resting portrait supplies UI art, reduced-motion units and loading/error fallback.
+Run `node scripts/generate-strides.mjs` with Playwright Chromium installed. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` for a system browser. The exporter bakes around the foot anchor (79, 118) in a 158 × 144 work area at reference size 88. It trims transparent margins, leaves a pixel gutter and packs the poses into a transparent WebP at quality 84. Commit all three sheets together with the generated frame coordinates. The frame index lists Scout, Runner, Brute, Spitter and Overlord in order, with walk then attack within each species. Each entry contains the source rectangle and the signed offset from the ground anchor. [Exporter](../scripts/generate-strides.mjs) · [Frame coordinates](../src/assets/motion/poses.json) · [Stride lengths](../src/game/gaits.json)
 
-| File under `src/assets/motion/` | Compressed bytes |
-| --- | ---: |
-| `standard-stride.webp` | 708,200 |
-| `ember-stride.webp` | 611,520 |
-| `riftborn-stride.webp` | 416,534 |
+| Sheet | Dimensions | Compressed bytes | Decoded RGBA |
+| --- | ---: | ---: | ---: |
+| `standard-stride.webp` | 1536 × 1504 | 1,676,608 | 8.81 MiB |
+| `ember-stride.webp` | 1536 × 1504 | 1,622,924 | 8.81 MiB |
+| `riftborn-stride.webp` | 1536 × 1237 | 995,880 | 7.25 MiB |
 
-The ten portraits add 185,972 bytes and the three atlases add 1,736,254 bytes. The renderer references one active gait sheet, about 5.54 MiB of RGBA pixels. It prepares that sheet at deployment or when a combat preference changes. Each walking alien uses one sprite draw. [Phone-size comparison](screenshots/unit-motion.webp) · [Animation sample](screenshots/foundry-riftborn.webp)
+The three sheets total 4,295,412 bytes, an increase of 2,559,158 bytes over 1.5.0. Combat references the equipped brood’s sheet and draws one cropped frame per alien. The comparison clip uses the game renderer and advances real battles at 60 simulation steps per second. The left column follows unopposed aliens and the right places a Bastion in each alien’s attack range. [Animated comparison](screenshots/alien-motion.webp)
 
 ## Launcher and interface
 

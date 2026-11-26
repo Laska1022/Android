@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.1 · November 27, 2026
+
+- Scouts snap their jaws, Runners rake with their forelimbs, Brutes ram, Spitters draw back to launch acid, and Overlords sweep their claws. All three alien skins animate while walking and while attacking a defender. Frost slows their stride, 2× speeds up combat and pause holds the current pose. [Watch the animations](docs/screenshots/alien-motion.webp)
+- Moved the incoming-lane chevron to the outer edge so it clears a Scout entering the last column.
+
 ## 1.5.0 · November 26, 2026
 
 - Equip **Foundry ceramic** robots and **Riftborn obsidian** aliens independently in Settings. All ten classes have new silhouettes. Both families ship offline alongside the Factory alloy, Cobalt ceramic, Native carapace and Ember brood finishes. [Unit lineup](docs/screenshots/foundry-lineup.webp)
