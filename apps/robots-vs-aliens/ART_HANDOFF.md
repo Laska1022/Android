@@ -14,6 +14,8 @@ Work in `Laska1022/Android` under `apps/robots-vs-aliens/`. The 1.4.0 integratio
 
 Foundry ceramic and Riftborn obsidian each contain five original silhouettes. All three robot finishes use class-specific firing, charging, hovering and impact responses. All three alien finishes have twelve gait poses per species, with a steady silhouette during reduced motion. The complete skin and animation work is on `codex/rva-foundry-riftborn`, based directly on the shipped Settings, lane warnings, sector scenes and orientation implementation at `0176911`. [Settings](docs/screenshots/foundry-settings.webp) · [Lineup](docs/screenshots/foundry-lineup.webp) · [Combat](docs/screenshots/foundry-riftborn.webp)
 
+**Integration.** The branch is published. At handoff, the cloud network returned HTTP 403 when opening the pull request through the GitHub API. The review and hosted CI run are pending. [Open the branch comparison against main](https://github.com/Laska1022/Android/compare/main...codex/rva-foundry-riftborn?expand=1)
+
 **Next hardware task.** Install the 1.5.0 build over a compatible signed 1.4.0 install on the muted Redmi. Verify all five earned star ratings, the saved Cobalt/Ember and orientation preferences, and cold reopen after switching to Foundry/Riftborn. Compare Pulse discharge and Runner footfalls at 1× and 2× in the Badlands and the Nest. Capture compositor screenshots, 180 frame intervals and app/WebView PSS in the same dense wave with both loadouts. Record the WebView, thermal conditions, sample duration, unit count, pause/resume and reduced motion. Cloud evidence and the reproducible fixture are in the [1.5.0 test record](TESTING.md#november-26-2026--150-android-code-6).
 
 ## What already works
