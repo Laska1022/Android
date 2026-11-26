@@ -1,0 +1,257 @@
+{
+  "date": "2026-11-27",
+  "device": "Xiaomi Redmi Note 7",
+  "androidApi": 28,
+  "version": "1.5.1 (7)",
+  "gitRevision": "9be2de4",
+  "mode": "Cadet, muted",
+  "webView": "Chrome 101.0.4951.61",
+  "landscapeViewportCssPx": [
+    775,
+    364
+  ],
+  "skins": [
+    "Foundry ceramic",
+    "Riftborn obsidian"
+  ],
+  "method": "Consecutive WebView requestAnimationFrame timestamps during live play. PSS is a separate dumpsys meminfo snapshot for each attributable process. Temperature is the battery sensor.",
+  "liveGameSamples": [
+    {
+      "sector": 2,
+      "speed": 1,
+      "reducedMotion": false,
+      "waveAtStart": "02 / 05",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 59.6,
+      "medianIntervalMs": 16.674,
+      "p95IntervalMs": 16.677,
+      "appPssKiB": 137697,
+      "rendererPssKiB": 79435,
+      "batteryCelsius": 27
+    },
+    {
+      "sector": 2,
+      "speed": 2,
+      "reducedMotion": false,
+      "waveAtStart": "02 / 05",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 59.7,
+      "medianIntervalMs": 16.674,
+      "p95IntervalMs": 16.676,
+      "appPssKiB": 138481,
+      "rendererPssKiB": 82670,
+      "batteryCelsius": 27
+    },
+    {
+      "sector": 2,
+      "speed": 1,
+      "reducedMotion": true,
+      "waveAtStart": "02 / 05",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 60,
+      "medianIntervalMs": 16.674,
+      "p95IntervalMs": 16.676,
+      "appPssKiB": 139603,
+      "rendererPssKiB": 81660,
+      "batteryCelsius": 27
+    },
+    {
+      "sector": 2,
+      "speed": 2,
+      "reducedMotion": true,
+      "waveAtStart": "02 / 05",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 60,
+      "medianIntervalMs": 16.673,
+      "p95IntervalMs": 16.678,
+      "appPssKiB": 139339,
+      "rendererPssKiB": 75340,
+      "batteryCelsius": 27
+    },
+    {
+      "sector": 5,
+      "speed": 2,
+      "reducedMotion": true,
+      "waveAtStart": "02 / 06",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 59.6,
+      "medianIntervalMs": 16.673,
+      "p95IntervalMs": 16.676,
+      "appPssKiB": 138522,
+      "rendererPssKiB": 70697,
+      "batteryCelsius": 28
+    },
+    {
+      "sector": 5,
+      "speed": 1,
+      "reducedMotion": true,
+      "waveAtStart": "02 / 06",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 60,
+      "medianIntervalMs": 16.675,
+      "p95IntervalMs": 16.677,
+      "appPssKiB": 137756,
+      "rendererPssKiB": 71453,
+      "batteryCelsius": 28
+    },
+    {
+      "sector": 5,
+      "speed": 2,
+      "reducedMotion": false,
+      "waveAtStart": "02 / 06",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 60,
+      "medianIntervalMs": 16.674,
+      "p95IntervalMs": 16.676,
+      "appPssKiB": 138322,
+      "rendererPssKiB": 71787,
+      "batteryCelsius": 28
+    },
+    {
+      "sector": 5,
+      "speed": 1,
+      "reducedMotion": false,
+      "waveAtStart": "02 / 06",
+      "numberOfDefenders": 15,
+      "intervals": 180,
+      "callbacksPerSecond": 59.6,
+      "medianIntervalMs": 16.673,
+      "p95IntervalMs": 16.675,
+      "appPssKiB": 138023,
+      "rendererPssKiB": 71043,
+      "batteryCelsius": 28
+    }
+  ],
+  "syntheticChromeBenchmark": {
+    "source": "Physical Chrome, synthetic renderer workload",
+    "samples": [
+      {
+        "sample": 1,
+        "revision": "0176911",
+        "skins": "standard",
+        "viewport": [
+          393,
+          719
+        ],
+        "canvasBacking": [
+          1440,
+          840
+        ],
+        "devicePixelRatio": 2.75,
+        "presentationScale": 0.5458333333333333,
+        "browser": "Chrome/101.0.0.0",
+        "samples": 360,
+        "callbacksPerSecond": 59.98021652524942,
+        "p95IntervalMs": 16.692000000000007,
+        "p95DrawSubmissionMs": 7
+      },
+      {
+        "sample": 2,
+        "revision": "9be2de4",
+        "skins": "standard",
+        "viewport": [
+          393,
+          719
+        ],
+        "canvasBacking": [
+          1440,
+          840
+        ],
+        "devicePixelRatio": 2.75,
+        "presentationScale": 0.5458333333333333,
+        "browser": "Chrome/101.0.0.0",
+        "samples": 360,
+        "callbacksPerSecond": 59.97692887469287,
+        "p95IntervalMs": 16.676000000000386,
+        "p95DrawSubmissionMs": 7.399999976158142
+      },
+      {
+        "sample": 3,
+        "revision": "9be2de4",
+        "skins": "foundry-riftborn",
+        "viewport": [
+          393,
+          719
+        ],
+        "canvasBacking": [
+          1440,
+          840
+        ],
+        "devicePixelRatio": 2.75,
+        "presentationScale": 0.5458333333333333,
+        "browser": "Chrome/101.0.0.0",
+        "samples": 360,
+        "callbacksPerSecond": 59.975719829422395,
+        "p95IntervalMs": 16.677000000000135,
+        "p95DrawSubmissionMs": 7.799999952316284
+      },
+      {
+        "sample": 4,
+        "revision": "9be2de4",
+        "skins": "foundry-riftborn",
+        "viewport": [
+          393,
+          719
+        ],
+        "canvasBacking": [
+          1440,
+          840
+        ],
+        "devicePixelRatio": 2.75,
+        "presentationScale": 0.5458333333333333,
+        "browser": "Chrome/101.0.0.0",
+        "samples": 360,
+        "callbacksPerSecond": 59.98015656486978,
+        "p95IntervalMs": 16.676000000000386,
+        "p95DrawSubmissionMs": 7.5
+      },
+      {
+        "sample": 5,
+        "revision": "9be2de4",
+        "skins": "standard",
+        "viewport": [
+          393,
+          719
+        ],
+        "canvasBacking": [
+          1440,
+          840
+        ],
+        "devicePixelRatio": 2.75,
+        "presentationScale": 0.5458333333333333,
+        "browser": "Chrome/101.0.0.0",
+        "samples": 360,
+        "callbacksPerSecond": 59.97342177858179,
+        "p95IntervalMs": 16.68000000000029,
+        "p95DrawSubmissionMs": 7.5
+      },
+      {
+        "sample": 6,
+        "revision": "0176911",
+        "skins": "standard",
+        "viewport": [
+          393,
+          719
+        ],
+        "canvasBacking": [
+          1440,
+          840
+        ],
+        "devicePixelRatio": 2.75,
+        "presentationScale": 0.5458333333333333,
+        "browser": "Chrome/101.0.0.0",
+        "samples": 360,
+        "callbacksPerSecond": 59.980946052803894,
+        "p95IntervalMs": 16.715999999999894,
+        "p95DrawSubmissionMs": 7.5
+      }
+    ]
+  }
+}

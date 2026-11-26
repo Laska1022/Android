@@ -4,7 +4,7 @@
 
 The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offline in a browser or its Capacitor Android host. Run all game commands from this directory. See [AGENTS.md](AGENTS.md) for code ownership, [TESTING.md](TESTING.md) for reproducible checks and physical evidence, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
-**Version 1.5.1, Android code 7.** The combined release adds game-aware Android Back navigation. The art branch `codex/rva-foundry-riftborn` starts at the released 1.4.0 handover on `main` (`0176911`). At `a3b1e24` it adds five Foundry robot skins, five Riftborn alien skins and combat poses for every finish. The two Settings selectors now each offer three choices. The existing save key retains campaign progress, selections, sound and motion preferences. [Skin settings](docs/screenshots/foundry-settings.webp) · [Art handover and next device task](ART_HANDOFF.md) · [Validation](TESTING.md#november-26-2026--150-android-code-6)
+**Version 1.5.1, Android code 7.** Commit `9be2de4` brings the second AI’s Foundry and Riftborn artwork together with Android Back navigation. Each faction has three selectable finishes. The second AI owns future artwork and animation. [Art handover](ART_HANDOFF.md) · [Physical and automated validation](TESTING.md#november-27-2026--151-android-code-7)
 
 The 1.4.0 Android host opens in landscape, supports a saved Follow phone preference and keeps the battle during rotation. Upcoming warnings reveal type on Cadet. The muted Redmi upgraded directly from local 1.4.0 to the integrated 1.5.1 APK. Existing preferences and all five star ratings survived. The system Back button passed the live pause, dialog and command-screen checks. See the 1.5.1 device record for the local developer’s verification.
 
@@ -20,6 +20,7 @@ The 1.3.0 sector art and mission briefings are included in this checkout. The lo
 | `e15908a` | Starting revision for the 1.3.0 sector artwork iteration. Records the preceding hosted Android build.            |
 | `d7a7f9e` | 1.4.0 game code tested on Redmi. Landscape preference, truthful lane warnings, sector scenery and skin support. |
 | `0176911` | Published art assignment and Redmi evidence. Both hosted web and Android jobs passed, with a downloadable [debug APK](https://github.com/Laska1022/Android/actions/runs/45813582262/artifacts/15114865206). |
+| `9be2de4` | Integrated Back and both 1.5.0 skin families. The local APK passed Redmi campaign and system navigation tests. Both hosted jobs passed. [Build and APK](https://github.com/Laska1022/Android/actions/runs/45900000216) |
 
 ## Gameplay decisions
 

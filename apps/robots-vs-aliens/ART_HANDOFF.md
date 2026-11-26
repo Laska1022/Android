@@ -4,7 +4,7 @@ You own new robot and alien skins and their combat animations for **Robots vs Al
 
 ## Start from the working integration
 
-Work in `Laska1022/Android` under `apps/robots-vs-aliens/`. The 1.4.0 integration and its Redmi handover reached `main` at `0176911`. The 1.5.0 art branch is `codex/rva-foundry-riftborn` (game commit `a3b1e24`, Android code 6). The parallel sector-art and campaign-balance branches have other owners. Read the root and app `AGENTS.md`, then [HANDOFF.md](HANDOFF.md) and [TESTING.md](TESTING.md).
+Continue from the latest `main` of `Laska1022/Android`, in `apps/robots-vs-aliens/`. Commit `9be2de4` integrates the Foundry/Riftborn and Android Back branches in 1.5.1 (Android code 7). The original art implementation is `a3b1e24`. The second AI owns subsequent skins and motion. Local development owns Android navigation and physical tests. Read the root and app `AGENTS.md`, [HANDOFF.md](HANDOFF.md) and [TESTING.md](TESTING.md).
 
 1. Fetch `origin` and inspect your working tree. Check whether your base contains `src/game/skins.ts` and this handover. If main contains the integration, start there. Otherwise start your artwork branch from the published integration tip and target that branch until it lands on main.
 2. If you already have art commits on another branch, keep them. Integrate the new base with a normal merge on your own branch. Resolve disagreements in the renderer against the contracts below. Record the base and tip in your PR. Use normal pushes.
@@ -16,7 +16,7 @@ Foundry ceramic and Riftborn obsidian each contain five original silhouettes. Al
 
 **Publication.** GitHub Actions built and published the 1.5.0 debug APK from tag `robots-vs-aliens-v1.5.0` at `0a7ee06`. The web, Android and release jobs passed. The downloaded APK matched the release checksum and passed v2 signature verification. The published art and its original commits are included in the combined 1.5.1 integration. [GitHub Release and APK](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.0) · [Hosted run](https://github.com/Laska1022/Android/actions/runs/45862945062) · [Original artwork commit](https://github.com/Laska1022/Android/commit/a3b1e24)
 
-**Next hardware task.** Install the 1.5.0 build over a compatible signed 1.4.0 install on the muted Redmi. Verify all five earned star ratings, the saved Cobalt/Ember and orientation preferences, and cold reopen after switching to Foundry/Riftborn. Compare Pulse discharge and Runner footfalls at 1× and 2× in the Badlands and the Nest. Capture compositor screenshots, 180 frame intervals and app/WebView PSS in the same dense wave with both loadouts. Record the WebView, thermal conditions, sample duration, unit count, pause/resume and reduced motion. Cloud evidence and the reproducible fixture are in the [1.5.0 test record](TESTING.md#november-26-2026--150-android-code-6).
+**Redmi acceptance.** Both finishes survived a cold restart and were used to win the Badlands and Nest. The physical checks covered 1×, 2×, reduced motion and Android Back. A separate observation of actual Nest combat saw all twelve Runner gait frames and Pulse recoil. Future art changes can use the [device measurements](docs/benchmarks/redmi-1.5.1.json), [Badlands capture](docs/screenshots/redmi-foundry-badlands.webp) and [Nest capture](docs/screenshots/redmi-riftborn-nest.webp) for comparison. A longer Survival session and newer Android devices remain hardware follow-ups.
 
 ## What already works
 
