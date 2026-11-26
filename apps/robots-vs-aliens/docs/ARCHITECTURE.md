@@ -45,7 +45,7 @@ The command screen uses a static CSS background. Selecting a campaign sector upd
 
 The renderer uses `game.sector` to choose one of five panoramas, trim colors and rift colors. First Contact uses `src/assets/perimeter.webp`. Sectors 2–5 use the images in `src/assets/sectors/`. Survival starts in First Contact. Each sector change paints a playable platform and gradient sky onto the same 1200 × 700 backing canvas. When the image loads, a request counter allows only the current selection to repaint the canvas. A failed image leaves the sector's fallback board in place. Combat frames reuse the cached surface.
 
-The renderer loads each class image once and shares light textures. Particles are bounded at 600 and Canvas device pixel ratio is capped at 2. HUD updates are throttled and tile labels change when the occupant or its health changes.
+The renderer caches portraits by finish and class and shares light textures. On deployment it prepares one gait atlas for the equipped brood when motion is enabled. Draws sample a frame from distance traveled and read recoil from existing attack timers. A missing atlas or reduced motion uses the equipped static portrait. Particles are bounded at 600 and Canvas device pixel ratio is capped at 2. HUD updates are throttled and tile labels change when the occupant or its health changes.
 
 All placement cells and loadout cards are actual buttons. The battlefield uses roving focus and arrow keys. Modals trap keyboard focus and restore it. Touch and pointer inputs use the same command methods. Reduced motion disables ambience and particles. Full nonvisual gameplay, high-contrast options, and customizable input remain future accessibility work.
 

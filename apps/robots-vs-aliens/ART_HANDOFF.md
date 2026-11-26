@@ -4,20 +4,26 @@ You own new robot and alien skins and their combat animations for **Robots vs Al
 
 ## Start from the working integration
 
-Work in `Laska1022/Android` under `apps/robots-vs-aliens/`. The integration branch is `codex/rva-landscape-loadouts` (1.4.0, Android code 5). The parallel sector-art and campaign-balance branches have other owners. Read the root and app `AGENTS.md`, then [HANDOFF.md](HANDOFF.md) and [TESTING.md](TESTING.md).
+Work in `Laska1022/Android` under `apps/robots-vs-aliens/`. The 1.4.0 integration and its Redmi handover reached `main` at `0176911`. The 1.5.0 art branch is `codex/rva-foundry-riftborn` (game commit `a3b1e24`, Android code 6). The parallel sector-art and campaign-balance branches have other owners. Read the root and app `AGENTS.md`, then [HANDOFF.md](HANDOFF.md) and [TESTING.md](TESTING.md).
 
 1. Fetch `origin` and inspect your working tree. Check whether your base contains `src/game/skins.ts` and this handover. If main contains the integration, start there. Otherwise start your artwork branch from the published integration tip and target that branch until it lands on main.
 2. If you already have art commits on another branch, keep them. Integrate the new base with a normal merge on your own branch. Resolve disagreements in the renderer against the contracts below. Record the base and tip in your PR. Use normal pushes.
 3. Scope your changes to game art, rendering, art tests and the related docs. The local developer owns Android rotation, physical Redmi verification and integration. Coordinate any engine, shared Settings or input change with that developer first.
 
+## Delivered on November 26, 2026
+
+Foundry ceramic and Riftborn obsidian each contain five original silhouettes. All three robot finishes use class-specific firing, charging, hovering and impact responses. All three alien finishes have twelve gait poses per species, with a steady silhouette during reduced motion. The complete skin and animation work is on `codex/rva-foundry-riftborn`, based directly on the shipped Settings, lane warnings, sector scenes and orientation implementation at `0176911`. [Settings](docs/screenshots/foundry-settings.webp) · [Lineup](docs/screenshots/foundry-lineup.webp) · [Combat](docs/screenshots/foundry-riftborn.webp)
+
+**Next hardware task.** Install the 1.5.0 build over a compatible signed 1.4.0 install on the muted Redmi. Verify all five earned star ratings, the saved Cobalt/Ember and orientation preferences, and cold reopen after switching to Foundry/Riftborn. Compare Pulse discharge and Runner footfalls at 1× and 2× in the Badlands and the Nest. Capture compositor screenshots, 180 frame intervals and app/WebView PSS in the same dense wave with both loadouts. Record the WebView, thermal conditions, sample duration, unit count, pause/resume and reduced motion. Cloud evidence and the reproducible fixture are in the [1.5.0 test record](TESTING.md#november-26-2026--150-android-code-6).
+
 ## What already works
 
 | Faction | Stable unit keys | Existing options |
 | --- | --- | --- |
-| Robots, facing right | `pulse`, `spark`, `frost`, `nova`, `bastion` | `standard` (Factory alloy), `cobalt` (Cobalt ceramic) |
-| Aliens, facing left | `scout`, `runner`, `brute`, `spitter`, `overlord` | `standard` (Native carapace), `ember` (Ember brood) |
+| Robots, facing right | `pulse`, `spark`, `frost`, `nova`, `bastion` | `standard` (Factory alloy), `cobalt` (Cobalt ceramic), `foundry` (Foundry ceramic) |
+| Aliens, facing left | `scout`, `runner`, `brute`, `spitter`, `overlord` | `standard` (Native carapace), `ember` (Ember brood), `riftborn` (Riftborn obsidian) |
 
-The two alternate finishes are baked palette treatments of the original illustrations. They provide end-to-end examples. Your assignment is to go beyond recolors. A robot family might use field-repaired armor plates with visible fasteners and distinct weapon assemblies. An alien family might use translucent mineral growth with different crest and limb silhouettes. Keep each role identifiable at battlefield size. Pulse and Frost must read differently in silhouette, as must Scout and Runner.
+Cobalt and Ember are baked palette treatments. Foundry and Riftborn use newly illustrated geometry and supply the reference for future original families. A robot family might use field-repaired armor plates with visible fasteners and distinct weapon assemblies. An alien family might use translucent mineral growth with different crest and limb silhouettes. Keep each role identifiable at battlefield size. Pulse and Frost must read differently in silhouette, as must Scout and Runner.
 
 ## Add a selectable skin
 
@@ -31,7 +37,7 @@ The two alternate finishes are baked palette treatments of the original illustra
 
 The current standard sprites are 224 px wide, with heights of 136–224 px depending on the silhouette. The local Redmi displayed the board at a 775 × 364 CSS-pixel landscape viewport. Use the [actual Cadet screenshot](docs/screenshots/redmi-incoming-lane.webp) and [Veteran combat screenshot](docs/screenshots/redmi-veteran-warning.webp) to judge scale and contrast before adding fine detail.
 
-The engine advances at 1/60 simulated second per step. [render.ts](src/game/render.ts) reads the engine state when drawing, including position, entity ID, game time, hit flashes and slow effects. `drawBot` and `drawAlien` receive presentation parameters. The current art uses bounded recoil, Frost hover, stride and hit lighting. Inspect those functions and their call sites before introducing frames. Presentation must never consume gameplay randomness, move hitboxes, advance timers, change attack rates or influence the next alien.
+The engine advances at 1/60 simulated second per step. [render.ts](src/game/render.ts) reads the engine state when drawing, including position, entity ID, game time, hit flashes and slow effects. `drawBot` and `drawAlien` receive presentation parameters. The 1.5.0 art uses a planted weapon mount, Frost hover, Spark charge, Bastion impact compression and a twelve-pose gait for each alien. The renderer samples travel and cooldowns directly. Inspect those functions and their call sites before introducing frames. Presentation must never consume gameplay randomness, move hitboxes, advance timers, change attack rates or influence the next alien.
 
 - Start with **Pulse firing** and **Runner locomotion**. Show a recognizable idle reference, a readable action and recovery. Compare with a static frame at phone size. Once those two work, extend the approach to the remaining roles.
 - Choose a sample frame from game time or existing combat state. Pausing should hold the pose. At 2×, motion should remain in step with the simulated attack. Reduced motion needs a stable pose with the battlefield, health and lane cues still readable. Keep placement previews and UI portraits readable at rest.

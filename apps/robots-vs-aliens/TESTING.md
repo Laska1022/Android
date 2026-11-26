@@ -67,6 +67,37 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 26, 2026 · 1.5.0, Android code 6
+
+Tested game commit `a3b1e24` on `codex/rva-foundry-riftborn` against `0176911`, the 1.4.0 release handover. Node 24.22.3, Chromium 156.0.8078.79 and Java 21 were used in the cloud checkout.
+
+- `npm ci` and `npm run check` passed. All 28 unit tests and 24 desktop/Pixel 7 browser scenarios passed. Two tests are specific to the opposite input mode and were skipped. Strict TypeScript, the production build and its 66-file service worker precache passed.
+- Offline checks decoded all ten new portraits and all three stride atlases. Each sheet contains twelve poses for each of five species. Pixel checks found different front and rear leg silhouettes in opposing poses for every row. Tests exercised independent selectors, original and unsupported save IDs, previews, cards, the guide, placement ghosts, firing, 1×, 2×, pause and reduced motion. Blocking the atlas request drew the selected static Scout and kept the Cadet lane warning.
+- The same Veteran replay in Last Light produced identical serialized simulation state at 1,200 fixed steps with standard skins at 1× and Foundry/Riftborn at 2×. This compares queued threats, RNG, units, projectiles, health, timers and economy. Seed 1154 starts with Pulse, Frost, Spark, a Runner and a Spitter. The replay is included in the render measurement script.
+- Captures compare the same five defenders and five threats in the Badlands and the Nest on both revisions. The canvas occupied 583 × 241 CSS pixels in a 775 × 364 emulated landscape viewport. The two-second motion sample shows staged firing, recovery and footfalls at 18 captured frames/s. Settings was also inspected at 1440 × 960 and 393 × 719. [Before and after](docs/screenshots/unit-motion.webp) · [Motion sample](docs/screenshots/foundry-riftborn.webp) · [Settings](docs/screenshots/foundry-settings.webp)
+
+**Crowded battle benchmark.** A headless Chromium window drew a 720 × 420 CSS-pixel canvas at DPR 2. The fixture keeps 30 robots, 30 aliens, 20 shots and 120 particles visible on the Last Light platform. It warms up for 60 frames and measures the next 360 callback intervals. Three runs per configuration were interleaved on the same machine. The table reports the median of the three per-run results. Draw submission measures time spent inside `renderer.draw` on the main thread. GPU completion and physical display timing require device measurements.
+
+| Renderer and loadout | Callbacks/s | p95 callback interval | p95 draw submission |
+| --- | ---: | ---: | ---: |
+| 1.4.0 Factory alloy / Native carapace | 60.0 | 16.7 ms | 0.6 ms |
+| 1.5.0 Factory alloy / Native carapace | 60.0 | 16.7 ms | 0.7 ms |
+| 1.5.0 Foundry ceramic / Riftborn obsidian | 60.0 | 16.7 ms | 0.6 ms |
+
+To repeat on the same browser, run from the app directory. The temporary baseline contains only the original source and assets. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` if using system Chromium.
+
+```sh
+baseline_src=$(mktemp -d)
+git archive 0176911:apps/robots-vs-aliens src | tar -x -C "$baseline_src"
+node scripts/measure-render.mjs "$baseline_src"
+node scripts/measure-render.mjs .
+node scripts/measure-render.mjs . alternate
+```
+
+**Android.** Capacitor sync, `assembleDebug` and `lintDebug` passed. App lint reported zero errors and four warnings. The 7,678,121-byte APK passed v2 signature verification and identified itself as `com.laska.robotvsaliens`, code 6. All 67 production files, including all 39 WebPs and the service worker, matched their APK entries byte for byte. SHA-256 `1c46d9607993273ea959c87edea6ddc5fa6e3f8577e808715d41347734dc1bf7`.
+
+ADB listed zero attached devices. The muted Redmi upgrade, physical frame delivery, memory and cold-reopen checks for this build remain with the device owner. [Hardware task](ART_HANDOFF.md#delivered-on-november-26-2026)
+
 ### November 26, 2026 · 1.4.0, Android code 5
 
 - **Automated.** 28 unit tests passed. The desktop Chromium and Pixel 7 browser projects passed 18 scenarios with two platform-specific skips. Tests exercise actual queued spawns including the Overlord, difficulty disclosure, pause, 2×, old saves, independent skin choices, offline reload, all 26 WebPs and late scene loading. Set `RVA_TEST_PORT` to use a different loopback port if another local checkout owns 4173.

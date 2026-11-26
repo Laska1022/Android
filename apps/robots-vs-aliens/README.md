@@ -58,7 +58,7 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 
 On phones, tap the cards and tiles. Android opens in landscape. Choose **Settings → Screen orientation → Follow phone** to use the phone’s rotation preference. Ordinary browser tabs adapt to the viewport.
 
-Watch the amber arrow on the right of the board to see where the next alien will enter. Cadet also names the alien. In Settings, select robot and alien skins independently. The preview, field guide and battlefield reflect the selection. Choices save on this device. [Redmi landscape screenshot](docs/screenshots/redmi-incoming-lane.webp)
+Watch the amber arrow on the right of the board to see where the next alien will enter. Cadet also names the alien. In Settings, select robot and alien skins independently. Choose Foundry ceramic for ivory plating and copper joints, or Riftborn obsidian for bone-crested alien silhouettes. Settings previews, robot cards, the field guide and the battlefield reflect your choices. Choices save on this device. [Redmi landscape screenshot](docs/screenshots/redmi-incoming-lane.webp)
 
 ## Android
 

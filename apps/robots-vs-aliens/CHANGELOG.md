@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0 · November 26, 2026
+
+- Equip **Foundry ceramic** robots and **Riftborn obsidian** aliens independently in Settings. All ten classes have new silhouettes. Both families ship offline alongside the Factory alloy, Cobalt ceramic, Native carapace and Ember brood finishes. [Unit lineup](docs/screenshots/foundry-lineup.webp)
+- Pulse and Nova recoil against their mounts, Frost hovers, Spark brightens before payout, and Bastion braces on impact. Each alien species has a distance-driven gait and an attack pose. Pause holds the pose and reduced motion uses still portraits. [Combat animation](docs/screenshots/foundry-riftborn.webp)
+
 ## 1.4.0 · November 26, 2026
 
 - Android opens horizontally by default in either landscape grip. Settings now offers a saved **Follow phone** option. Switching orientation keeps the current battle and placed robots.
