@@ -1,7 +1,15 @@
 import type { BotKind, EnemyKind } from './engine';
 
-export const ROBOT_SKINS = { standard: 'Factory alloy', cobalt: 'Cobalt ceramic' } as const;
-export const ALIEN_SKINS = { standard: 'Native carapace', ember: 'Ember brood' } as const;
+export const ROBOT_SKINS = {
+  standard: 'Factory alloy',
+  cobalt: 'Cobalt ceramic',
+  foundry: 'Foundry ceramic',
+} as const;
+export const ALIEN_SKINS = {
+  standard: 'Native carapace',
+  ember: 'Ember brood',
+  riftborn: 'Riftborn obsidian',
+} as const;
 export type RobotSkin = keyof typeof ROBOT_SKINS;
 export type AlienSkin = keyof typeof ALIEN_SKINS;
 export type UnitSkin = RobotSkin | AlienSkin;

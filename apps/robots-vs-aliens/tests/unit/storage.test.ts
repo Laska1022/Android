@@ -53,6 +53,9 @@ describe('save data', () => {
   it('restores supported cosmetics independently of corrupt or outdated choices', () => {
     for (const [robotSkin, alienSkin, restoredRobot, restoredAlien] of [
       ['cobalt', 'ember', 'cobalt', 'ember'],
+      ['foundry', 'riftborn', 'foundry', 'riftborn'],
+      ['riftborn', 'riftborn', 'standard', 'riftborn'],
+      ['foundry', 'foundry', 'foundry', 'standard'],
       ['unknown', 'ember', 'standard', 'ember'],
       ['cobalt', 'toString', 'cobalt', 'standard'],
     ]) {

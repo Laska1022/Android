@@ -161,6 +161,7 @@ function updateSectors() {
   });
 }
 function start(endless = false) {
+  renderer.prepareBattle();
   audio.unlock();
   closeModal(false);
   game = new Game(sector, endless, undefined, save.difficulty);
