@@ -12,6 +12,8 @@ Start each new art branch from the latest `origin/main` in `apps/robots-vs-alien
 
 ## Delivered on November 27, 2026
 
+Release `robots-vs-aliens-v1.5.2` is the shared baseline at `5672626`. In the Nest the Redmi displayed every Riftborn Spitter walk and attack pose at 2×. Acid left the unit on its first attack pose. Reuse the Scout and Spitter checks below when the next skin family changes their silhouettes. [Physical Nest screenshot](docs/screenshots/redmi-spitter-1.5.2.jpg) · [Published release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.2)
+
 The local 1.5.2 build passed the Scout versus Bastion check on a muted Redmi Note 7 with Foundry and Riftborn equipped. Android Back froze and resumed the encounter. All 24 attack frames appeared at 2× and all 24 walk frames reappeared after recycling. Use this capture as the phone reference when adjusting the next family. [Physical screenshot](docs/screenshots/redmi-scout-contact-1.5.2.jpg) · [Release test record](TESTING.md#november-27-2026--152-android-code-8)
 
 In the published 1.5.0 APK the upper shell stayed nearly fixed during a walk. Travel also stopped advancing the gait when an enemy reached a blocker. In 1.5.1 every brood has 24 articulated walking poses and 24 attack poses for each of the five species. Attack frame zero coincides with a strike or acid discharge. The warning chevron uses the outside edge of the arena, where it clears an incoming Scout. The resting artwork still supplies the Settings preview and reduced-motion combat. [Gameplay clip](docs/screenshots/alien-motion.webp) · [Asset dimensions and reproduction](docs/ASSETS.md#alien-walks-and-attacks)
