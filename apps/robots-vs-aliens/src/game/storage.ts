@@ -66,9 +66,22 @@ export function loadSave(): Save {
   }
 }
 
-// On origins without Web Locks, IndexedDB serializes readwrite transactions on the same store.
-// The save itself stays in localStorage so installed v1 games can keep reading it.
-function withIndexedDBLock(write: () => boolean): Promise<boolean> {
+interface SaveJournal {
+  imported: string | null;
+  revision: number;
+  save: Save;
+}
+
+function journalRevision(raw: string | null): number {
+  try {
+    const revision = JSON.parse(raw ?? 'null')?.journalRevision;
+    return Number.isSafeInteger(revision) && revision > 0 ? revision : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function storeWithIndexedDB(merge: (latest: Save) => Save): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const open = indexedDB.open('rva-save-lock', 1);
     open.onupgradeneeded = () => open.result.createObjectStore('writers');
@@ -76,14 +89,41 @@ function withIndexedDBLock(write: () => boolean): Promise<boolean> {
     open.onsuccess = () => {
       const db = open.result;
       const transaction = db.transaction('writers', 'readwrite');
-      let saved = false;
-      // The request callback runs only after this transaction has exclusive access.
-      transaction.objectStore('writers').get(0).onsuccess = () => {
-        saved = write();
+      const writers = transaction.objectStore('writers');
+      const read = writers.get(0);
+      read.onsuccess = () => {
+        try {
+          const previous: SaveJournal | undefined = read.result;
+          const local = localStorage.getItem(SAVE_KEY);
+          const revision = journalRevision(local);
+          // Another tab can still see the original v1 record or an earlier mirror.
+          // A fresh unversioned record from a legacy or Web Locks writer starts a new import.
+          const useJournal =
+            previous &&
+            (local === previous.imported || (revision > 0 && revision <= previous.revision));
+          const save = merge(useJournal ? previous.save : parseSave(local));
+          const next: SaveJournal = {
+            imported: useJournal ? previous.imported : local,
+            revision: Math.max(previous?.revision ?? 0, revision) + 1,
+            save,
+          };
+          writers.put(next, 0).onsuccess = () => {
+            try {
+              localStorage.setItem(
+                SAVE_KEY,
+                JSON.stringify({ ...save, journalRevision: next.revision }),
+              );
+            } catch {
+              transaction.abort();
+            }
+          };
+        } catch {
+          transaction.abort();
+        }
       };
-      transaction.oncomplete = transaction.onabort = () => {
+      transaction.oncomplete = transaction.onabort = (event) => {
         db.close();
-        resolve(saved);
+        resolve(event.type === 'complete');
       };
     };
   });
@@ -93,26 +133,25 @@ export async function storeSave(
   progress: Progress,
   preferences: Partial<Preferences>,
 ): Promise<boolean> {
-  function write() {
-    try {
-      const latest = parseSave(localStorage.getItem(SAVE_KEY));
-      const merged: Save = {
-        ...latest,
-        ...preferences,
-        unlocked: Math.max(latest.unlocked, progress.unlocked),
-        best: Math.max(latest.best, progress.best),
-        stars: latest.stars.map((stars, sector) => Math.max(stars, progress.stars[sector] ?? 0)),
-      };
-      localStorage.setItem(SAVE_KEY, JSON.stringify(merged));
-      return true;
-    } catch {
-      return false;
-    }
+  function merge(latest: Save): Save {
+    return {
+      ...latest,
+      ...preferences,
+      unlocked: Math.max(latest.unlocked, progress.unlocked),
+      best: Math.max(latest.best, progress.best),
+      stars: latest.stars.map((stars, sector) => Math.max(stars, progress.stars[sector] ?? 0)),
+    };
   }
 
   try {
-    if (navigator.locks) return await navigator.locks.request(SAVE_KEY, write);
-    return await withIndexedDBLock(write);
+    if (navigator.locks) {
+      return await navigator.locks.request(SAVE_KEY, () => {
+        const latest = parseSave(localStorage.getItem(SAVE_KEY));
+        localStorage.setItem(SAVE_KEY, JSON.stringify(merge(latest)));
+        return true;
+      });
+    }
+    return await storeWithIndexedDB(merge);
   } catch {
     return false;
   }

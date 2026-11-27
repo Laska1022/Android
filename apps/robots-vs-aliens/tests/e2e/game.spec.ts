@@ -58,6 +58,38 @@ test('simultaneous preference changes survive in tabs without Web Locks', async 
     .toMatchObject({ robotSkin: 'foundry', alienSkin: 'riftborn' });
 });
 
+test('the fallback writer keeps a newer battlefield when a tab reads a stale save', async ({
+  page,
+}) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'locks', { value: undefined }));
+  await page.goto('/');
+  const legacy = JSON.stringify({ best: 4200, stars: [2], fieldSkin: 'polar' });
+  const restore = (raw: string) =>
+    page.evaluate((value) => localStorage.setItem('rva-save-v1', value), raw);
+  const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('rva-save-v1')!));
+  await restore(legacy);
+  await page.reload();
+  await page.locator('#settings-button').click();
+  await page.getByLabel('Battlefield skin', { exact: true }).selectOption('turf');
+  await expect.poll(saved).toMatchObject({ best: 4200, fieldSkin: 'turf' });
+
+  // A second renderer can still see precisely the v1 record that the first imported.
+  await restore(legacy);
+  await page.getByLabel('Robot skin', { exact: true }).selectOption('foundry');
+  await expect.poll(saved).toMatchObject({ best: 4200, fieldSkin: 'turf', robotSkin: 'foundry' });
+
+  // A later legacy writer can also bring in genuinely newer campaign progress and preferences.
+  await restore(JSON.stringify({ best: 6000, stars: [3], fieldSkin: 'polar', muted: true }));
+  await page.getByLabel('Alien skin', { exact: true }).selectOption('riftborn');
+  await expect.poll(saved).toMatchObject({
+    best: 6000,
+    stars: [3, 0, 0, 0, 0],
+    fieldSkin: 'polar',
+    muted: true,
+    alienSkin: 'riftborn',
+  });
+});
+
 test('deploy, recycle, pause, resume, and fight without browser errors', async ({
   page,
 }, testInfo) => {
