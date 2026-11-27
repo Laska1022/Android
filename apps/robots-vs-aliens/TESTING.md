@@ -97,6 +97,7 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ### November 27, 2026 · 1.5.3, Android code 9
 
+- **GitHub Actions.** The web and Android jobs passed for `329feff`. The Android job uploaded `robots-vs-aliens-debug-apk`. [Build results](https://github.com/Laska1022/Android/actions/runs/45966561053) · [Debug APK artifact](https://github.com/Laska1022/Android/actions/runs/45966561053/artifacts/15183251337)
 - **Browser and simulation.** All 30 unit tests and 36 Chromium desktop/mobile tests passed, with four platform-specific skips. A separate two-tab run won Cadet First Contact with three stars and 4,090 points using the normal budget. Sound was toggled in the older tab. After reload, mute, all three stars, the best score and the sector 2 unlock persisted. The seeded close-contact reproduction recorded three Pulse hits against the Scout at both tested positions. [Reproduction details](docs/KNOWN_BUGS.md)
 - **Android package.** Capacitor sync, `assembleDebug` and `lintDebug` passed. App lint reported four warnings and zero errors. The debug APK reported version 1.5.3, code 9, passed v2 signature verification and contained all 67 production files byte for byte. No physical Android device was attached for this run.
 
