@@ -570,7 +570,7 @@ canvas {
   width: 13px;
   height: 13px;
 }
-.tool-button span {
+#pickup-count {
   color: #ecd18e;
 }
 .next-wave {
@@ -2326,5 +2326,40 @@ button {
   }
   .modal {
     max-height: 94vh;
+  }
+}
+
+html:lang(ru) {
+  --display: 'Roboto Condensed', 'Barlow Condensed', sans-serif;
+}
+.menu-cover h1 > span {
+  color: inherit;
+}
+html:lang(ru) .recycle-button {
+  min-width: 46px;
+}
+html:lang(ru) .sector strong {
+  white-space: normal;
+}
+@media (max-width: 650px) and (orientation: portrait) {
+  html:lang(ru) .menu-cover h1 {
+    font-size: clamp(29px, 9vw, 54px);
+  }
+}
+@media (max-width: 420px) {
+  html:lang(ru) .brand > span {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  html:lang(ru) .brand-vs {
+    font-size: 10px;
+  }
+  html:lang(ru) .select-setting {
+    display: grid;
+    gap: 8px;
+    padding-block: 12px;
+  }
+  html:lang(ru) .setting select {
+    width: 100%;
   }
 }

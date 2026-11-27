@@ -48,6 +48,33 @@ describe('save data', () => {
       robotSkin: 'cobalt',
     });
   });
+  it('changes language in a legacy save without losing newer progress or cosmetics', async () => {
+    let value = JSON.stringify({
+      language: 'unsupported',
+      unlocked: 2,
+      best: 7100,
+      stars: [3, 2],
+      fieldSkin: 'polar',
+    });
+    vi.stubGlobal('localStorage', {
+      getItem: () => value,
+      setItem: (_key: string, next: string) => {
+        value = next;
+      },
+    });
+    expect(loadSave().language).toBe('system');
+    const stale = { unlocked: 0, best: 0, stars: [0] };
+    expect(await storeSave(stale, { language: 'ru' })).toBe(true);
+    expect(await storeSave(stale, { battleLayout: 'classic' })).toBe(true);
+    expect(loadSave()).toMatchObject({
+      language: 'ru',
+      unlocked: 2,
+      best: 7100,
+      stars: [3, 2, 0, 0, 0],
+      fieldSkin: 'polar',
+      battleLayout: 'classic',
+    });
+  });
   it('sanitizes corrupt and out-of-range progress', () => {
     vi.stubGlobal('localStorage', { getItem: () => '{broken' });
     expect(loadSave().stars).toEqual([0, 0, 0, 0, 0]);
@@ -65,6 +92,7 @@ describe('save data', () => {
       alienSkin: 'standard',
       battleLayout: 'expanded',
       fieldSkin: 'standard',
+      language: 'system',
     });
   });
   it('keeps v1 progress while accepting only supported campaign difficulty values', () => {
@@ -84,6 +112,7 @@ describe('save data', () => {
         alienSkin: 'standard',
         battleLayout: 'expanded',
         fieldSkin: 'standard',
+        language: 'system',
       });
     }
   });

@@ -1,6 +1,6 @@
 {
   "name": "robots-vs-aliens",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "description": "An original neon sci-fi lane-defense game for web and Android.",
@@ -21,6 +21,7 @@
     "@capacitor/core": "^8.0.0",
     "@fontsource/barlow-condensed": "^5.3.0",
     "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/roboto-condensed": "^5.3.0",
     "@fontsource/space-mono": "^5.3.0"
   },
   "devDependencies": {

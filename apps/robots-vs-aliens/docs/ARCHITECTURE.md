@@ -11,6 +11,7 @@ Vite + strict TypeScript, Canvas 2D, semantic HTML controls, CSS, Web Audio, a g
 | `src/assets/`                | Bundled WebP command scene, five battlefields and ten class sprites. See [asset provenance](ASSETS.md).      |
 | `src/game/audio.ts`          | Gesture-unlocked synthesized effects, bounded transient voices, mute                                         |
 | `src/game/storage.ts`        | Versioned, validated, failure-tolerant local saves                                                           |
+| `src/i18n/`                  | English and Russian interface text, number formatting and device-language selection                          |
 | `src/main.ts`                | UI controller, input, focus management, lifecycle, modals, campaign progression, 60 Hz game loop             |
 | `src/style.css`              | Desktop, tablet, phone, landscape layouts; reduced-motion styles                                             |
 | `scripts/generate-sw.mjs`    | Content-hashed precache for every production asset, offline navigation                                       |
@@ -29,13 +30,19 @@ Campaign completion requires the last wave's spawn queue and active enemies to b
 
 ## Persistence
 
-The `rva-save-v1` record stores `unlocked` (0–4), `best`, `stars` (five integers, 0–3), `muted`, `reducedMotion`, `difficulty`, independent robot and alien skins, `battleLayout` and `fieldSkin`. Older records keep their progress and load the Cadet preference. Each save reads the latest record under a cross-tab lock, takes the highest score, unlock and star count per sector, and applies the preferences changed by that action. Malformed data falls back to valid values. If storage is unavailable, the session remains playable. Progress is local to the device or browser. Closing the process ends a running battle.
+The `rva-save-v1` record stores `unlocked` (0–4), `best`, `stars` (five integers, 0–3), `muted`, `reducedMotion`, `difficulty`, independent robot and alien skins, `battleLayout`, `fieldSkin` and `language`. Older records keep their progress and load the Cadet preference. Each save reads the latest record under a cross-tab lock, takes the highest score, unlock and star count per sector, and applies the preferences changed by that action. Malformed data falls back to valid values. If storage is unavailable, the session remains playable. Progress is local to the device or browser. Closing the process ends a running battle.
 
 The controller passes the chosen difficulty to each new campaign. Cadet holds the simulation clock and income before the player launches First Contact. The HUD and highlighted center lane use the first patrol's lane sequence. The opening budget and enemy-count adjustments taper over sectors one and two. Survival always runs the Veteran rules.
 
 Energy drops are native HTML buttons in an absolute layer inside the placement grid. Their center is the pickup’s fractional column and lane center. A 44 × 44 CSS-pixel button receives native mouse, touch and keyboard activation. Its visible bolt is part of the button. The HUD reconciles buttons with live pickup IDs at spawn, collection and expiry. Gameplay owns the single successful award in `Game.collect(id)`. The Collect action and E use the same engine method for every live drop.
 
 Changing the field finish repaints the currently cached panorama and platform. Only the latest sector request can install a panorama, and only the selected material can repaint after its texture loads. Normal frames reuse the resulting canvas.
+
+## Interface language
+
+Both catalogs are bundled with the game. The saved language can be `system`, `en` or `ru`. A missing or invalid preference follows the device’s list of preferred languages and falls back to English. The interface applies language changes in place. The game controller retains the current mission and updates its visible text, accessible names and open dialog. The incoming marker reuses the engine’s current threat and its difficulty-specific disclosure.
+
+The Russian install manifest shares the English manifest’s app ID, scope and start URL. Android’s launcher label follows the device locale through `res/values-ru`. The in-game language selector controls the interface inside the app.
 
 ## Offline and hosting
 

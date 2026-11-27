@@ -110,6 +110,6 @@ Screenshots in `docs/screenshots/` are game captures. See [TESTING.md](../TESTIN
 
 The game synthesizes sound effects with Web Audio oscillators and gain envelopes in `src/game/audio.ts`. The current release contains no music track or sampled audio.
 
-Local Fontsource packages provide Barlow Condensed, DM Sans and Space Mono under the SIL Open Font License. [Bundled license notices](../public/licenses/) name the font copyright holders and ship with the offline build.
+Local Fontsource packages provide Barlow Condensed, DM Sans, Space Mono and the Cyrillic subset of Roboto Condensed (600 and 700) under the SIL Open Font License. [Bundled license notices](../public/licenses/) name the font copyright holders and ship with the offline build.
 
 The native host uses Apache-2.0-licensed Capacitor code and the Gradle wrapper. Dependency license notices remain in their respective packages.

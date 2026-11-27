@@ -1,8 +1,10 @@
+import { isLanguageChoice, type LanguageChoice } from '../i18n/language';
 import type { CampaignDifficulty } from './engine';
 import { isRobotSkin, isAlienSkin, type RobotSkin, type AlienSkin } from './skins';
 import { isBattleLayout, isFieldSkin, type BattleLayout, type FieldSkin } from './field';
 
 export interface Save {
+  language: LanguageChoice;
   unlocked: number;
   best: number;
   stars: number[];
@@ -19,6 +21,7 @@ export type Preferences = Omit<Save, keyof Progress>;
 const SAVE_KEY = 'rva-save-v1';
 
 const defaults = (): Save => ({
+  language: 'system',
   unlocked: 0,
   best: 0,
   stars: [0, 0, 0, 0, 0],
@@ -35,6 +38,7 @@ function parseSave(value: string | null): Save {
     const raw = JSON.parse(value ?? 'null');
     if (!raw || typeof raw !== 'object') return defaults();
     return {
+      language: isLanguageChoice(raw.language) ? raw.language : 'system',
       unlocked: Number.isInteger(raw.unlocked) ? Math.max(0, Math.min(4, raw.unlocked)) : 0,
       best: Number.isFinite(raw.best) ? Math.max(0, raw.best) : 0,
       stars: Array.from({ length: 5 }, (_, i) =>

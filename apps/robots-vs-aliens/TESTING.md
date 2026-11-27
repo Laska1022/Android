@@ -67,6 +67,12 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 27, 2026 · 1.7.0, Android code 10
+
+- The release candidate passed 34 unit tests, strict TypeScript, the production build and 50 Chromium desktop/mobile scenarios. Eight platform-specific scenarios were skipped. The service worker precaches 74 files.
+- Tested the Russian default, a saved override, device-language changes, Cyrillic shortcuts, translated live announcements and pickup controls, an offline reload, and a three-star victory followed by the second sector. Reviewed the command screen, Settings and battlefield from 340 × 568 portrait through 1440 × 960 desktop, including 775 × 364 landscape. [Russian settings](docs/screenshots/russian-settings.webp) · [Russian battlefield](docs/screenshots/russian-battle.webp)
+- Android assembly, lint and release verification are pending. ADB listed no connected device. [Continuation instructions](NEXT_AI_RUSSIAN.md)
+
 ### November 27, 2026 · 1.6.0, Android code 8
 
 **Pickup reproduction.** The web bundle extracted from the published 1.5.1 APK ran at 775 × 364 in Chromium with touch emulation. A real touchscreen tap 18 CSS pixels below the gold bolt’s center deployed the selected Bastion. Energy fell from 194 to 119 and the pickup count stayed at one. In the new build the same offset activates the pickup’s 44 × 44 button, awards 35 energy and leaves the underlying tile alone. Browser tests repeat this with a build selected, with Recycle over an occupied tile, and with Orbital Strike armed. They also exercise Enter on an individual drop, the Collect button for two simultaneous drops and the E shortcut.

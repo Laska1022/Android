@@ -6,6 +6,8 @@ import '@fontsource/dm-sans/latin-500.css';
 import '@fontsource/dm-sans/latin-600.css';
 import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/space-mono/latin-400.css';
+import '@fontsource/roboto-condensed/cyrillic-600.css';
+import '@fontsource/roboto-condensed/cyrillic-700.css';
 import './style.css';
 import './game/battlefield.css';
 import {
@@ -20,15 +22,9 @@ import {
 } from './game/engine';
 import { Renderer, botIcon, alienIcon } from './game/render';
 import { LaneWarning } from './game/lane-warning';
-import {
-  BATTLE_LAYOUTS,
-  FIELD_SKINS,
-  fieldTextures,
-  isBattleLayout,
-  isFieldSkin,
-} from './game/field';
+import { fieldTextures, isBattleLayout, isFieldSkin } from './game/field';
 import { GAME_BACK_EVENT, setGameBackHandled } from './game/navigation';
-import { ROBOT_SKINS, ALIEN_SKINS, isRobotSkin, isAlienSkin } from './game/skins';
+import { isRobotSkin, isAlienSkin } from './game/skins';
 import {
   supportsNativeOrientation,
   getOrientationMode,
@@ -36,6 +32,9 @@ import {
 } from './game/orientation';
 import { AudioEngine } from './game/audio';
 import { loadSave, storeSave, type Preferences } from './game/storage';
+
+import { messages, type Messages } from './i18n';
+import { resolveLanguage, isLanguageChoice } from './i18n/language';
 
 const $ = <T extends HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const icons = {
@@ -53,6 +52,12 @@ const icon = (name: keyof typeof icons) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${icons[name]}</svg>`;
 const kinds = Object.keys(BOTS) as BotKind[];
 const save = loadSave();
+function preferredLanguage() {
+  return resolveLanguage(save.language, [...(navigator.languages ?? []), navigator.language]);
+}
+let t = messages[preferredLanguage()];
+let renderDialog: (() => void) | null = null;
+let activeToast: ((copy: Messages) => string) | null = null;
 const audio = new AudioEngine();
 audio.muted = save.muted;
 let game = new Game();
@@ -70,30 +75,35 @@ let resumeAfterDialog = false;
 
 $('#app').innerHTML = `
   <header class="site-header">
-    <a class="brand" href="./" aria-label="Robots vs Aliens home"><img src="./icon.svg" alt=""/><span>ROBOTS <span class="brand-vs">vs</span> ALIENS<small>LAST OUTPOST</small></span></a>
-    <nav aria-label="Game tools"><span class="connection"><i></i> OUTPOST COMMAND</span><button class="quiet" id="guide-button" aria-label="Field guide">${icon('book')}<span>Field guide</span></button><button class="icon-button" id="sound-button" aria-label="Toggle sound" aria-pressed="${!save.muted}">${icon('sound')}</button><button class="icon-button settings-button" id="settings-button" aria-label="Settings">⚙</button></nav>
+    <a class="brand" href="./" data-label="home"><img src="./icon.svg" alt=""/><span><span data-caption="robots"></span> <span class="brand-vs" data-caption="versus"></span> <span data-caption="aliens"></span><small data-caption="subtitle"></small></span></a>
+    <nav data-label="tools"><span class="connection"><i></i> <span data-caption="command"></span></span><button class="quiet" id="guide-button" data-label="guide">${icon('book')}<span data-caption="guide"></span></button><button class="icon-button" id="sound-button" data-label="soundToggle" aria-pressed="${!save.muted}">${icon('sound')}</button><button class="icon-button settings-button" id="settings-button" data-label="settings">⚙</button></nav>
   </header>
   <main>
-    <section class="console" aria-label="Defense console">
-      <div class="console-top"><div class="sector-status"><span class="live-dot"></span><span id="sector-label">SECTOR 01</span><span class="separator">/</span><span id="mission-label">FIRST CONTACT</span></div><div class="console-tags"><span>PERSONAL BEST &nbsp;<b id="best-score">${save.best.toLocaleString()}</b></span></div></div>
+    <section class="console" data-label="console">
+      <div class="console-top"><div class="sector-status"><span class="live-dot"></span><span id="sector-label"></span><span class="separator">/</span><span id="mission-label"></span></div><div class="console-tags"><span><span data-caption="best"></span> &nbsp;<b id="best-score"></b></span></div></div>
       <div class="console-body">
         <div class="battle-column">
-          <div class="hud"><div class="energy-stat">${icon('bolt')}<strong id="energy">325</strong><span>ENERGY</span></div><div class="integrity">${icon('shield')}<div><span>CORE INTEGRITY</span><div id="hearts" aria-label="5 core integrity">${'<i></i>'.repeat(5)}</div></div></div><div class="wave-stat"><span id="wave-label">PREPARE YOUR SQUAD</span><strong id="wave-count">00 <small>/ 04</small></strong></div><button class="icon-button" id="pause-button" aria-label="Pause game" disabled>${icon('pause')}</button></div>
+          <div class="hud"><div class="energy-stat">${icon('bolt')}<strong id="energy"></strong><span data-caption="energy"></span></div><div class="integrity">${icon('shield')}<div><span data-caption="core"></span><div id="hearts">${'<i></i>'.repeat(5)}</div></div></div><div class="wave-stat"><span id="wave-label"></span><strong id="wave-count"></strong></div><button class="icon-button" id="pause-button" data-label="pause" disabled>${icon('pause')}</button></div>
           <div class="arena" id="arena">
-            <div class="battle-scene" id="battle-scene"><canvas id="battlefield" aria-label="Animated alien landscape and tactical battlefield"></canvas>
-            <div id="battle-grid" class="battle-grid" role="group" aria-label="Battlefield: 5 lanes and 9 columns" hidden>${Array.from({ length: 45 }, (_, i) => `<button class="cell" data-row="${Math.floor(i / 9)}" data-col="${i % 9}" aria-label="Lane ${Math.floor(i / 9) + 1}, column ${(i % 9) + 1}, empty" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}<div class="energy-layer" id="energy-layer"></div></div></div>
-            <div class="menu-cover" id="menu-cover"><div class="mission-chip" id="mission-location">${SECTORS[0].location}</div><h1>The last <em>outpost.</em></h1><p id="mission-brief">${SECTORS[0].description}</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button></div>
-            <div class="arena-caption"><span>TACTICAL FEED</span><span id="arena-instruction">SELECT AN EMPTY TILE TO DEPLOY PULSE</span></div>
+            <div class="battle-scene" id="battle-scene"><canvas id="battlefield"></canvas>
+            <div id="battle-grid" class="battle-grid" role="group" data-label="grid" hidden>${Array.from({ length: ROWS * COLS }, (_, i) => `<button class="cell" data-row="${Math.floor(i / COLS)}" data-col="${i % COLS}" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}<div class="energy-layer" id="energy-layer"></div></div></div>
+            <div class="menu-cover" id="menu-cover"><div class="mission-chip" id="mission-location"></div><h1><span data-caption="titleStart"></span> <em data-caption="titleEnd"></em></h1><p id="mission-brief"></p><button class="primary" id="start-button"><span data-caption="deploy"></span> ${icon('arrow')}</button></div>
+            <div class="arena-caption"><span data-caption="feed"></span><span id="arena-instruction"></span></div>
             <div class="toast" id="toast" role="status" aria-live="polite"></div>
             <div class="wave-banner" id="wave-banner" aria-hidden="true"></div>
           </div>
-          <div class="battle-toolbar"><div class="tactical-status"><span class="pulse-dot"></span><span id="tactical-status">Awaiting your command</span></div><div class="battle-actions"><button id="collect-button" class="tool-button" disabled>${icon('bolt')} Collect <span id="pickup-count">0</span></button><button id="speed-button" class="tool-button" aria-label="Toggle double speed" aria-pressed="false">1×</button><button id="wave-button" class="tool-button next-wave" disabled>Send wave ${icon('arrow')}</button></div></div>
+          <div class="battle-toolbar"><div class="tactical-status"><span class="pulse-dot"></span><span id="tactical-status"></span></div><div class="battle-actions"><button id="collect-button" class="tool-button" disabled>${icon('bolt')} <span data-caption="collect"></span> <span id="pickup-count">0</span></button><button id="speed-button" class="tool-button" data-label="speed" aria-pressed="false">1×</button><button id="wave-button" class="tool-button next-wave" disabled></button></div></div>
         </div>
-        <aside class="deck"><div class="deck-heading"><div><span class="eyebrow">ROBOT SYSTEMS</span><h2>Squad loadout</h2></div><span class="count">05</span></div><div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card ${i === 0 ? 'selected' : ''}" data-bot="${kind}" aria-pressed="${i === 0}" aria-label="Select ${BOTS[kind].name}, ${BOTS[kind].cost} energy. ${BOTS[kind].description}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span class="bot-details"><strong>${BOTS[kind].name}</strong><small>${BOTS[kind].role}</small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div><div class="loadout-tip"><span id="selected-name">PULSE / BLASTER</span><p id="selected-description">${BOTS.pulse.description}</p></div><div class="abilities"><button id="beam-button" class="ability" aria-label="Select orbital strike, then select a lane" aria-pressed="false">${icon('target')}<span>Orbital strike<small id="beam-status">READY · Q</small></span></button><button id="recycle-button" class="recycle-button" aria-label="Recycle a robot for up to 50 percent energy" aria-pressed="false">${icon('recycle')}<span>Recycle</span></button></div></aside>
+        <aside class="deck">
+          <div class="deck-heading"><div><span class="eyebrow" data-caption="robotSystems"></span><h2 data-caption="loadout"></h2></div><span class="count">05</span></div>
+          <div class="bot-cards">${kinds.map((kind, i) => `<button class="bot-card" data-bot="${kind}" style="--bot-color:${BOTS[kind].color}"><span class="keycap">${i + 1}</span><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span class="bot-details"><strong></strong><small></small></span><span class="bot-cost">${icon('bolt')}${BOTS[kind].cost}</span></button>`).join('')}</div>
+          <div class="loadout-tip"><span id="selected-name"></span><p id="selected-description"></p></div>
+          <div class="abilities"><button id="beam-button" class="ability" data-label="strikeSelect" aria-pressed="false">${icon('target')}<span><span data-caption="strike"></span><small id="beam-status"></small></span></button><button id="recycle-button" class="recycle-button" data-label="recycleSelect" aria-pressed="false">${icon('recycle')}<span data-caption="recycle"></span></button></div>
+        </aside>
       </div>
-      <div class="campaign"><div class="campaign-label"><span class="eyebrow">CAMPAIGN</span><strong>Select sector</strong></div><div class="sectors" id="sectors">${SECTORS.map((s, i) => `<button class="sector ${i === 0 ? 'active' : ''}" data-sector="${i}" ${i > save.unlocked ? 'disabled' : ''} aria-label="Sector ${i + 1}: ${s.name}${i > save.unlocked ? ', locked' : ''}"><span>0${i + 1}</span><div><strong>${s.name}</strong><small>${i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : i === 0 ? 'START HERE' : 'AVAILABLE'}</small></div>${i > save.unlocked ? '<b>⌑</b>' : '<b>↗</b>'}</button>`).join('')}</div></div>
+      <div class="campaign"><div class="campaign-label"><span class="eyebrow" data-caption="campaign"></span><strong data-caption="selectSector"></strong></div><div class="sectors" id="sectors">${SECTORS.map((_, i) => `<button class="sector" data-sector="${i}"><span>0${i + 1}</span><div><strong></strong><small></small></div><b></b></button>`).join('')}</div></div>
     </section>
-    <footer><button class="text-button" id="endless-button">Survival mode ↗</button></footer>
+    <footer><button class="text-button" id="endless-button"><span data-caption="survival"></span> ↗</button></footer>
   </main>
   <div id="modal-backdrop" class="modal-backdrop" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"></section></div>
 `;
@@ -115,17 +125,18 @@ renderer.reducedMotion =
   save.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
 
-function toast(message: string) {
-  $('#toast').textContent = message;
+function toast(message: (copy: Messages) => string) {
+  activeToast = message;
+  $('#toast').textContent = message(t);
   $('#toast').classList.add('visible');
   toastTimer = 3;
 }
 function persist(preferences: Partial<Preferences> = {}) {
   Object.assign(save, preferences);
   void storeSave(save, preferences).then((saved) => {
-    if (!saved) toast('Storage is unavailable. Progress will last for this session.');
+    if (!saved) toast((copy) => copy.storageError);
   });
-  $('#best-score').textContent = save.best.toLocaleString();
+  $('#best-score').textContent = t.number(save.best);
 }
 function select(choice: typeof selected) {
   selected = choice;
@@ -138,29 +149,30 @@ function select(choice: typeof selected) {
   $('#recycle-button').setAttribute('aria-pressed', String(choice === 'recycle'));
   $('#selected-name').textContent =
     choice === 'beam'
-      ? 'ORBITAL STRIKE / 42s RECHARGE'
+      ? t.strikeTitle
       : choice === 'recycle'
-        ? 'RECYCLE / SALVAGE'
-        : `${BOTS[choice].name.toUpperCase()} / ${BOTS[choice].role}`;
+        ? t.recycleTitle
+        : `${t.bots[choice].name.toUpperCase()} / ${t.bots[choice].role}`;
   $('#selected-description').textContent =
     choice === 'beam'
-      ? 'Select a lane to deal 320 damage to every alien in it.'
+      ? t.strikeDescription
       : choice === 'recycle'
-        ? 'Select a robot to recover up to 50% of its cost, based on health.'
-        : BOTS[choice].description;
+        ? t.recycleDescription
+        : t.bots[choice].description;
   $('#arena-instruction').textContent =
     choice === 'beam'
-      ? 'SELECT A LANE FOR ORBITAL STRIKE'
+      ? t.strikeHint
       : choice === 'recycle'
-        ? 'SELECT A ROBOT TO RECYCLE'
-        : `SELECT AN EMPTY TILE TO DEPLOY ${BOTS[choice].name.toUpperCase()}`;
+        ? t.recycleHint
+        : t.deployHint(t.bots[choice].name);
 }
 function setSector(i: number) {
   sector = i;
-  $('#mission-location').textContent = SECTORS[i].location;
-  $('#mission-brief').textContent = SECTORS[i].description;
-  $('#sector-label').textContent = `SECTOR 0${i + 1}`;
-  $('#mission-label').textContent = SECTORS[i].name.toUpperCase();
+  $('#battlefield').setAttribute('aria-label', t.battlefield(t.sectors[i].name));
+  $('#mission-location').textContent = t.sectors[i].location;
+  $('#mission-brief').textContent = t.sectors[i].description;
+  $('#sector-label').textContent = t.sectorNumber(i + 1);
+  $('#mission-label').textContent = t.sectors[i].name.toUpperCase();
   document
     .querySelectorAll<HTMLElement>('[data-sector]')
     .forEach((b) => b.classList.toggle('active', Number(b.dataset.sector) === i));
@@ -169,13 +181,17 @@ function updateSectors() {
   document.querySelectorAll<HTMLButtonElement>('[data-sector]').forEach((b) => {
     const i = Number(b.dataset.sector);
     b.disabled = i > save.unlocked || !menu;
+    b.querySelector('strong')!.textContent = t.sectors[i].name;
     b.querySelector('small')!.textContent =
-      i > save.unlocked ? 'LOCKED' : save.stars[i] ? '★'.repeat(save.stars[i]) : 'AVAILABLE';
+      i > save.unlocked
+        ? t.locked
+        : save.stars[i]
+          ? '★'.repeat(save.stars[i])
+          : i === 0
+            ? t.startHere
+            : t.available;
     b.querySelector('b')!.textContent = i > save.unlocked ? '⌑' : '↗';
-    b.setAttribute(
-      'aria-label',
-      `Sector ${i + 1}: ${SECTORS[i].name}${i > save.unlocked ? ', locked' : ''}`,
-    );
+    b.setAttribute('aria-label', t.sectorLabel(i + 1, t.sectors[i].name, i > save.unlocked));
   });
 }
 function start(endless = false) {
@@ -200,8 +216,7 @@ function start(endless = false) {
   select('pulse');
   updateSectors();
   updateHud();
-  if (!game.awaitingLaunch)
-    toast('Deploy Pulse in threatened lanes. Collect gold cells for energy.');
+  if (!game.awaitingLaunch) toast((copy) => copy.startTip);
   $('#arena').classList.add('is-playing');
   $('.cell').focus({ preventScroll: true });
 }
@@ -236,7 +251,6 @@ function syncEnergyButtons() {
       button = document.createElement('button');
       button.type = 'button';
       button.className = 'energy-target';
-      button.setAttribute('aria-label', `Collect ${pickup.value} energy in lane ${pickup.row + 1}`);
       button.style.left = `${(pickup.x / COLS) * 100}%`;
       button.style.top = `${((pickup.row + 0.5) / ROWS) * 100}%`;
       button.innerHTML = `<span class="energy-core">${icon('bolt')}</span>`;
@@ -247,7 +261,7 @@ function syncEnergyButtons() {
         if (menu || game.phase !== 'playing') return;
         audio.unlock();
         const keyboard = event.detail === 0;
-        if (game.collect(pickup.id)) toast(`+${pickup.value} energy`);
+        if (game.collect(pickup.id)) toast((copy) => copy.collected(pickup.value));
         if (keyboard) {
           const col = Math.floor(pickup.x);
           $(`.cell[data-row="${pickup.row}"][data-col="${col}"]`).focus({ preventScroll: true });
@@ -257,6 +271,8 @@ function syncEnergyButtons() {
       energyLayer.append(button);
       energyButtons.set(pickup.id, button);
     }
+    const label = t.pickup(pickup.value, pickup.row + 1);
+    if (button.getAttribute('aria-label') !== label) button.setAttribute('aria-label', label);
     button.classList.toggle('expiring', pickup.life < 3);
   }
 }
@@ -268,40 +284,40 @@ function updateHud() {
     menu ? startingEnergy(sector, save.difficulty) : Math.floor(game.energy),
   );
   $('#wave-label').textContent = menu
-    ? 'PREPARE YOUR SQUAD'
+    ? t.prepare
     : game.endless
-      ? 'SURVIVAL MODE'
+      ? t.survival
       : game.waveActive
-        ? 'INCOMING HOSTILES'
-        : 'DEPLOYMENT WINDOW';
+        ? t.incomingHostiles
+        : t.deployment;
   $('#wave-count').innerHTML =
     `${String(menu ? 0 : game.wave).padStart(2, '0')} <small>/ ${game.endless && !menu ? '∞' : String(SECTORS[sector].waves).padStart(2, '0')}</small>`;
   const hearts = $('#hearts');
-  hearts.setAttribute('aria-label', `${game.lives} core integrity`);
+  hearts.setAttribute('aria-label', t.integrity(menu ? 5 : game.lives));
   [...hearts.children].forEach((h, i) => h.classList.toggle('empty', !menu && i >= game.lives));
   const waveButton = $<HTMLButtonElement>('#wave-button');
   waveButton.disabled = menu || game.phase !== 'playing' || game.waveActive;
   waveButton.innerHTML =
     !menu && !game.waveActive && !game.awaitingLaunch
-      ? `Send wave · ${Math.ceil(game.intermission)}s ${icon('arrow')}`
-      : `Send wave ${icon('arrow')}`;
+      ? `${t.waveTimer(Math.ceil(game.intermission))} ${icon('arrow')}`
+      : `${t.sendWave} ${icon('arrow')}`;
   $('#tactical-status').textContent = menu
-    ? `${save.difficulty === 'cadet' ? 'Cadet' : 'Veteran'} campaign · Change in Settings`
+    ? t.campaignHint(t.difficulty[save.difficulty])
     : game.phase === 'paused'
-      ? 'Simulation paused'
+      ? t.paused
       : game.awaitingLaunch
         ? game.bots.some((bot) => bot.row === FIRST_PATROL_LANE - 1 && BOTS[bot.kind].damage > 0)
-          ? `Lane ${FIRST_PATROL_LANE} covered. Send wave when ready.`
-          : `Place Pulse in lane ${FIRST_PATROL_LANE} (center), then Send wave.`
+          ? t.covered(FIRST_PATROL_LANE)
+          : t.firstPatrol(FIRST_PATROL_LANE)
         : game.waveActive
-          ? `${game.enemies.length} hostiles detected · ${game.pickups.length && game.wave === 1 ? 'Collect gold cells for energy' : game.score.toLocaleString() + ' points'}`
-          : `Wave ${game.wave + 1} incoming · +75 energy between waves`;
+          ? `${t.hostiles(game.enemies.length)} · ${game.pickups.length && game.wave === 1 ? t.goldHint : t.points(game.score)}`
+          : t.nextWave(game.wave + 1);
   $('#beam-status').textContent =
     !menu && game.awaitingLaunch
-      ? 'ON STANDBY'
+      ? t.standby
       : game.beamCooldown > 0 && !menu
-        ? `${Math.ceil(game.beamCooldown)}s RECHARGING`
-        : 'READY · Q';
+        ? t.recharging(Math.ceil(game.beamCooldown))
+        : t.ready;
   $<HTMLButtonElement>('#beam-button').disabled =
     !menu && (game.awaitingLaunch || game.beamCooldown > 0);
   $('#pickup-count').textContent = String(game.pickups.length);
@@ -319,7 +335,11 @@ function updateHud() {
     const row = Number(b.dataset.row),
       col = Number(b.dataset.col);
     const bot = game.bots.find((b) => b.row === row && b.col === col);
-    const label = `Lane ${row + 1}, column ${col + 1}, ${bot ? `${BOTS[bot.kind].name}, ${Math.ceil(bot.hp)} health` : 'empty'}`;
+    const label = t.tile(
+      row + 1,
+      col + 1,
+      bot ? t.botHealth(t.bots[bot.kind].name, Math.ceil(bot.hp)) : t.empty,
+    );
     if (b.getAttribute('aria-label') !== label) b.setAttribute('aria-label', label);
   });
 }
@@ -328,19 +348,25 @@ function syncBackHandling() {
     console.warn('Android Back integration is unavailable.');
   });
 }
-function openModal(title: string, contents: string) {
+function renderModal(title: string, contents: string) {
+  $('#modal').innerHTML =
+    `<button id="modal-close" class="modal-close icon-button" aria-label="${t.close}">${icon('close')}</button><div class="eyebrow">${t.labels.command}</div><h2 id="modal-title">${title}</h2>${contents}`;
+  $('.modal-close').onclick = () => closeModal();
+}
+function openModal(render: () => void) {
+  if (renderDialog) return;
   returnFocus = document.activeElement as HTMLElement;
   resumeAfterDialog = !menu && game.phase === 'playing';
   if (resumeAfterDialog) game.phase = 'paused';
-  $('#modal').innerHTML =
-    `<button class="modal-close icon-button" aria-label="Close dialog">${icon('close')}</button><div class="eyebrow">OUTPOST COMMAND</div><h2 id="modal-title">${title}</h2>${contents}`;
+  renderDialog = render;
+  render();
   $('#modal-backdrop').hidden = false;
   syncBackHandling();
   $('#modal').focus();
-  $('.modal-close').onclick = () => closeModal();
   updateHud();
 }
 function closeModal(resume = true) {
+  renderDialog = null;
   $('#modal-backdrop').hidden = true;
   syncBackHandling();
   if (resume && resumeAfterDialog && game.phase === 'paused') game.phase = 'playing';
@@ -353,9 +379,12 @@ function pause() {
     closeModal();
     return;
   }
-  openModal(
-    'Mission paused',
-    `<p>Resume the defense, restart this sector, or return to command.</p><div class="modal-actions"><button class="primary" id="resume-button">Resume mission ${icon('arrow')}</button><button class="secondary" id="restart-button">Restart sector</button><button class="text-button" id="quit-button">Return to command</button></div>`,
+  openModal(renderPause);
+}
+function renderPause() {
+  renderModal(
+    t.pauseTitle,
+    `<p>${t.pauseHelp}</p><div class="modal-actions"><button class="primary" id="resume-button">${t.resume} ${icon('arrow')}</button><button class="secondary" id="restart-button">${t.restart}</button><button class="text-button" id="quit-button">${t.quit}</button></div>`,
   );
   $('#resume-button').onclick = () => closeModal();
   $('#restart-button').onclick = () => start(game.endless);
@@ -370,9 +399,12 @@ function finish() {
     save.unlocked = Math.min(4, Math.max(save.unlocked, sector + 1));
   }
   persist();
-  openModal(
-    won ? 'The line holds.' : 'Core lost.',
-    `<div class="result-emblem">${won ? '✦' : '⌁'}</div><p>${won ? 'The outpost is safe. Your squad made the difference.' : 'The core has fallen. Rebuild your strategy and reclaim the outpost.'}</p>${won ? `<div class="stars" aria-label="${stars} out of 3 stars">${'★'.repeat(stars)}<span>${'★'.repeat(3 - stars)}</span></div>` : ''}<div class="result-stats"><div><strong>${game.score.toLocaleString()}</strong><span>SCORE</span></div><div><strong>${game.kills}</strong><span>ALIENS STOPPED</span></div><div><strong>${Math.floor(game.time / 60)}:${String(Math.floor(game.time % 60)).padStart(2, '0')}</strong><span>TIME HELD</span></div></div><div class="modal-actions">${won && sector < 4 ? '<button class="primary" id="next-sector">Deploy to next sector →</button>' : ''}<button class="${won && sector < 4 ? 'secondary' : 'primary'}" id="retry-button">${won ? 'Play again' : 'Try again'}</button><button class="text-button" id="quit-button">Return to command</button></div>`,
+  openModal(() => renderResult(won, stars));
+}
+function renderResult(won: boolean, stars: number) {
+  renderModal(
+    won ? t.won : t.lost,
+    `<div class="result-emblem">${won ? '✦' : '⌁'}</div><p>${won ? t.winHelp : t.lossHelp}</p>${won ? `<div class="stars" aria-label="${t.stars(stars)}">${'★'.repeat(stars)}<span>${'★'.repeat(3 - stars)}</span></div>` : ''}<div class="result-stats"><div><strong>${t.number(game.score)}</strong><span>${t.score}</span></div><div><strong>${game.kills}</strong><span>${t.stopped}</span></div><div><strong>${Math.floor(game.time / 60)}:${String(Math.floor(game.time % 60)).padStart(2, '0')}</strong><span>${t.time}</span></div></div><div class="modal-actions">${won && sector < 4 ? `<button class="primary" id="next-sector">${t.nextSector} →</button>` : ''}<button class="${won && sector < 4 ? 'secondary' : 'primary'}" id="retry-button">${won ? t.playAgain : t.retry}</button><button class="text-button" id="quit-button">${t.quit}</button></div>`,
   );
   $('#retry-button').onclick = () => start(game.endless);
   $('#quit-button').onclick = mainMenu;
@@ -459,33 +491,40 @@ function wireOrientationSetting(select: HTMLSelectElement) {
       select.disabled = false;
     })
     .catch(() => {
-      help.textContent = 'Could not read the rotation preference. Reopen Settings to retry.';
+      help.textContent = t.orientationReadError;
     });
   select.onchange = async () => {
     select.disabled = true;
     try {
       await setOrientationMode(select.value === 'follow' ? 'follow' : 'landscape');
     } catch {
-      help.textContent = 'Could not apply rotation. Reopen Settings to retry.';
+      help.textContent = t.orientationWriteError;
       return;
     }
     select.disabled = false;
   };
 }
-$('#settings-button').onclick = () => {
-  if (!$('#modal-backdrop').hidden) return;
-  openModal(
-    'Command settings',
-    `<label class="setting"><span>Campaign difficulty<small>Cadet gives you time to prepare. Veteran uses the original waves. Applies at deployment.</small></span><select id="difficulty-setting" aria-label="Campaign difficulty"><option value="cadet" ${save.difficulty === 'cadet' ? 'selected' : ''}>Cadet</option><option value="veteran" ${save.difficulty === 'veteran' ? 'selected' : ''}>Veteran</option></select></label>` +
+function renderSettings() {
+  renderModal(
+    t.settingsTitle,
+    `<label class="setting select-setting"><span>${t.language}</span><select id="language-setting" aria-label="${t.language}"><option value="system">${t.system}</option><option value="en" lang="en">English</option><option value="ru" lang="ru">Русский</option></select></label>` +
+      `<label class="setting select-setting"><span>${t.difficultyLabel}<small>${t.difficultyHelp}</small></span><select id="difficulty-setting" aria-label="${t.difficultyLabel}">${selectOptions(t.difficulty, save.difficulty)}</select></label>` +
       (supportsNativeOrientation()
-        ? `<label class="setting"><span>Screen orientation<small id="orientation-help">Follow phone uses your device’s rotation setting.</small></span><select id="orientation-setting" aria-label="Screen orientation" disabled><option value="landscape">Landscape</option><option value="follow">Follow phone</option></select></label>`
+        ? `<label class="setting select-setting"><span>${t.orientation}<small id="orientation-help">${t.orientationHelp}</small></span><select id="orientation-setting" aria-label="${t.orientation}" disabled><option value="landscape">${t.landscape}</option><option value="follow">${t.follow}</option></select></label>`
         : '') +
-      `<label class="setting"><span>Battle layout</span><select id="battle-layout" aria-label="Battle layout">${selectOptions(BATTLE_LAYOUTS, save.battleLayout)}</select></label>` +
-      `<label class="setting"><span class="skin-label"><i id="field-sample" aria-hidden="true"></i><span>Battlefield skin</span></span><select id="field-skin" aria-label="Battlefield skin">${selectOptions(FIELD_SKINS, save.fieldSkin)}</select></label>` +
-      `<label class="setting"><span class="skin-label"><img id="robot-skin-preview" src="${botIcon('pulse', save.robotSkin)}" alt=""/><span>Robot skin</span></span><select id="robot-skin" aria-label="Robot skin">${selectOptions(ROBOT_SKINS, save.robotSkin)}</select></label>` +
-      `<label class="setting"><span class="skin-label"><img id="alien-skin-preview" src="${alienIcon('scout', save.alienSkin)}" alt=""/><span>Alien skin</span></span><select id="alien-skin" aria-label="Alien skin">${selectOptions(ALIEN_SKINS, save.alienSkin)}</select></label>` +
-      `<label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
+      `<label class="setting select-setting"><span>${t.layout}</span><select id="battle-layout" aria-label="${t.layout}">${selectOptions(t.layouts, save.battleLayout)}</select></label>` +
+      `<label class="setting select-setting"><span class="skin-label"><i id="field-sample" aria-hidden="true"></i><span>${t.fieldSkin}</span></span><select id="field-skin" aria-label="${t.fieldSkin}">${selectOptions(t.fields, save.fieldSkin)}</select></label>` +
+      `<label class="setting select-setting"><span class="skin-label"><img id="robot-skin-preview" src="${botIcon('pulse', save.robotSkin)}" alt=""/><span>${t.robotSkin}</span></span><select id="robot-skin" aria-label="${t.robotSkin}">${selectOptions(t.robotSkins, save.robotSkin)}</select></label>` +
+      `<label class="setting select-setting"><span class="skin-label"><img id="alien-skin-preview" src="${alienIcon('scout', save.alienSkin)}" alt=""/><span>${t.alienSkin}</span></span><select id="alien-skin" aria-label="${t.alienSkin}">${selectOptions(t.alienSkins, save.alienSkin)}</select></label>` +
+      `<label class="setting"><span>${t.sound}<small>${t.soundHelp}</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>${t.motion}<small>${t.motionHelp}</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">${t.saveHelp}</p><button class="primary" id="settings-done">${t.done}</button>`,
   );
+  const language = $<HTMLSelectElement>('#language-setting');
+  language.value = save.language;
+  language.onchange = () => {
+    if (!isLanguageChoice(language.value)) return;
+    persist({ language: language.value });
+    applyLanguage();
+  };
   const updateFieldSample = () => {
     $('#field-sample').style.backgroundImage =
       save.fieldSkin === 'standard' ? '' : `url("${fieldTextures[save.fieldSkin]}")`;
@@ -538,14 +577,18 @@ $('#settings-button').onclick = () => {
     persist({ reducedMotion: renderer.reducedMotion });
   };
   $('#settings-done').onclick = () => closeModal();
-};
-$('#guide-button').onclick = () => {
-  if (!$('#modal-backdrop').hidden) return;
-  openModal(
-    'Know your squad.',
-    `<p>Aliens advance from the right. The incoming marker shows the next lane. Cadet also identifies the alien. Place robots on empty tiles to protect the core on the left.</p><div class="guide-grid">${kinds.map((kind) => `<div><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span><strong>${BOTS[kind].name} <small>· ${BOTS[kind].cost} ENERGY</small></strong><p>${BOTS[kind].description}</p></span></div>`).join('')}</div><div class="guide-notes"><p><strong>Build an economy.</strong> You gain 3 energy each second. Tap golden cells or press E to collect bonus energy. Start with Spark at the back and Pulse in threatened lanes.</p><p><strong>Your last resort.</strong> Each lane has one emergency sweeper. Orbital strike (Q) deals 320 damage to an entire lane and recharges in 42 seconds. Recycle (R) refunds up to half a robot’s cost.</p><p><strong>Stay sharp.</strong> Runners are fast. Brutes are tough. Spitters attack at range. An Overlord leads the final wave. Clear all waves to unlock the next sector.</p></div><div class="keyboard-guide"><kbd>1–5</kbd> Select robot <kbd>Q</kbd> Strike <kbd>R</kbd> Recycle <kbd>E</kbd> Collect <kbd>Space</kbd> Pause</div><p class="fine-print">Keyboard: Tab to the battlefield, use arrow keys to choose a tile, then Enter to deploy. On phones, tap a robot and a tile. Landscape gives you a wider view.</p>`,
+}
+$('#settings-button').onclick = () => openModal(renderSettings);
+function renderGuide() {
+  renderModal(
+    t.guideTitle,
+    `<p>${t.guideIntro}</p><div class="guide-grid">${kinds.map((kind) => `<div><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span><strong>${t.bots[kind].name} <small>· ${BOTS[kind].cost} ${t.labels.energy}</small></strong><p>${t.bots[kind].description}</p></span></div>`).join('')}</div>
+     <div class="guide-notes">${t.guideNotes.map(([title, note]) => `<p><strong>${title}</strong> ${note}</p>`).join('')}</div>
+     <div class="keyboard-guide">${t.shortcuts.map(([key, action]) => `<kbd>${key}</kbd> ${action}`).join(' ')}</div>
+     <p class="fine-print">${t.guideControls}</p>`,
   );
-};
+}
+$('#guide-button').onclick = () => openModal(renderGuide);
 document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
   cell.onclick = () => {
     if (menu || game.phase !== 'playing') return;
@@ -554,17 +597,16 @@ document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
       col = Number(cell.dataset.col);
     if (selected === 'beam') {
       if (game.beam(row)) {
-        toast('Orbital strike deployed.');
+        toast((copy) => copy.strikeFired);
         select('pulse');
-      } else toast('Orbital strike is recharging.');
+      } else toast((copy) => copy.strikeCooling);
     } else if (selected === 'recycle') {
-      if (!game.recycle(row, col)) toast('Select a tile with a robot to recycle.');
-    } else if (!game.place(selected, row, col))
-      toast(
-        game.bots.some((b) => b.row === row && b.col === col)
-          ? 'That tile is occupied. Choose an empty tile.'
-          : `Need ${BOTS[selected].cost} energy. Collect gold cells or deploy Spark.`,
-      );
+      if (!game.recycle(row, col)) toast((copy) => copy.recycleEmpty);
+    } else if (!game.place(selected, row, col)) {
+      const cost = BOTS[selected].cost;
+      const occupied = game.bots.some((bot) => bot.row === row && bot.col === col);
+      toast((copy) => (occupied ? copy.occupied : copy.insufficient(cost)));
+    }
     updateHud();
   };
   cell.onpointerenter = () => {
@@ -622,9 +664,11 @@ document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).matches('input, textarea'))
     return;
   if (e.key >= '1' && e.key <= '5') select(kinds[Number(e.key) - 1]);
-  if (e.key.toLowerCase() === 'q' && !$<HTMLButtonElement>('#beam-button').disabled) select('beam');
-  if (e.key.toLowerCase() === 'r') select('recycle');
-  if (!menu && e.key.toLowerCase() === 'e') collectAllEnergy();
+  const key = e.key.toLowerCase();
+  if ((key === 'q' || key === 'й') && !$<HTMLButtonElement>('#beam-button').disabled)
+    select('beam');
+  if (key === 'r' || key === 'к') select('recycle');
+  if (!menu && (key === 'e' || key === 'у')) collectAllEnergy();
   if (!menu && e.code === 'Space' && !e.repeat && (e.target as HTMLElement).tagName !== 'BUTTON') {
     e.preventDefault();
     pause();
@@ -648,22 +692,19 @@ function frame(now: number) {
     for (const event of game.drainEvents()) {
       audio.play(event.type, event.kind);
       if (event.type === 'wave') {
-        $('#wave-banner').textContent =
-          game.wave === game.totalWaves && !game.endless
-            ? 'FINAL WAVE · HOLD THE LINE'
-            : `WAVE ${String(game.wave).padStart(2, '0')} · INCOMING`;
+        $('#wave-banner').textContent = waveMessage();
         $('#wave-banner').classList.remove('show');
         void $('#wave-banner').offsetWidth;
         $('#wave-banner').classList.add('show');
       }
-      if (event.type === 'breach') toast('Core breached! Reinforce the open lane.');
+      if (event.type === 'breach') toast((copy) => copy.breach);
     }
     if (game.phase !== previousPhase) {
       previousPhase = game.phase;
       if (game.phase === 'won' || game.phase === 'lost') finish();
     }
   }
-  laneWarning.update(menu ? null : game.incomingThreat);
+  laneWarning.update(menu ? null : game.incomingThreat, t);
   if (!menu) renderer.draw(game);
   if (toastTimer > 0) {
     toastTimer -= elapsed;
@@ -676,12 +717,54 @@ function frame(now: number) {
   }
   requestAnimationFrame(frame);
 }
-updateHud();
+function waveMessage() {
+  return game.wave === game.totalWaves && !game.endless ? t.finalWave : t.waveBanner(game.wave);
+}
+
+function applyLanguage() {
+  const language = preferredLanguage();
+  t = messages[language];
+  document.documentElement.lang = language;
+  document.title = t.pageTitle;
+  $<HTMLMetaElement>('meta[name="description"]').content = t.description;
+  $<HTMLLinkElement>('link[rel="manifest"]').href =
+    language === 'ru' ? './manifest.ru.webmanifest' : './manifest.webmanifest';
+  type Label = keyof Messages['labels'];
+  for (const el of document.querySelectorAll<HTMLElement>('[data-caption]'))
+    el.textContent = t.labels[el.dataset.caption as Label];
+  for (const el of document.querySelectorAll<HTMLElement>('[data-label]'))
+    el.setAttribute('aria-label', t.labels[el.dataset.label as Label]);
+  for (const card of document.querySelectorAll<HTMLElement>('[data-bot]')) {
+    const kind = card.dataset.bot as BotKind;
+    const { name, role, description } = t.bots[kind];
+    card.querySelector('strong')!.textContent = name;
+    card.querySelector('small')!.textContent = role;
+    card.setAttribute('aria-label', t.selectBot(name, BOTS[kind].cost, description));
+  }
+  $('#best-score').textContent = t.number(save.best);
+  setSector(sector);
+  updateSectors();
+  select(selected);
+  updateHud();
+  laneWarning.update(menu ? null : game.incomingThreat, t);
+  if (activeToast && toastTimer > 0) $('#toast').textContent = activeToast(t);
+  if (game.wave > 0) $('#wave-banner').textContent = waveMessage();
+  if (renderDialog) {
+    const focusId = document.activeElement?.id;
+    const scroll = $('#modal').scrollTop;
+    renderDialog();
+    (document.getElementById(focusId || 'modal') ?? $('#modal')).focus({ preventScroll: true });
+    $('#modal').scrollTop = scroll;
+  }
+}
+
+window.addEventListener('languagechange', () => {
+  if (preferredLanguage() !== document.documentElement.lang) applyLanguage();
+});
+applyLanguage();
 requestAnimationFrame(frame);
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('./sw.js')
-      .catch(() => toast('Offline cache unavailable. You can keep playing online.'));
+    navigator.serviceWorker.register('./sw.js').catch(() => toast((copy) => copy.offlineError));
   });
 }

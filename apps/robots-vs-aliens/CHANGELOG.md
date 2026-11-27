@@ -1,22 +1,17 @@
 # Changelog
 
+## 1.7.0 · Release candidate
+
+- Russian is available throughout the game, including sector briefings, skin names, lane warnings, energy pickups, battle results and screen-reader labels. Russian-speaking devices start in Russian. Choose **Settings → Language → Русский** to switch manually. The language can change during a mission and stays available offline. [Command screen](docs/screenshots/russian-command.webp) · [Language setting](docs/screenshots/russian-settings.webp)
+- On a Russian keyboard, Й selects the orbital strike, К selects recycling and У collects energy. The field guide lists both keyboard layouts. [Russian battlefield](docs/screenshots/russian-battle.webp)
+- Includes the 1.6 expanded battlefield and energy controls alongside the 1.5.3 cross-tab save and close-range combat fixes. Older campaigns retain their unlocks, stars and cosmetics.
+
 ## 1.6.0 · November 27, 2026
 
 - Expanded lanes gives the fight more screen space by default. Settings → Battle layout → Classic console restores the original framing. Both layouts keep all nine columns and five lanes reachable.
 - Choose Sector alloy, Copper foundry or Polar relay in Settings → Battlefield skin. Each choice works across the campaign and Survival and is available offline. [Copper foundry](docs/screenshots/field-copper-foundry.webp) · [Polar relay](docs/screenshots/field-polar-relay.webp)
 - Tap a gold bolt to collect its 35 energy. Each pickup has its own touch target and supports keyboard activation. Collect and E still collect every available drop.
 
-## 1.5.1 · November 27, 2026
-
-**Public animation build.**
-
-- Scouts snap their jaws, Runners rake with their forelimbs, Brutes ram, Spitters draw back to launch acid, and Overlords sweep their claws. All three alien skins animate while walking and while attacking a defender. Frost slows their stride, 2× speeds up combat and pause holds the current pose. [Watch the animations](docs/screenshots/alien-motion.webp)
-- Moved the incoming-lane chevron to the outer edge so it clears a Scout entering the last column.
-
-**Redmi integration build at `9be2de4`.**
-
-- Integrated the second developer’s 1.5.0 Foundry and Riftborn work with Android Back navigation. Both skin families, their animations and their original commits are included.
-- Android Back pauses and resumes missions, dismisses dialogs and returns from a completed mission to command. The command screen delegates Back to Android. Holding Escape on a keyboard performs one action per press.
 ## 1.5.3 · November 27, 2026
 
 - Changing a setting in an older tab preserves the best score, sector unlocks, stars and other preferences saved in another tab.
@@ -30,8 +25,15 @@
 
 ## 1.5.1 · November 27, 2026
 
+**Public animation build.**
+
 - Scouts snap their jaws, Runners rake with their forelimbs, Brutes ram, Spitters draw back to launch acid, and Overlords sweep their claws. All three alien skins animate while walking and while attacking a defender. Frost slows their stride, 2× speeds up combat and pause holds the current pose. [Watch the animations](docs/screenshots/alien-motion.webp)
 - Moved the incoming-lane chevron to the outer edge so it clears a Scout entering the last column.
+
+**Redmi integration build at `9be2de4`.**
+
+- Integrated the second developer’s 1.5.0 Foundry and Riftborn work with Android Back navigation. Both skin families, their animations and their original commits are included.
+- Android Back pauses and resumes missions, dismisses dialogs and returns from a completed mission to command. The command screen delegates Back to Android. Holding Escape on a keyboard performs one action per press.
 
 ## 1.5.0 · November 26, 2026
 

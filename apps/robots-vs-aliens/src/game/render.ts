@@ -3,7 +3,6 @@ import {
   COLS,
   ENEMIES,
   ROWS,
-  SECTORS,
   type Bot,
   type BotKind,
   type Enemy,
@@ -479,8 +478,6 @@ export class Renderer {
   private selectSector(sector: number) {
     this.sector = sector;
     const scene = sectorScenes[sector] ?? sectorScenes[0];
-    const name = (SECTORS[sector] ?? SECTORS[0]).name;
-    this.canvas.setAttribute('aria-label', `${name} battlefield, five defense lanes`);
     // This also covers missing or corrupt artwork. Units and controls use the same coordinates.
     this.landscape = undefined;
     this.repaintTerrain();

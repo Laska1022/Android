@@ -6,6 +6,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 
 ## What's playable
 
+- Play in English or Russian. The game follows the device language on first launch. Choose **Settings → Language → Русский** or **Настройки → Язык → English** to switch, including during a mission. Both languages work offline.
 - Five robot classes: **Pulse** blaster, **Spark** generator, **Frost** disruptor, **Nova** artillery, and **Bastion** defender.
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
 - Each sector has its own battlefield, from the Greenline perimeter and Badlands to the Crystal Basin, Relay Nine and the Nest. Selecting an unlocked sector reveals its location and briefing.
@@ -56,6 +57,8 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 | `Escape` or pause button | Pause / resume                                                 |
 | `Space`                  | Pause when focus is not on a button; activate a focused button |
 | Arrows + Enter           | Navigate battlefield tiles and deploy                          |
+
+На русской раскладке **Й** выбирает орбитальный удар, **К** — разборку робота, а **У** собирает энергию. В игре откройте **Справочник**, чтобы посмотреть характеристики роботов и остальные команды.
 
 On phones, tap the cards and tiles. Android opens in landscape. Choose **Settings → Screen orientation → Follow phone** to use the phone’s rotation preference. Ordinary browser tabs adapt to the viewport.
 
