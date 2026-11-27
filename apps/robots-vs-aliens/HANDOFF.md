@@ -4,11 +4,11 @@
 
 The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offline in a browser or its Capacitor Android host. Run all game commands from this directory. See [AGENTS.md](AGENTS.md) for code ownership, [TESTING.md](TESTING.md) for reproducible checks and physical evidence, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
+**Current source is 1.5.3, Android code 9.** A settings change in an older tab preserves a newer campaign win. Pulse can hit a Scout already crossing its tile. The keyboard edge and reduced-motion reports are still open. [Bug report and reproductions](docs/KNOWN_BUGS.md)
+
 The latest public APK is **1.5.2** at `5672626`. Its checksum, v2 signature and all 67 production web files were verified after download. The public 1.5.1 and 1.5.2 debug certificates differ. On the locally signed Redmi build, the Scout’s bite, the Spitter’s ranged attack and system Back passed. [Release and APK](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.2) · [Verified build and device record](TESTING.md#november-27-2026--152-android-code-8)
 
 **Version 1.5.2, Android code 8.** The public 1.5.1 tag at `5a9da25` shipped the second AI’s full-body walk and attack animations for all five aliens across three skins. The parallel 1.5.1 build on main at `9be2de4` tested Android Back on the Redmi. The two lines meet in 1.5.2. Start future skin and animation work from main. [Animation clip](docs/screenshots/alien-motion.webp) · [Art handover](ART_HANDOFF.md) · [Verification by build](TESTING.md#validation-record)
-
-An older browser tab can erase campaign progress after a win. The bug review includes reproduction steps for that data loss and three combat, keyboard, and settings issues. [Open bugs in 1.5.2](docs/KNOWN_BUGS.md)
 
 The game defaults to landscape and remembers Follow phone. Both factions have three independently selectable finishes. Android Back dismisses a dialog, pauses or resumes combat, and returns from mission results to command. Public debug APK certificates have differed between releases. Keep an existing installation with valuable progress when Android reports a signature conflict. [Distribution history](TESTING.md#validation-record)
 

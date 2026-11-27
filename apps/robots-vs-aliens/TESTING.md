@@ -67,6 +67,11 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 27, 2026 · 1.5.3, Android code 9
+
+- **Browser and simulation.** All 30 unit tests and 36 Chromium desktop/mobile tests passed, with four platform-specific skips. A separate two-tab run won Cadet First Contact with three stars and 4,090 points using the normal budget. Sound was toggled in the older tab. After reload, mute, all three stars, the best score and the sector 2 unlock persisted. The seeded close-contact reproduction recorded three Pulse hits against the Scout at both tested positions. [Reproduction details](docs/KNOWN_BUGS.md)
+- **Android package.** Capacitor sync, `assembleDebug` and `lintDebug` passed. App lint reported four warnings and zero errors. The debug APK reported version 1.5.3, code 9, passed v2 signature verification and contained all 67 production files byte for byte. No physical Android device was attached for this run.
+
 ### November 27, 2026 · 1.5.2, Android code 8
 
 - **Published APK.** GitHub built tag `robots-vs-aliens-v1.5.2` at `5672626`. The downloaded APK is 10,244,945 bytes and its SHA-256 is `dbb962eeedf25f2aed865561fdf3f44e1841e7afbb848302baed11a3a1b4f735`. It passed v2 signature verification. Its package is `com.laska.robotvsaliens`, version 1.5.2, code 8. All 67 production web files matched the independent hosted web job byte for byte. Compared with the local Redmi build, the game JavaScript, CSS and art were identical. HTML whitespace, text-file line endings and the resulting cache identifier differed. [GitHub release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.2) · [Web, Android and publication jobs](https://github.com/Laska1022/Android/actions/runs/45950300989)

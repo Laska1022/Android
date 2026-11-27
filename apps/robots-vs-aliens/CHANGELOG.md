@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.3 · November 27, 2026
+
+- Changing a setting in an older tab preserves the best score, sector unlocks, stars and other preferences saved in another tab.
+- A defender placed on an approaching alien can hit it at point-blank range. Pulse now hits the Scout crossing its tile in First Contact.
+
 ## 1.5.2 · November 27, 2026
 
 - Android Back now pauses and resumes a mission, dismisses Settings and the field guide, and returns to command after a win or loss. Holding Escape on a keyboard triggers one action per press.

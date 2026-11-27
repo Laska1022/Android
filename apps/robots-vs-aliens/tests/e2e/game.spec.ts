@@ -1,5 +1,63 @@
 import { expect, test } from '@playwright/test';
 
+test('muting an older tab preserves another tab’s saved victory and loadout', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: /Sector 2:/ })).toBeDisabled();
+  const other = await context.newPage();
+  await other.goto('/');
+  await other.evaluate(() => {
+    localStorage.setItem('rva-save-v1', JSON.stringify({ unlocked: 1, best: 4120, stars: [3] }));
+  });
+  await other.reload();
+  await other.getByRole('button', { name: 'Settings', exact: true }).click();
+  await other.getByLabel('Robot skin', { exact: true }).selectOption('foundry');
+  await expect
+    .poll(() => other.evaluate(() => JSON.parse(localStorage.getItem('rva-save-v1')!).robotSkin))
+    .toBe('foundry');
+
+  await page.getByRole('button', { name: 'Toggle sound' }).click();
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('rva-save-v1')!)))
+    .toMatchObject({
+      unlocked: 1,
+      best: 4120,
+      stars: [3, 0, 0, 0, 0],
+      muted: true,
+      robotSkin: 'foundry',
+    });
+  await page.reload();
+  await expect(page.getByRole('button', { name: /Sector 2:/ })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Toggle sound' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+});
+
+test('simultaneous preference changes survive in tabs without Web Locks', async ({
+  page,
+  context,
+}) => {
+  await context.addInitScript(() =>
+    Object.defineProperty(navigator, 'locks', { value: undefined }),
+  );
+  const other = await context.newPage();
+  await Promise.all([page.goto('/'), other.goto('/')]);
+  await Promise.all([
+    page.locator('#settings-button').click(),
+    other.locator('#settings-button').click(),
+  ]);
+  await Promise.all([
+    page.getByLabel('Robot skin', { exact: true }).selectOption('foundry'),
+    other.getByLabel('Alien skin', { exact: true }).selectOption('riftborn'),
+  ]);
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('rva-save-v1') ?? 'null')))
+    .toMatchObject({ robotSkin: 'foundry', alienSkin: 'riftborn' });
+});
+
 test('deploy, recycle, pause, resume, and fight without browser errors', async ({
   page,
 }, testInfo) => {
