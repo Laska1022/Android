@@ -8,6 +8,8 @@ The latest public APK is **1.5.2** at `5672626`. Its checksum, v2 signature and 
 
 **Version 1.5.2, Android code 8.** The public 1.5.1 tag at `5a9da25` shipped the second AI’s full-body walk and attack animations for all five aliens across three skins. The parallel 1.5.1 build on main at `9be2de4` tested Android Back on the Redmi. The two lines meet in 1.5.2. Start future skin and animation work from main. [Animation clip](docs/screenshots/alien-motion.webp) · [Art handover](ART_HANDOFF.md) · [Verification by build](TESTING.md#validation-record)
 
+An older browser tab can erase campaign progress after a win. The bug review includes reproduction steps for that data loss and three combat, keyboard, and settings issues. [Open bugs in 1.5.2](docs/KNOWN_BUGS.md)
+
 The game defaults to landscape and remembers Follow phone. Both factions have three independently selectable finishes. Android Back dismisses a dialog, pauses or resumes combat, and returns from mission results to command. Public debug APK certificates have differed between releases. Keep an existing installation with valuable progress when Android reports a signature conflict. [Distribution history](TESTING.md#validation-record)
 
 The 1.3.0 sector art and mission briefings are included in this checkout. The local 1.3.0 APK cleared sectors 2–5 on the muted Redmi. Version 1.4.0 preserved all five three-star ratings across the upgrade. The external sector-art branch contains a parallel implementation. Use the shipped renderer and asset conventions here when merging artwork. [Versioned verification record](TESTING.md)
