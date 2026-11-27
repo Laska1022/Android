@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.0 · November 27, 2026
+
+- Expanded lanes gives the fight more screen space by default. Settings → Battle layout → Classic console restores the original framing. Both layouts keep all nine columns and five lanes reachable.
+- Choose Sector alloy, Copper foundry or Polar relay in Settings → Battlefield skin. Each choice works across the campaign and Survival and is available offline. [Copper foundry](docs/screenshots/field-copper-foundry.webp) · [Polar relay](docs/screenshots/field-polar-relay.webp)
+- Tap a gold bolt to collect its 35 energy. Each pickup has its own touch target and supports keyboard activation. Collect and E still collect every available drop.
+
 ## 1.5.1 · November 27, 2026
 
 **Public animation build.**

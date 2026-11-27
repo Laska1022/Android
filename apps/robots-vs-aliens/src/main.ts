@@ -7,16 +7,26 @@ import '@fontsource/dm-sans/latin-600.css';
 import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/space-mono/latin-400.css';
 import './style.css';
+import './game/battlefield.css';
 import {
   BOTS,
+  COLS,
+  ROWS,
   FIRST_PATROL_LANE,
   Game,
   SECTORS,
   startingEnergy,
   type BotKind,
 } from './game/engine';
-import { BOARD, Renderer, botIcon, alienIcon } from './game/render';
+import { Renderer, botIcon, alienIcon } from './game/render';
 import { LaneWarning } from './game/lane-warning';
+import {
+  BATTLE_LAYOUTS,
+  FIELD_SKINS,
+  fieldTextures,
+  isBattleLayout,
+  isFieldSkin,
+} from './game/field';
 import { GAME_BACK_EVENT, setGameBackHandled } from './game/navigation';
 import { ROBOT_SKINS, ALIEN_SKINS, isRobotSkin, isAlienSkin } from './game/skins';
 import {
@@ -70,8 +80,8 @@ $('#app').innerHTML = `
         <div class="battle-column">
           <div class="hud"><div class="energy-stat">${icon('bolt')}<strong id="energy">325</strong><span>ENERGY</span></div><div class="integrity">${icon('shield')}<div><span>CORE INTEGRITY</span><div id="hearts" aria-label="5 core integrity">${'<i></i>'.repeat(5)}</div></div></div><div class="wave-stat"><span id="wave-label">PREPARE YOUR SQUAD</span><strong id="wave-count">00 <small>/ 04</small></strong></div><button class="icon-button" id="pause-button" aria-label="Pause game" disabled>${icon('pause')}</button></div>
           <div class="arena" id="arena">
-            <canvas id="battlefield" aria-label="Animated alien landscape and tactical battlefield"></canvas>
-            <div id="battle-grid" class="battle-grid" role="group" aria-label="Battlefield: 5 lanes and 9 columns" hidden>${Array.from({ length: 45 }, (_, i) => `<button class="cell" data-row="${Math.floor(i / 9)}" data-col="${i % 9}" aria-label="Lane ${Math.floor(i / 9) + 1}, column ${(i % 9) + 1}, empty" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}</div>
+            <div class="battle-scene" id="battle-scene"><canvas id="battlefield" aria-label="Animated alien landscape and tactical battlefield"></canvas>
+            <div id="battle-grid" class="battle-grid" role="group" aria-label="Battlefield: 5 lanes and 9 columns" hidden>${Array.from({ length: 45 }, (_, i) => `<button class="cell" data-row="${Math.floor(i / 9)}" data-col="${i % 9}" aria-label="Lane ${Math.floor(i / 9) + 1}, column ${(i % 9) + 1}, empty" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}<div class="energy-layer" id="energy-layer"></div></div></div>
             <div class="menu-cover" id="menu-cover"><div class="mission-chip" id="mission-location">${SECTORS[0].location}</div><h1>The last <em>outpost.</em></h1><p id="mission-brief">${SECTORS[0].description}</p><button class="primary" id="start-button">Deploy squad ${icon('arrow')}</button></div>
             <div class="arena-caption"><span>TACTICAL FEED</span><span id="arena-instruction">SELECT AN EMPTY TILE TO DEPLOY PULSE</span></div>
             <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -88,7 +98,11 @@ $('#app').innerHTML = `
   <div id="modal-backdrop" class="modal-backdrop" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"></section></div>
 `;
 const renderer = new Renderer($('#battlefield'));
-const laneWarning = new LaneWarning($('#arena'));
+const laneWarning = new LaneWarning($('#arena'), $('#battle-scene'));
+document.body.dataset.battleLayout = save.battleLayout;
+renderer.fieldSkin = save.fieldSkin;
+const energyLayer = $('#energy-layer');
+const energyButtons = new Map<number, HTMLButtonElement>();
 function applySkins() {
   renderer.robotSkin = save.robotSkin;
   renderer.alienSkin = save.alienSkin;
@@ -166,6 +180,8 @@ function start(endless = false) {
   audio.unlock();
   menu = false;
   closeModal(false);
+  energyLayer.replaceChildren();
+  energyButtons.clear();
   game = new Game(sector, endless, undefined, save.difficulty);
   document.body.classList.add('in-mission');
   window.scrollTo(0, 0);
@@ -200,7 +216,50 @@ function mainMenu() {
   updateHud();
   $('#start-button').focus();
 }
+// The collectible and its touch target are the same button. Tiles are siblings,
+// so collection also takes precedence over recycle and orbital targeting.
+function syncEnergyButtons() {
+  for (const [id, button] of energyButtons) {
+    if (!menu && game.pickups.some((p) => p.id === id)) continue;
+    // Preserve the original touch target if a player holds it across expiry.
+    if (!menu && button.matches(':active')) continue;
+    button.remove();
+    energyButtons.delete(id);
+  }
+  if (menu) return;
+  for (const pickup of game.pickups) {
+    let button = energyButtons.get(pickup.id);
+    if (!button) {
+      button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'energy-target';
+      button.setAttribute('aria-label', `Collect ${pickup.value} energy in lane ${pickup.row + 1}`);
+      button.style.left = `${(pickup.x / COLS) * 100}%`;
+      button.style.top = `${((pickup.row + 0.5) / ROWS) * 100}%`;
+      button.innerHTML = `<span class="energy-core">${icon('bolt')}</span>`;
+      button.onpointerenter = () => {
+        renderer.hover = null;
+      };
+      button.onclick = (event) => {
+        if (menu || game.phase !== 'playing') return;
+        audio.unlock();
+        const keyboard = event.detail === 0;
+        if (game.collect(pickup.id)) toast(`+${pickup.value} energy`);
+        if (keyboard) {
+          const col = Math.floor(pickup.x);
+          $(`.cell[data-row="${pickup.row}"][data-col="${col}"]`).focus({ preventScroll: true });
+        }
+        updateHud();
+      };
+      energyLayer.append(button);
+      energyButtons.set(pickup.id, button);
+    }
+    button.classList.toggle('expiring', pickup.life < 3);
+  }
+}
+
 function updateHud() {
+  syncEnergyButtons();
   $('#battle-grid').toggleAttribute('data-first-patrol', !menu && game.awaitingLaunch);
   $('#energy').textContent = String(
     menu ? startingEnergy(sector, save.difficulty) : Math.floor(game.energy),
@@ -348,10 +407,11 @@ $('#speed-button').onclick = () => {
   $('#speed-button').textContent = `${speed}×`;
   $('#speed-button').setAttribute('aria-pressed', String(speed === 2));
 };
-$('#collect-button').onclick = () => {
-  for (const p of [...game.pickups]) game.collect(p.id);
+function collectAllEnergy() {
+  for (const pickup of game.pickups) game.collect(pickup.id);
   updateHud();
-};
+}
+$('#collect-button').onclick = collectAllEnergy;
 $('#beam-button').onclick = () => {
   audio.unlock();
   select('beam');
@@ -381,7 +441,7 @@ $('#sound-button').onclick = () => {
   persist();
   if (!audio.muted) audio.play('energy');
 };
-function skinOptions(choices: Record<string, string>, selectedSkin: string) {
+function selectOptions(choices: Record<string, string>, selectedSkin: string) {
   return Object.entries(choices)
     .map(
       ([id, name]) =>
@@ -418,10 +478,30 @@ $('#settings-button').onclick = () => {
       (supportsNativeOrientation()
         ? `<label class="setting"><span>Screen orientation<small id="orientation-help">Follow phone uses your device’s rotation setting.</small></span><select id="orientation-setting" aria-label="Screen orientation" disabled><option value="landscape">Landscape</option><option value="follow">Follow phone</option></select></label>`
         : '') +
-      `<label class="setting"><span class="skin-label"><img id="robot-skin-preview" src="${botIcon('pulse', save.robotSkin)}" alt=""/><span>Robot skin</span></span><select id="robot-skin" aria-label="Robot skin">${skinOptions(ROBOT_SKINS, save.robotSkin)}</select></label>` +
-      `<label class="setting"><span class="skin-label"><img id="alien-skin-preview" src="${alienIcon('scout', save.alienSkin)}" alt=""/><span>Alien skin</span></span><select id="alien-skin" aria-label="Alien skin">${skinOptions(ALIEN_SKINS, save.alienSkin)}</select></label>` +
+      `<label class="setting"><span>Battle layout</span><select id="battle-layout" aria-label="Battle layout">${selectOptions(BATTLE_LAYOUTS, save.battleLayout)}</select></label>` +
+      `<label class="setting"><span class="skin-label"><i id="field-sample" aria-hidden="true"></i><span>Battlefield skin</span></span><select id="field-skin" aria-label="Battlefield skin">${selectOptions(FIELD_SKINS, save.fieldSkin)}</select></label>` +
+      `<label class="setting"><span class="skin-label"><img id="robot-skin-preview" src="${botIcon('pulse', save.robotSkin)}" alt=""/><span>Robot skin</span></span><select id="robot-skin" aria-label="Robot skin">${selectOptions(ROBOT_SKINS, save.robotSkin)}</select></label>` +
+      `<label class="setting"><span class="skin-label"><img id="alien-skin-preview" src="${alienIcon('scout', save.alienSkin)}" alt=""/><span>Alien skin</span></span><select id="alien-skin" aria-label="Alien skin">${selectOptions(ALIEN_SKINS, save.alienSkin)}</select></label>` +
       `<label class="setting"><span>Sound effects<small>Original synthesized sci-fi audio</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>Reduced motion<small>Disable ambient movement and combat particles</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.</p><button class="primary" id="settings-done">Back to the outpost</button>`,
   );
+  const updateFieldSample = () => {
+    $('#field-sample').style.backgroundImage =
+      save.fieldSkin === 'standard' ? '' : `url("${fieldTextures[save.fieldSkin]}")`;
+  };
+  updateFieldSample();
+  $<HTMLSelectElement>('#battle-layout').onchange = (event) => {
+    const layout = (event.target as HTMLSelectElement).value;
+    if (!isBattleLayout(layout)) return;
+    document.body.dataset.battleLayout = save.battleLayout = layout;
+    persist();
+  };
+  $<HTMLSelectElement>('#field-skin').onchange = (event) => {
+    const skin = (event.target as HTMLSelectElement).value;
+    if (!isFieldSkin(skin)) return;
+    renderer.fieldSkin = save.fieldSkin = skin;
+    updateFieldSample();
+    persist();
+  };
   const orientation = document.querySelector<HTMLSelectElement>('#orientation-setting');
   if (orientation) wireOrientationSetting(orientation);
   $<HTMLSelectElement>('#robot-skin').onchange = (event) => {
@@ -468,22 +548,11 @@ $('#guide-button').onclick = () => {
   );
 };
 document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
-  cell.onclick = (e) => {
+  cell.onclick = () => {
     if (menu || game.phase !== 'playing') return;
     audio.unlock();
     const row = Number(cell.dataset.row),
       col = Number(cell.dataset.col);
-    if (e.detail > 0) {
-      const bounds = $('#battlefield').getBoundingClientRect();
-      const x = (((e.clientX - bounds.left) / bounds.width) * 1200 - BOARD.x) / 100;
-      const y = (((e.clientY - bounds.top) / bounds.height) * 700 - BOARD.y) / 82;
-      const pickup = game.pickups.find((p) => Math.hypot(p.x - x, p.row + 0.5 - y) < 0.38);
-      if (pickup) {
-        game.collect(pickup.id);
-        updateHud();
-        return;
-      }
-    }
     if (selected === 'beam') {
       if (game.beam(row)) {
         toast('Orbital strike deployed.');
@@ -556,9 +625,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key >= '1' && e.key <= '5') select(kinds[Number(e.key) - 1]);
   if (e.key.toLowerCase() === 'q' && !$<HTMLButtonElement>('#beam-button').disabled) select('beam');
   if (e.key.toLowerCase() === 'r') select('recycle');
-  if (!menu && e.key.toLowerCase() === 'e') {
-    for (const p of [...game.pickups]) game.collect(p.id);
-  }
+  if (!menu && e.key.toLowerCase() === 'e') collectAllEnergy();
   if (!menu && e.code === 'Space' && !e.repeat && (e.target as HTMLElement).tagName !== 'BUTTON') {
     e.preventDefault();
     pause();

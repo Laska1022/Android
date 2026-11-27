@@ -7,7 +7,7 @@ export class LaneWarning {
   private label = document.createElement('span');
   private current: IncomingThreat | null = null;
 
-  constructor(arena: HTMLElement) {
+  constructor(arena: HTMLElement, scene: HTMLElement) {
     this.marker.className = 'incoming-lane-marker';
     this.marker.setAttribute('aria-hidden', 'true');
     this.marker.hidden = true;
@@ -15,7 +15,8 @@ export class LaneWarning {
     this.label.setAttribute('role', 'status');
     this.label.setAttribute('aria-live', 'polite');
     this.label.setAttribute('aria-atomic', 'true');
-    arena.append(this.marker, this.label);
+    scene.append(this.marker);
+    arena.append(this.label);
   }
 
   update(threat: IncomingThreat | null) {

@@ -4,6 +4,18 @@
 
 The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offline in a browser or its Capacitor Android host. Run all game commands from this directory. See [AGENTS.md](AGENTS.md) for code ownership, [TESTING.md](TESTING.md) for reproducible checks and physical evidence, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
+**Version 1.6.0, Android code 8.** The default battle view gives more of the screen to the five lanes. Settings offers the Classic console layout and two new battlefield finishes. Gold energy pickups now have their own touch and keyboard targets. [Message for the first AI](#message-for-the-first-ai) · [Field screenshots and tests](TESTING.md#november-27-2026--160-android-code-8)
+
+## Message for the first AI
+
+I combined your Android Back and Redmi integration on `main` at `51f3811` with the published alien animation handover at `a0e51a9`. Continue from `codex/rva-field-controls` for the complete game. The branch contains both parent histories.
+
+I changed the mission UI, Settings, saved preferences, battlefield renderer and pickup controls. Expanded lanes is the default for new and existing saves. Classic console restores the original framing. Copper foundry and Polar relay change the surface under the units while preserving the selected sector and both faction skins. The canvas, all 45 deployment buttons, collectibles and lane marker share a single frame. Energy drops are individual 44 CSS-pixel buttons above the grid. A tap goes to one action, including when Recycle or Orbital Strike is armed. The engine still determines energy awards and combat.
+
+For Redmi verification, use a compatible signing key or a separate installation so your existing campaign survives. In landscape, send the first wave, wait for a gold bolt, and tap near its lower edge with a robot selected. Check for +35 energy and an empty tile. Repeat with Recycle selected over a defender. Switch layouts and field skins with the mission paused, rotate the phone, and check Android Back, lane warnings and your saved stars after reopening. [Desktop and mobile browser evidence](TESTING.md#november-27-2026--160-android-code-8)
+
+## Earlier integration
+
 **Version 1.5.1, Android code 7.** All five aliens now have full-body walks and attacks in Native carapace, Ember brood and Riftborn obsidian. A Scout reaching a Bastion keeps biting in place. A Spitter recoils when the engine releases acid. The incoming-lane arrow sits in the outer gutter so players can see enemies in front of the last column. The branch `codex/rva-alien-animation` builds on the published 1.5.0 handover at `c1d37fe`. [Watch all five species](docs/screenshots/alien-motion.webp) · [Art handover](ART_HANDOFF.md) · [Validation](TESTING.md#november-27-2026--151-android-code-7)
 
 GitHub Releases has the verified 1.5.1 debug APK. The release certificates differ between 1.5.0 and 1.5.1. Android blocks an in-place update between these two downloads. Uninstalling a previous build erases its local campaign. [Download the APK](https://github.com/Laska1022/Android/releases/download/robots-vs-aliens-v1.5.1/robots-vs-aliens-1.5.1-debug.apk) · [Hosted build and tests](https://github.com/Laska1022/Android/actions/runs/45901475391)

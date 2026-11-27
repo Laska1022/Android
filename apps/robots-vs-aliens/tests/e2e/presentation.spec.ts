@@ -4,6 +4,8 @@ const artwork = [
   'bastion',
   'brute',
   'command',
+  'copper-foundry',
+  'polar-relay',
   'foundry-pulse',
   'foundry-spark',
   'foundry-frost',

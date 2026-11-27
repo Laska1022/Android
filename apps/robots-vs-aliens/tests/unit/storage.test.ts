@@ -30,6 +30,8 @@ describe('save data', () => {
       difficulty: 'cadet',
       robotSkin: 'standard',
       alienSkin: 'standard',
+      battleLayout: 'expanded',
+      fieldSkin: 'standard',
     });
   });
   it('keeps v1 progress while accepting only supported campaign difficulty values', () => {
@@ -47,6 +49,36 @@ describe('save data', () => {
         difficulty: difficulty === 'veteran' ? 'veteran' : 'cadet',
         robotSkin: 'standard',
         alienSkin: 'standard',
+        battleLayout: 'expanded',
+        fieldSkin: 'standard',
+      });
+    }
+  });
+  it('restores layout and field skin independently while preserving older campaign progress', () => {
+    for (const [layout, field, wantLayout, wantField] of [
+      ['classic', 'foundry', 'classic', 'foundry'],
+      ['expanded', 'polar', 'expanded', 'polar'],
+      ['old', 'foundry', 'expanded', 'foundry'],
+      ['classic', 'toString', 'classic', 'standard'],
+    ]) {
+      vi.stubGlobal('localStorage', {
+        getItem: () =>
+          JSON.stringify({
+            unlocked: 4,
+            best: 4500,
+            robotSkin: 'foundry',
+            alienSkin: 'ember',
+            battleLayout: layout,
+            fieldSkin: field,
+          }),
+      });
+      expect(loadSave()).toMatchObject({
+        unlocked: 4,
+        best: 4500,
+        robotSkin: 'foundry',
+        alienSkin: 'ember',
+        battleLayout: wantLayout,
+        fieldSkin: wantField,
       });
     }
   });

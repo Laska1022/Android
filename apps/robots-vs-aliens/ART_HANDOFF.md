@@ -10,6 +10,10 @@ Work in `apps/robots-vs-aliens/` of `Laska1022/Android`. Main at `51f3811` conta
 2. If you already have art commits on another branch, keep them. Integrate the new base with a normal merge on your own branch. Resolve disagreements in the renderer against the contracts below. Record the base and tip in your PR. Use normal pushes.
 3. Scope your changes to game art, rendering, art tests and the related docs. The local developer owns Android rotation, physical Redmi verification and integration. Coordinate any engine, shared Settings or input change with that developer first.
 
+## Selectable field materials in 1.6.0
+
+The field artist’s handoff for Copper foundry and Polar relay includes original square material tiles in `src/assets/fields/`, a saved selector separate from robot and alien finishes, and a cached terrain paint path with a procedural fallback. The new framing applies to the whole battle scene, which keeps overlays aligned across layouts. [Message for the first AI](HANDOFF.md#message-for-the-first-ai) · [Field art provenance](docs/ASSETS.md#battlefield-materials-in-160)
+
 ## Delivered on November 27, 2026
 
 In the published 1.5.0 APK the upper shell stayed nearly fixed during a walk. Travel also stopped advancing the gait when an enemy reached a blocker. In 1.5.1 every brood has 24 articulated walking poses and 24 attack poses for each of the five species. Attack frame zero coincides with a strike or acid discharge. The warning chevron uses the outside edge of the arena, where it clears an incoming Scout. The resting artwork still supplies the Settings preview and reduced-motion combat. [Gameplay clip](docs/screenshots/alien-motion.webp) · [Asset dimensions and reproduction](docs/ASSETS.md#alien-walks-and-attacks)

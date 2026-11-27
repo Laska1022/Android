@@ -13,6 +13,7 @@ import {
 } from './engine';
 import { unitArtwork, type AlienSkin, type RobotSkin, type UnitSkin } from './skins';
 
+import { fieldTextures, type FieldSkin } from './field';
 import gaits from './gaits.json';
 import alienFrames from '../assets/motion/poses.json';
 
@@ -327,10 +328,48 @@ function projectile(c: Ctx, shot: Shot) {
   }
 }
 
+// Field materials and lane rails are painted only when the cached terrain changes.
+function drawFieldTile(
+  c: Ctx,
+  skin: Exclude<FieldSkin, 'standard'>,
+  texture: HTMLImageElement | undefined,
+  x: number,
+  y: number,
+  row: number,
+  col: number,
+) {
+  const foundry = skin === 'foundry';
+  const w = BOARD.cw,
+    h = BOARD.ch;
+  c.fillStyle = foundry ? '#211d1b' : '#142631';
+  c.fillRect(x, y, w, h);
+  c.fillStyle = foundry ? '#46403a' : '#364f60';
+  c.fillRect(x + 2, y + 3, w - 4, h - 6);
+  if (texture?.complete && texture.naturalWidth) {
+    c.save();
+    c.translate(x + w / 2, y + h / 2);
+    if ((row + col) % 2) c.rotate(Math.PI);
+    c.drawImage(texture, -w / 2 + 2, -h / 2 + 3, w - 4, h - 6);
+    c.restore();
+  }
+  if (foundry) {
+    line(c, x + 4, y + h - 4, x + w - 4, y + h - 4, '#ac7752', 2);
+    for (let i = 0; i < 3; i++)
+      line(c, x + 7 + i * 5, y + h - 7, x + 10 + i * 5, y + h - 12, '#c79361', 2);
+  } else {
+    line(c, x + 3, y + 4, x + w - 11, y + 4, '#7ca4b2', 1.4);
+    line(c, x + w - 11, y + 4, x + w - 4, y + 11, '#9bc5d3', 1.4);
+    line(c, x + 5, y + h - 6, x + 19, y + h - 6, '#76bac4', 2);
+  }
+}
+
 export class Renderer {
   private c: Ctx;
   private background = document.createElement('canvas');
   private sector = -1;
+  private field: FieldSkin = 'standard';
+  private surface?: HTMLImageElement;
+  private landscape?: HTMLImageElement;
   private sceneRequest = 0;
   hover: { row: number; col: number } | null = null;
   selection: BotKind | 'recycle' | 'beam' = 'pulse';
@@ -417,17 +456,40 @@ export class Renderer {
     return selected.complete && selected.naturalWidth ? selected : this.standard[kind];
   }
 
+  set fieldSkin(skin: FieldSkin) {
+    if (skin === this.field) return;
+    this.field = skin;
+    this.surface = undefined;
+    if (skin !== 'standard') {
+      const surface = new Image();
+      this.surface = surface;
+      surface.onload = () => {
+        if (this.surface === surface) this.repaintTerrain();
+      };
+      surface.src = fieldTextures[skin];
+    }
+    this.repaintTerrain();
+  }
+
+  private repaintTerrain() {
+    if (this.sector >= 0)
+      this.drawBackground(sectorScenes[this.sector] ?? sectorScenes[0], this.landscape);
+  }
+
   private selectSector(sector: number) {
     this.sector = sector;
     const scene = sectorScenes[sector] ?? sectorScenes[0];
     const name = (SECTORS[sector] ?? SECTORS[0]).name;
     this.canvas.setAttribute('aria-label', `${name} battlefield, five defense lanes`);
     // This also covers missing or corrupt artwork. Units and controls use the same coordinates.
-    this.drawBackground(scene);
+    this.landscape = undefined;
+    this.repaintTerrain();
     const request = ++this.sceneRequest;
     const landscape = new Image();
     landscape.onload = () => {
-      if (request === this.sceneRequest) this.drawBackground(scene, landscape);
+      if (request !== this.sceneRequest) return;
+      this.landscape = landscape;
+      this.repaintTerrain();
     };
     landscape.src = scene.image;
   }
@@ -457,6 +519,10 @@ export class Renderer {
       const y = BOARD.y + row * BOARD.ch;
       for (let col = 0; col < COLS; col++) {
         const x = BOARD.x + col * BOARD.cw;
+        if (this.field !== 'standard') {
+          drawFieldTile(c, this.field, this.surface, x, y, row, col);
+          continue;
+        }
         const floor = c.createLinearGradient(0, y, 0, y + BOARD.ch);
         floor.addColorStop(0, (row + col) % 2 ? '#354c54' : '#3d555a');
         floor.addColorStop(0.5, (row + col) % 2 ? '#293f48' : '#2e454c');
@@ -483,7 +549,7 @@ export class Renderer {
       line(c, 99, center, 140, center, '#a2c4caac', 2);
       line(c, 1076, center, 1102, center, scene.rift + '82', 1.5);
     }
-    if (scene.deckTint) {
+    if (scene.deckTint && this.field === 'standard') {
       c.fillStyle = scene.deckTint;
       c.fillRect(BOARD.x, BOARD.y, COLS * BOARD.cw, ROWS * BOARD.ch);
     }
@@ -611,16 +677,6 @@ export class Renderer {
       glow(c, x, y, 51, 44, '#bfff8a8c');
       panel(c, x - 27, y - 18, 50, 36, 7, '#53727b', '#d2f3ec');
       line(c, x + 12, y - 28, x + 12, y + 28, '#d8ffbf', 5);
-    }
-    for (const pickup of game.pickups) {
-      const x = BOARD.x + pickup.x * BOARD.cw;
-      const y = BOARD.y + (pickup.row + 0.5) * BOARD.ch + Math.sin(t * 3) * 3;
-      c.globalAlpha = pickup.life < 3 && !this.reducedMotion ? 0.73 + Math.sin(t * 10) * 0.18 : 1;
-      glow(c, x, y, 30, 30, '#ffc65a75');
-      panel(c, x - 15, y - 15, 30, 30, 7, '#44351a', '#ffd77c');
-      line(c, x + 3, y - 10, x - 5, y + 1, '#ffedaf', 3);
-      line(c, x - 5, y + 1, x + 4, y + 1, '#ffedaf', 3);
-      line(c, x + 4, y + 1, x - 3, y + 11, '#ffedaf', 3);
     }
     if (!this.reducedMotion) {
       for (const p of game.particles) {

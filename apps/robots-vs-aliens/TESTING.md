@@ -67,6 +67,24 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 27, 2026 · 1.6.0, Android code 8
+
+**Pickup reproduction.** The web bundle extracted from the published 1.5.1 APK ran at 775 × 364 in Chromium with touch emulation. A real touchscreen tap 18 CSS pixels below the gold bolt’s center deployed the selected Bastion. Energy fell from 194 to 119 and the pickup count stayed at one. In the new build the same offset activates the pickup’s 44 × 44 button, awards 35 energy and leaves the underlying tile alone. Browser tests repeat this with a build selected, with Recycle over an occupied tile, and with Orbital Strike armed. They also exercise Enter on an individual drop, the Collect button for two simultaneous drops and the E shortcut.
+
+**Usable lane area.** These measurements come from the actual 9 × 5 button grid during a mission. Screen and grid dimensions are in CSS pixels, rounded to the nearest pixel. Classic matched the published 1.5.1 grid in the landscape phone comparison.
+
+| Viewport | Classic console | Expanded lanes |
+| --- | ---: | ---: |
+| 775 × 364 landscape phone | 437 × 141 | 514 × 202 |
+| 393 × 719 portrait phone | 284 × 139 | 297 × 199 |
+| 1440 × 960 desktop | 827 × 377 | 967 × 567 |
+
+**Art and settings.** Exercised the three field finishes after an offline reload and switched layouts during the same mission with a deployed defender. Pixel comparisons sampled the actual rendered tiles. The late-response check confirms a previous material cannot overwrite the selected finish. A blocked material request still leaves the lane markings and deployment targets usable. [Copper foundry, landscape](docs/screenshots/field-copper-foundry.webp) · [Polar relay, landscape](docs/screenshots/field-polar-relay.webp)
+
+**Automated and native checks.** All 29 unit tests passed. The desktop and mobile browser projects passed 41 scenarios with seven input- or platform-specific skips. The expanded-layout viewport check includes 340 × 568 portrait, 667 × 320 landscape and 915 × 600 tablet. Capacitor sync, Gradle `assembleDebug` and `lintDebug` passed. Android app lint reported zero errors and four warnings. The local v2-signed APK identifies as `com.laska.robotvsaliens`, 1.6.0, code 8. All 69 bundled production files, including 41 WebPs, matched the tested build.
+
+**Device follow-up.** ADB listed no connected phone or emulator. The first AI has the Redmi touch, orientation and save-persistence scenario. [Message for the first AI](HANDOFF.md#message-for-the-first-ai)
+
 ### November 27, 2026 · 1.5.1, Android code 7
 
 - **Web and combat.** All 28 unit tests passed. Desktop Chromium and Pixel 7 emulation passed 26 browser scenarios, with two input-specific skips. In the ordinary Cadet UI, a player bought a Bastion in lane 3, column 9. The first Scout walked to it, dealt damage through repeated attack frames at one fixed position at both speeds, paused on an identical canvas and resumed walking after recycling. The warning remained visible beyond the incoming Scout. Reduced motion, a failed sheet, skin switching and an offline reload are covered. [First Contact at 775 × 364](docs/screenshots/alien-contact-phone.webp)

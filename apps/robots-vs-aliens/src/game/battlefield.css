@@ -1,0 +1,230 @@
+/* The canvas, tile buttons, pickups and lane marker share this coordinate space. */
+.battle-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.energy-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+button.energy-target {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  touch-action: manipulation;
+}
+button.energy-target:active:not(:disabled) {
+  transform: translate(-50%, -50%);
+}
+.energy-core {
+  display: grid;
+  place-items: center;
+  width: clamp(24px, 2.5vw, 34px);
+  height: clamp(24px, 2.5vw, 34px);
+  border: 2px solid #ffe4a1;
+  border-radius: 34% 45% 34% 45%;
+  background: linear-gradient(145deg, #a86a22, #49331c 65%);
+  box-shadow:
+    0 0 0 2px #4e351b,
+    0 0 9px 2px #ffc65d99,
+    inset 0 1px 2px #ffffbf7a;
+}
+.energy-core svg {
+  width: 70%;
+  height: 70%;
+  fill: #ffdc80;
+  stroke: #fff4c4;
+}
+.energy-target.expiring .energy-core {
+  border-style: dashed;
+}
+button.energy-target:focus-visible {
+  outline-color: #fff0b0;
+}
+#field-sample {
+  display: inline-block;
+  width: 43px;
+  height: 30px;
+  border: 1px solid #758b90;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 11px, #82949b66 12px 13px),
+    linear-gradient(160deg, #4b6269, #253842);
+  background-size: cover;
+}
+
+/* Frame world x=45..1200 and y=108..618. The full 9×5 grid, core and rift fit. */
+.in-mission[data-battle-layout='expanded'] .battle-scene {
+  position: absolute;
+  right: 0;
+  top: calc(-108 * 100% / 510);
+  width: calc(1200 * 100% / 1155);
+  height: calc(700 * 100% / 510);
+}
+.in-mission[data-battle-layout='expanded'] #battlefield {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.in-mission[data-battle-layout='expanded'] main {
+  max-width: 1660px;
+  padding: 6px clamp(5px, 1.3vw, 22px) 0;
+}
+.in-mission[data-battle-layout='expanded'] .site-header {
+  height: 48px;
+}
+.in-mission[data-battle-layout='expanded'] .console-top {
+  height: 28px;
+}
+.in-mission[data-battle-layout='expanded'] .hud {
+  height: 48px;
+}
+.in-mission[data-battle-layout='expanded'] .arena {
+  height: clamp(228px, min(49vw, calc(100vh - 180px)), 760px);
+  min-height: 0;
+}
+.in-mission[data-battle-layout='expanded'] .arena-caption {
+  display: none;
+}
+.in-mission[data-battle-layout='expanded'] .incoming-lane-label {
+  top: 5px;
+  bottom: auto;
+  right: 1%;
+}
+@media (min-width: 951px), (orientation: landscape) and (min-width: 560px) {
+  .in-mission[data-battle-layout='expanded'] .console-body {
+    grid-template-columns: minmax(0, 1fr) clamp(106px, 11vw, 170px);
+  }
+  .in-mission[data-battle-layout='expanded'] .deck {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 6px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-cards {
+    flex-direction: column;
+  }
+  .in-mission[data-battle-layout='expanded'] .deck-heading .eyebrow,
+  .in-mission[data-battle-layout='expanded'] .deck-heading .count,
+  .in-mission[data-battle-layout='expanded'] .loadout-tip,
+  .in-mission[data-battle-layout='expanded'] .bot-card .keycap,
+  .in-mission[data-battle-layout='expanded'] .bot-details small {
+    display: none;
+  }
+  .in-mission[data-battle-layout='expanded'] .deck-heading {
+    margin-bottom: 5px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-card {
+    display: grid;
+    grid-template-columns: minmax(30px, 42%) 1fr;
+    align-content: center;
+    gap: 0 4px;
+    min-height: 55px;
+    padding: 3px 4px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-card img {
+    grid-row: span 2;
+    width: 100%;
+    height: 40px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-details,
+  .in-mission[data-battle-layout='expanded'] .bot-cost {
+    margin: 0;
+    justify-self: start;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-details strong {
+    font-size: 15px;
+  }
+  .in-mission[data-battle-layout='expanded'] .abilities {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    height: auto;
+  }
+  .in-mission[data-battle-layout='expanded'] .abilities button {
+    width: 100%;
+    min-height: 34px;
+    padding: 2px 4px;
+    justify-content: center;
+  }
+}
+@media (max-width: 950px) and (orientation: portrait) {
+  .in-mission[data-battle-layout='expanded'] .arena {
+    height: clamp(236px, 63vw, 450px);
+  }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  .in-mission[data-battle-layout='expanded'] main {
+    padding: 2px 4px 0;
+  }
+  .in-mission[data-battle-layout='expanded'] .site-header {
+    height: 33px;
+  }
+  .in-mission[data-battle-layout='expanded'] .hud {
+    height: 34px;
+  }
+  .in-mission[data-battle-layout='expanded'] .arena {
+    height: clamp(150px, calc(100vh - 113px), 448px);
+    height: clamp(150px, calc(100dvh - 113px), 448px);
+  }
+  .in-mission[data-battle-layout='expanded'] .battle-toolbar {
+    height: 39px;
+  }
+  .in-mission[data-battle-layout='expanded'] .deck {
+    padding: 4px;
+    gap: 3px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-cards {
+    gap: 3px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-card {
+    min-height: 34px;
+    padding: 1px 2px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-card img {
+    height: 31px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-details strong {
+    font-size: 12px;
+  }
+  .in-mission[data-battle-layout='expanded'] .abilities {
+    margin: 2px 0 0;
+    gap: 2px;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 660px) and (orientation: portrait) {
+  .in-mission[data-battle-layout='expanded'] .site-header {
+    height: 42px;
+  }
+  .in-mission[data-battle-layout='expanded'] .console-top {
+    height: 24px;
+  }
+  .in-mission[data-battle-layout='expanded'] .hud {
+    height: 42px;
+  }
+  .in-mission[data-battle-layout='expanded'] .loadout-tip,
+  .in-mission[data-battle-layout='expanded'] .bot-details small {
+    display: none;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-card {
+    min-height: 64px;
+  }
+  .in-mission[data-battle-layout='expanded'] .bot-card img {
+    height: 31px;
+  }
+  .in-mission[data-battle-layout='expanded'] .abilities {
+    grid-row: auto;
+  }
+}

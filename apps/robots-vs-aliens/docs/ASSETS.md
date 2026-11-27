@@ -92,6 +92,12 @@ Run `node scripts/generate-strides.mjs` with Playwright Chromium installed. Set 
 
 The three sheets total 4,295,412 bytes, an increase of 2,559,158 bytes over 1.5.0. Combat references the equipped brood’s sheet and draws one cropped frame per alien. The comparison clip uses the game renderer and advances real battles at 60 simulation steps per second. The left column follows unopposed aliens and the right places a Bastion in each alien’s attack range. [Animated comparison](screenshots/alien-motion.webp)
 
+## Battlefield materials in 1.6.0
+
+Copper foundry and Polar relay are original floor materials generated for this game with OpenAI ImageGen. The brief asked for two independent overhead industrial panels with quiet centers. The foundry uses worn gunmetal, copper scoring and cooling louvers. The relay uses slate ceramic, titanium edging and icy glass channels. The resulting 1774 × 887 atlas was split at its midpoint. Each 887 px square was resampled to 320 × 320 and encoded as WebP at quality 83.
+
+The two files total 31,720 bytes. The renderer varies their orientation across the 45 tiles and draws lane seams and edge markings into the cached sector background. Each skin also has authored borders and a base color available during loading or after a failed decode. [Foundry in play](screenshots/field-copper-foundry.webp) · [Relay in play](screenshots/field-polar-relay.webp)
+
 ## Launcher and interface
 
 The original launcher emblem is an angular ivory helmet around a continuous cyan sensor slit, with two coral service markings. The vector source is [public/icon.svg](../public/icon.svg). Android themed launchers use the matching [monochrome vector](../android/app/src/main/res/drawable/ic_launcher_monochrome.xml).

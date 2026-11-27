@@ -10,6 +10,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
 - Each sector has its own battlefield, from the Greenline perimeter and Badlands to the Crystal Basin, Relay Nine and the Nest. Selecting an unlocked sector reveals its location and briefing.
 - Choose robot and alien skins independently in Settings. All five aliens have full-body walking and attack animations in each brood, including ranged attacks against defenders. The art is bundled for offline play. [See the aliens in motion](docs/screenshots/alien-motion.webp)
+- Expanded lanes gives the battlefield more screen space by default. Settings → Battle layout switches to Classic console at any time. Settings → Battlefield skin changes the floor to Sector alloy, Copper foundry or Polar relay. [Landscape battle](docs/screenshots/field-copper-foundry.webp)
 - Energy pickups, health-based recycling, lane-wide orbital strikes, pause, and double speed.
 - Procedural sci-fi sound effects, reduced-motion settings, keyboard navigation, and touch controls.
 - Saved campaign unlocks, star ratings, preferences, and best score on the current device.
@@ -43,7 +44,7 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 1. Select an unlocked sector, read its briefing and choose **Deploy squad**. The default **Cadet** campaign lets you set up before the first attack in First Contact. Press **Send wave** when ready. For the original challenge, choose **Veteran** in Settings. Survival always uses Veteran rules.
 2. Select a robot card, then an empty tile. Aliens enter from the right; defend the core on the left.
 3. Place Spark generators in the back. Cover threatened lanes with Pulse, then combine Frost and Nova. Put Bastion in front to buy time.
-4. Collect golden energy cells. Orbital strike clears a threatened lane; each lane also has one automatic emergency sweeper.
+4. Tap a gold bolt to collect 35 energy. The Collect button or E gathers every available bolt. Orbital strike clears a threatened lane, and each lane also has one automatic emergency sweeper.
 5. Clear every wave to unlock the next sector. Remaining core integrity determines your stars.
 
 | Control                  | Action                                                         |

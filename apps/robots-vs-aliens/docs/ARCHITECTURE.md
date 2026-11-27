@@ -19,7 +19,7 @@ Vite + strict TypeScript, Canvas 2D, semantic HTML controls, CSS, Web Audio, a g
 
 ## Simulation
 
-Coordinates are in cells. There are 5 rows and 9 columns. The logical Canvas is 1200 × 700; the platform begins at (157, 170), with 100 × 82 cells. DOM tile bounds match the renderer using percentages. UI device pixels are converted back to logical coordinates when picking up energy.
+Coordinates are in cells. There are 5 rows and 9 columns. The logical Canvas is 1200 × 700; the platform begins at (157, 170), with 100 × 82 cells. DOM tile bounds match the renderer using percentages. The battle scene contains the canvas, placement grid, lane arrow and collectible buttons. Classic console shows the entire backing canvas. Expanded lanes frames logical x = 45–1200 and y = 108–618. The frame scales all those elements together.
 
 The engine has no browser dependencies. `Game.update(dt)` caps input at 0.1 seconds; the controller uses a 1/60-second accumulator and clamps long frames to avoid runaway catch-up. Hiding the document pauses play. 2× speed advances twice as many fixed simulation steps. Seeded randomness supports reproducible tests. Render animation never changes hitboxes.
 
@@ -29,9 +29,13 @@ Campaign completion requires the last wave's spawn queue and active enemies to b
 
 ## Persistence
 
-The `rva-save-v1` record stores `unlocked` (0–4), `best`, `stars` (five integers, 0–3), `muted`, `reducedMotion` and `difficulty`. Older records keep their progress and load the Cadet preference. Malformed data falls back to valid values. If storage is unavailable, the session remains playable. Progress is local to the device or browser. Closing the process ends a running battle.
+The `rva-save-v1` record stores `unlocked` (0–4), `best`, `stars` (five integers, 0–3), `muted`, `reducedMotion`, `difficulty`, independent robot and alien skins, `battleLayout` and `fieldSkin`. Older records keep their progress and load the Cadet preference. Malformed data falls back to valid values. If storage is unavailable, the session remains playable. Progress is local to the device or browser. Closing the process ends a running battle.
 
 The controller passes the chosen difficulty to each new campaign. Cadet holds the simulation clock and income before the player launches First Contact. The HUD and highlighted center lane use the first patrol's lane sequence. The opening budget and enemy-count adjustments taper over sectors one and two. Survival always runs the Veteran rules.
+
+Energy drops are native HTML buttons in an absolute layer inside the placement grid. Their center is the pickup’s fractional column and lane center. A 44 × 44 CSS-pixel button receives native mouse, touch and keyboard activation. Its visible bolt is part of the button. The HUD reconciles buttons with live pickup IDs at spawn, collection and expiry. Gameplay owns the single successful award in `Game.collect(id)`. The Collect action and E use the same engine method for every live drop.
+
+Changing the field finish repaints the currently cached panorama and platform. Only the latest sector request can install a panorama, and only the selected material can repaint after its texture loads. Normal frames reuse the resulting canvas.
 
 ## Offline and hosting
 
