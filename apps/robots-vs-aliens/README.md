@@ -9,7 +9,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 - Five robot classes: **Pulse** blaster, **Spark** generator, **Frost** disruptor, **Nova** artillery, and **Bastion** defender.
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
 - Each sector has its own battlefield, from the Greenline perimeter and Badlands to the Crystal Basin, Relay Nine and the Nest. Selecting an unlocked sector reveals its location and briefing.
-- Ten robot and alien sprites share the battlefield with weapon trails, impact lighting and emergency sweepers. All sector art is bundled for offline play.
+- Choose robot and alien skins independently in Settings. All five aliens have full-body walking and attack animations in each brood, including ranged attacks against defenders. The art is bundled for offline play. [See the aliens in motion](docs/screenshots/alien-motion.webp)
 - Energy pickups, health-based recycling, lane-wide orbital strikes, pause, and double speed.
 - Procedural sci-fi sound effects, reduced-motion settings, keyboard navigation, and touch controls.
 - Saved campaign unlocks, star ratings, preferences, and best score on the current device.

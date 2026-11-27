@@ -8,10 +8,9 @@
 }
 
 .incoming-lane-marker {
-  left: 89%;
-  width: 6.5%;
-  max-width: 53px;
-  height: clamp(11px, 2.2vw, 17px);
+  right: 0.35%;
+  width: clamp(9px, 2.1%, 22px);
+  height: clamp(10px, 1.7vw, 16px);
   transform: translateY(-50%);
   clip-path: polygon(0 50%, 24% 0, 100% 0, 100% 100%, 24% 100%);
   background: #ffb76e;
@@ -22,21 +21,7 @@
   position: absolute;
   inset: 2px;
   background: #331e25;
-  clip-path: polygon(
-    8% 50%,
-    30% 0,
-    39% 0,
-    20% 50%,
-    39% 100%,
-    30% 100%,
-    8% 50%,
-    48% 50%,
-    70% 0,
-    100% 0,
-    100% 100%,
-    70% 100%,
-    48% 50%
-  );
+  clip-path: polygon(12% 50%, 52% 8%, 79% 8%, 41% 50%, 79% 92%, 52% 92%);
 }
 
 .incoming-lane-label {

@@ -1,9 +1,15 @@
 # Changelog
 
+## 1.5.2 · November 27, 2026
+
+- Android Back now pauses and resumes a mission, dismisses Settings and the field guide, and returns to command after a win or loss. Holding Escape on a keyboard triggers one action per press.
+- The same APK includes the second AI’s 24-frame walks and attacks for every alien and all three alien finishes. The warning arrow stays clear of enemies entering the last column. [Animation preview](docs/screenshots/alien-motion.webp)
+- The offline asset list uses the same URL paths when built on Windows and Linux.
+
 ## 1.5.1 · November 27, 2026
 
-- Integrated the second developer’s 1.5.0 Foundry and Riftborn work with Android Back navigation. Both skin families, their animations and their original commits are included.
-- Android Back pauses and resumes missions, dismisses dialogs and returns from a completed mission to command. The command screen delegates Back to Android. Holding Escape on a keyboard performs one action per press.
+- Scouts snap their jaws, Runners rake with their forelimbs, Brutes ram, Spitters draw back to launch acid, and Overlords sweep their claws. All three alien skins animate while walking and while attacking a defender. Frost slows their stride, 2× speeds up combat and pause holds the current pose. [Watch the animations](docs/screenshots/alien-motion.webp)
+- Moved the incoming-lane chevron to the outer edge so it clears a Scout entering the last column.
 
 ## 1.5.0 · November 26, 2026
 

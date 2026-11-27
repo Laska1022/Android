@@ -107,7 +107,11 @@ jobs:
           mv app-debug.apk "$asset"
           digest=$(sha256sum "$asset" | cut -d ' ' -f 1)
           notes="$RUNNER_TEMP/game-release.md"
-          printf 'Android debug APK for **Robots vs Aliens %s**. An existing installation can be updated when its signing certificate matches.\n\nSHA-256 for `%s` is `%s`.\n' "$version" "$asset" "$digest" > "$notes"
+          {
+            printf 'Android debug APK for **Robots vs Aliens %s**. [Changes in this version](https://github.com/%s/blob/%s/apps/robots-vs-aliens/CHANGELOG.md).\n\n' "$version" "$GH_REPO" "$RELEASE_TAG"
+            printf 'Android requires a matching signing certificate for in-place updates. These CI debug builds can have different certificates. If Android rejects an update, keep your existing installation to preserve its campaign. Uninstalling erases local progress.\n\n'
+            printf 'SHA-256 for `%s` is `%s`.\n' "$asset" "$digest"
+          } > "$notes"
 
           # A retry may find the draft created before an interrupted upload.
           state="$RUNNER_TEMP/game-release.json"

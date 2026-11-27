@@ -67,7 +67,16 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 27, 2026 · 1.5.2, Android code 8
+
+- **Automated.** The complete release run passed 28 unit tests and 32 desktop/mobile Chromium scenarios. Four input-specific cases were skipped. An earlier run timed out waiting for the service worker in the mobile offline-launch case. That case passed five consecutive repeats and the full rerun. Capacitor sync, `assembleDebug` and `lintDebug` passed. App lint reported four warnings and zero errors.
+- **Local Android package.** The tested debug APK was 10,246,604 bytes with SHA-256 `1ca2e70dd6853f31067f5f71fba1509e7081bb8af5a1265a2c6931043b1cd85d`. All 67 production web files matched their APK entries. Precache URLs use forward slashes on Windows and Linux.
+- **Physical Redmi Note 7.** The muted local build upgraded in place from the Android Back build of 1.5.1. Android 9 / WebView 101 displayed 775 × 364 CSS pixels in landscape. All five three-star ratings, the 12,710 best score, Cadet, mute, Foundry and Riftborn survived. Android Back dismissed Settings, paused on an identical battlefield image and resumed the mission.
+- **Combat.** In First Contact a lane-three Scout walked through all 24 frames, struck a Bastion in column nine (950 to 931 health) and showed all 24 attack frames at 2×. It resumed walking after recycling. A short sample after recycling measured 59.98 WebView animation callbacks/s over 180 intervals and 16.67 ms at p95. The command screen remained muted on exit. [Physical contact screenshot](docs/screenshots/redmi-scout-contact-1.5.2.jpg)
+
 ### November 27, 2026 · 1.5.1, Android code 7
+
+#### Main build with Android Back at `9be2de4`
 
 - **Hosted.** The web and Android jobs passed for `9be2de4` on main. [GitHub Actions run](https://github.com/Laska1022/Android/actions/runs/45900000216) · [Downloadable debug APK artifact](https://github.com/Laska1022/Android/actions/runs/45900000216/artifacts/15155930507)
 
@@ -80,6 +89,37 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 **Installed-game performance.** Wave-two samples covered each combination of 1×/2× and full/reduced motion in both sectors with the alternate finishes. Each sample tracked 180 WebView animation intervals. The eight samples measured 59.6–60.0 callbacks/s and approximately 16.68 ms at p95. Separate memory snapshots measured 137,697–139,603 KiB PSS for the app and 70,697–82,670 KiB PSS for the game-bound WebView renderer. The battery sensor read 27–28 °C. Combat continued between samples, so the live scenes differed. [Individual measurements](docs/benchmarks/redmi-1.5.1.json)
 
 **Controlled physical Chrome comparison.** A USB-loopback QA page on the same device replayed the published Last Light renderer fixture with 30 robots, 30 aliens, 20 shots and 120 particles. The canvas backing was 1440 × 840, scaled to fit a 393 × 719 CSS-pixel Chrome 101 viewport. Each pass warmed up for 60 callbacks and recorded the next 360. The order was 1.4.0 standard, 1.5.1 standard, 1.5.1 alternate, then the reverse. All six samples delivered 59.97–59.98 callbacks/s. The p95 CPU draw submission times were 7.0/7.5 ms for the baseline, 7.4/7.5 ms for integrated standard art, and 7.8/7.5 ms for Foundry/Riftborn. These short runs do not measure sustained thermal throttling. The Android APK measurements above used actual combat. [Six controlled samples](docs/benchmarks/redmi-1.5.1.json)
+
+#### Published alien-animation build at `5a9da25`
+
+- **Web and combat.** All 28 unit tests passed. Desktop Chromium and Pixel 7 emulation passed 26 browser scenarios, with two input-specific skips. In the ordinary Cadet UI, a player bought a Bastion in lane 3, column 9. The first Scout walked to it, dealt damage through repeated attack frames at one fixed position at both speeds, paused on an identical canvas and resumed walking after recycling. The warning remained visible beyond the incoming Scout. Reduced motion, a failed sheet, skin switching and an offline reload are covered. [First Contact at 775 × 364](docs/screenshots/alien-contact-phone.webp)
+- **Visible movement.** At a 583 × 241 CSS-pixel battlefield, opposite 1.5.0 walk frames changed zero upper-body silhouette pixels for each of the 15 species and skin combinations. The same alpha-mask comparison in 1.5.1 changed 28–189 upper-body pixels when walking and 55–359 between anticipation and contact. The browser suite checks both halves of all 30 walk and attack silhouettes offline. Baking every atlas twice produced identical bytes. The clip shows five real game simulations per column per finish, sampled at 20 fps. The left side advances and the right actually damages a Bastion. [8-second motion comparison](docs/screenshots/alien-motion.webp)
+- **Android.** Capacitor sync, Gradle `assembleDebug` and `lintDebug` passed. Android app lint reported zero errors and four warnings. The local v2-signed debug APK reported `com.laska.robotvsaliens`, version 1.5.1, code 7. All 67 production files, including the 39 WebPs, matched the APK byte for byte.
+- **Published APK.** GitHub Actions passed its web, Android and release jobs at tag `robots-vs-aliens-v1.5.1`, commit `5a9da25`. The public download is 10,242,713 bytes. Its SHA-256 is `e84bc49a12330524ad052be297fcbf6ed0cd73689e57cca69dcc06fcba868b78`, matching the release notes. It passed v2 signature verification and all 67 packaged web files matched the tested build. [GitHub Release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.1) · [Hosted checks](https://github.com/Laska1022/Android/actions/runs/45901475391)
+- **Upgrade compatibility.** The published 1.5.0 signing certificate starts with `51094d51e2dd` (SHA-256). The 1.5.1 certificate starts with `885b90ad080d`. Android rejects an in-place update between these builds. Uninstalling erases device-local progress. Use a separate test device to keep a 1.5.0 campaign intact. A persistent signing key held by the release owner is needed for reliable updates in a future release series.
+- **Physical device.** ADB listed zero attached devices. Phone frame delivery, process memory, thermal behavior and upgrade persistence on the Redmi remain open. [Hardware scenario](ART_HANDOFF.md#delivered-on-november-27-2026)
+
+The renderer comparison uses 30 aliens (15 walking, 15 attacking), 30 robots, 20 projectiles and 120 particles at DPR 2. Each trial discards 60 warm-up frames and measures 360 callbacks. The table gives the median of three interleaved trials on Linux Chromium 156.0.8078.79. Replaying 1,200 fixed steps with standard skins at 1× and alternate skins at 2× produced identical serialized game states.
+
+| Version and brood | Animation callbacks/s | p95 frame interval | p95 draw submission |
+| --- | ---: | ---: | ---: |
+| 1.5.0 Native | 60.0 | 16.7 ms | 0.7 ms |
+| 1.5.1 Native | 60.0 | 16.7 ms | 0.7 ms |
+| 1.5.0 Riftborn | 59.8 | 16.7 ms | 0.6 ms |
+| 1.5.1 Riftborn | 60.0 | 16.7 ms | 0.7 ms |
+
+Run the same fixture against the released source from the app directory.
+
+```sh
+baseline_src=$(mktemp -d)
+repo_root=$(git rev-parse --show-toplevel)
+git -C "$repo_root" archive robots-vs-aliens-v1.5.0 apps/robots-vs-aliens/src |
+  tar -x -C "$baseline_src" --strip-components=2
+node scripts/measure-render.mjs "$baseline_src"
+node scripts/measure-render.mjs .
+node scripts/measure-render.mjs "$baseline_src" alternate
+node scripts/measure-render.mjs . alternate
+```
 
 ### November 26, 2026 · 1.5.0, Android code 6
 
