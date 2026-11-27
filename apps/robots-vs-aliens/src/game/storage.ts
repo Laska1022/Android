@@ -31,7 +31,7 @@ const defaults = (): Save => ({
   robotSkin: 'standard',
   alienSkin: 'standard',
   battleLayout: 'expanded',
-  fieldSkin: 'standard',
+  fieldSkin: 'turf',
 });
 function parseSave(value: string | null): Save {
   try {
@@ -50,6 +50,7 @@ function parseSave(value: string | null): Save {
       robotSkin: isRobotSkin(raw.robotSkin) ? raw.robotSkin : 'standard',
       alienSkin: isAlienSkin(raw.alienSkin) ? raw.alienSkin : 'standard',
       battleLayout: isBattleLayout(raw.battleLayout) ? raw.battleLayout : 'expanded',
+      // Campaigns saved before field skins used the original alloy deck.
       fieldSkin: isFieldSkin(raw.fieldSkin) ? raw.fieldSkin : 'standard',
     };
   } catch {

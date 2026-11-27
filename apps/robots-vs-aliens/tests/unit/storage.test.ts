@@ -116,6 +116,18 @@ describe('save data', () => {
       });
     }
   });
+  it('starts new players on turf and retains the original floor for legacy campaigns', () => {
+    vi.stubGlobal('localStorage', { getItem: () => null });
+    expect(loadSave().fieldSkin).toBe('turf');
+    for (const [raw, expected] of [
+      [{ best: 4200 }, 'standard'],
+      [{ fieldSkin: 'standard' }, 'standard'],
+      [{ fieldSkin: 'turf' }, 'turf'],
+    ] as const) {
+      vi.stubGlobal('localStorage', { getItem: () => JSON.stringify(raw) });
+      expect(loadSave().fieldSkin).toBe(expected);
+    }
+  });
   it('restores layout and field skin independently while preserving older campaign progress', () => {
     for (const [layout, field, wantLayout, wantField] of [
       ['classic', 'foundry', 'classic', 'foundry'],

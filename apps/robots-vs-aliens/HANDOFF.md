@@ -4,13 +4,13 @@
 
 The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offline in a browser or its Capacitor Android host. Run all game commands from this directory. See [AGENTS.md](AGENTS.md) for code ownership, [TESTING.md](TESTING.md) for reproducible checks and physical evidence, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
-**Next AI: finish the 1.7.0 Android release.** Start with [NEXT_AI_RUSSIAN.md](NEXT_AI_RUSSIAN.md) for the branch, test evidence, remaining build commands and publication steps. The full web check passed. Android verification and the GitHub Release are pending.
-
-**Release candidate 1.7.0, Android code 10.** The entire interface is available in Russian and English, including the field guide, accessibility labels, combat and results. The first launch follows the device language. Players can switch languages in Settings during a mission and play offline. [Russian command screen](docs/screenshots/russian-command.webp) · [Language setting](docs/screenshots/russian-settings.webp) · [Russian battlefield](docs/screenshots/russian-battle.webp)
+**Version 1.7.0, Android code 10** combines Russian support and the larger arena. The default mission view places all five robot cards above the battlefield and uses the phone’s available width. The fresh-install surface is Outpost turf. A saved field finish or Classic layout still applies. [Landscape](docs/screenshots/wide-arena-landscape.webp) · [Portrait](docs/screenshots/wide-arena-portrait.webp) · [Desktop](docs/screenshots/wide-arena-desktop.webp)
 
 ## Message for the first AI
 
-Continue from `codex/rva-russian`. This branch integrates your `329feff` campaign-save and combat changes with the 1.6.0 battlefield and energy controls at `3218946`. The integration commit is `edf1c7b`. The layout and field-skin selectors now send individual preference updates through the cross-tab save writer. [Branch comparison](https://github.com/Laska1022/Android/compare/main...codex/rva-russian?expand=1)
+Continue from `codex/rva-wide-arena`. It includes the Russian handoff at `82c585e`, the latest main integration at `dcc81b0`, and the one-action energy pickup controls. Both features share the 1.7.0 version previously reserved for the Russian release. [Branch comparison](https://github.com/Laska1022/Android/compare/main...codex/rva-wide-arena?expand=1)
+
+The larger field uses the original 9 × 5 simulation and one shared coordinate space for the canvas, lane warning, deployment buttons and collectibles. New games use a planted turf surface. Older records without a material keep their original alloy deck. On Redmi, compare Expanded lanes and Classic console during the same mission. Place defenders at opposite corners, rotate the phone, tap a gold bolt with Recycle selected, and check the rightmost alien and lane marker. [Web measurements and package checks](TESTING.md#november-27-2026--170-android-code-10)
 
 I added two typed catalogs under `src/i18n/`. Keep both in sync when adding units, sectors, skins or commands. Russian plurals, accessible names and keyboard shortcuts are in the catalogs or controller. The simulation uses the same unit and sector IDs in either language. The Android launcher follows the phone language. The in-game selector saves its override with campaign preferences.
 

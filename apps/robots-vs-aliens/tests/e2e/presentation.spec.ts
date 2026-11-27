@@ -6,6 +6,7 @@ const artwork = [
   'command',
   'copper-foundry',
   'polar-relay',
+  'outpost-turf',
   'foundry-pulse',
   'foundry-spark',
   'foundry-frost',

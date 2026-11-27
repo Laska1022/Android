@@ -327,16 +327,72 @@ function projectile(c: Ctx, shot: Shot) {
   }
 }
 
+// A single soil texture runs through the beds. Lane cuts and planting marks
+// belong to the cached terrain, so mobile combat frames only composite it.
+function drawTurf(c: Ctx, texture?: HTMLImageElement) {
+  const width = COLS * BOARD.cw,
+    height = ROWS * BOARD.ch;
+  c.save();
+  c.translate(BOARD.x, BOARD.y);
+  c.fillStyle = '#536c3b';
+  c.fillRect(0, 0, width, height);
+  if (texture?.complete && texture.naturalWidth) c.drawImage(texture, 0, 0, width, height);
+
+  const shade = c.createLinearGradient(0, 0, width, height);
+  shade.addColorStop(0, '#6d8b5438');
+  shade.addColorStop(0.6, '#17483d44');
+  shade.addColorStop(1, '#113c3bc2');
+  c.fillStyle = shade;
+  c.fillRect(0, 0, width, height);
+  for (let row = 0; row < ROWS; row++) {
+    const y = row * BOARD.ch;
+    c.fillStyle = row % 2 === 0 ? '#b3cc7133' : '#17382f4d';
+    c.fillRect(0, y, width, BOARD.ch);
+    for (let col = 0; col < COLS; col++) {
+      const x = col * BOARD.cw;
+      if ((col + row) % 2 === 0) {
+        c.fillStyle = '#c9d39315';
+        c.fillRect(x, y, BOARD.cw, BOARD.ch);
+      }
+      line(c, x, y + 3, x, y + BOARD.ch - 2, '#173d3670', 1);
+      line(c, x + 4, y + 5, x + 11, y + 5, '#d4e7b56b', 1.5);
+    }
+    line(c, 0, y + 1, width, y + 1, '#243d2c', 2.5);
+    line(c, 0, y + 3, width, y + 3, '#b8dba24f');
+  }
+  c.restore();
+}
+
 // Field materials and lane rails are painted only when the cached terrain changes.
 function drawFieldTile(
   c: Ctx,
-  skin: Exclude<FieldSkin, 'standard'>,
+  skin: Exclude<FieldSkin, 'turf'>,
   texture: HTMLImageElement | undefined,
-  x: number,
-  y: number,
   row: number,
   col: number,
 ) {
+  const x = BOARD.x + col * BOARD.cw,
+    y = BOARD.y + row * BOARD.ch;
+  if (skin === 'standard') {
+    const floor = c.createLinearGradient(0, y, 0, y + BOARD.ch);
+    floor.addColorStop(0, (row + col) % 2 ? '#354c54' : '#3d555a');
+    floor.addColorStop(0.5, (row + col) % 2 ? '#293f48' : '#2e454c');
+    floor.addColorStop(1, '#253a43');
+    panel(c, x + 1.5, y + 1.5, 97, 79, 4, floor, '#567079');
+    line(c, x + 6, y + 4, x + 66, y + 4, '#9bbabe48');
+    line(c, x + 8, y + 11, x + 15, y + 11, '#95b3b569', 1.5);
+    line(c, x + 85, y + 71, x + 92, y + 71, '#95b3b569', 1.5);
+    for (let vent = 0; vent < 3; vent++)
+      line(c, x + 8 + vent * 4, y + 71, x + 11 + vent * 4, y + 68, '#10293280', 1.5);
+    // Fixed tool marks vary by tile and are painted only into this static plate.
+    const seed = row * COLS + col;
+    for (let mark = 0; mark < 9; mark++) {
+      const sx = x + 8 + ((seed * 43 + mark * 37) % 75);
+      const sy = y + 9 + ((seed * 17 + mark * 13) % 61);
+      line(c, sx, sy, sx + 2 + ((seed + mark) % 7), sy - 1.5, '#c5d4ce13');
+    }
+    return;
+  }
   const foundry = skin === 'foundry';
   const w = BOARD.cw,
     h = BOARD.ch;
@@ -366,6 +422,7 @@ export class Renderer {
   private c: Ctx;
   private background = document.createElement('canvas');
   private sector = -1;
+  private viewAspect = BOARD.width / BOARD.height;
   private field: FieldSkin = 'standard';
   private surface?: HTMLImageElement;
   private landscape?: HTMLImageElement;
@@ -499,7 +556,21 @@ export class Renderer {
     sky.addColorStop(1, '#101e2c');
     c.fillStyle = sky;
     c.fillRect(0, 0, BOARD.width, BOARD.height);
-    if (landscape) c.drawImage(landscape, 0, 0, BOARD.width, BOARD.height);
+    if (landscape) {
+      const w = Math.min(landscape.naturalWidth, landscape.naturalHeight * this.viewAspect);
+      const h = Math.min(landscape.naturalHeight, landscape.naturalWidth / this.viewAspect);
+      c.drawImage(
+        landscape,
+        (landscape.naturalWidth - w) / 2,
+        (landscape.naturalHeight - h) / 2,
+        w,
+        h,
+        0,
+        0,
+        BOARD.width,
+        BOARD.height,
+      );
+    }
     const vignette = c.createLinearGradient(0, 0, 0, BOARD.height);
     vignette.addColorStop(0, '#0b13281a');
     vignette.addColorStop(0.25, '#101b2b30');
@@ -512,38 +583,23 @@ export class Renderer {
     panel(c, 146, 164, 922, 421, 8, '#182c37', '#3f5860');
     c.fillStyle = scene.trim;
     c.fillRect(156, 162, 276, 2);
-    for (let row = 0; row < ROWS; row++) {
-      const y = BOARD.y + row * BOARD.ch;
-      for (let col = 0; col < COLS; col++) {
-        const x = BOARD.x + col * BOARD.cw;
-        if (this.field !== 'standard') {
-          drawFieldTile(c, this.field, this.surface, x, y, row, col);
-          continue;
-        }
-        const floor = c.createLinearGradient(0, y, 0, y + BOARD.ch);
-        floor.addColorStop(0, (row + col) % 2 ? '#354c54' : '#3d555a');
-        floor.addColorStop(0.5, (row + col) % 2 ? '#293f48' : '#2e454c');
-        floor.addColorStop(1, '#253a43');
-        panel(c, x + 1.5, y + 1.5, 97, 79, 4, floor, '#567079');
-        line(c, x + 6, y + 4, x + 66, y + 4, '#9bbabe48');
-        line(c, x + 8, y + 11, x + 15, y + 11, '#95b3b569', 1.5);
-        line(c, x + 85, y + 71, x + 92, y + 71, '#95b3b569', 1.5);
-        for (let vent = 0; vent < 3; vent++)
-          line(c, x + 8 + vent * 4, y + 71, x + 11 + vent * 4, y + 68, '#10293280', 1.5);
-        // Fixed tool marks vary by tile and are painted only into this static plate.
-        const seed = row * COLS + col;
-        for (let mark = 0; mark < 9; mark++) {
-          const sx = x + 8 + ((seed * 43 + mark * 37) % 75);
-          const sy = y + 9 + ((seed * 17 + mark * 13) % 61);
-          line(c, sx, sy, sx + 2 + ((seed + mark) % 7), sy - 1.5, '#c5d4ce13');
+    if (this.field === 'turf') {
+      drawTurf(c, this.surface);
+    } else {
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          drawFieldTile(c, this.field, this.surface, row, col);
         }
       }
+    }
+    for (let row = 0; row < ROWS; row++) {
+      const y = BOARD.y + row * BOARD.ch;
       const center = y + BOARD.ch / 2;
-      panel(c, 55, center - 22, 45, 44, 7, '#10232edb', '#75909b');
+      panel(c, 98, center - 30, 44, 53, 5, '#10232ee8', '#75909b');
       c.font = 'bold 15px monospace';
       c.fillStyle = '#d0e1dc';
-      c.fillText(String(row + 1).padStart(2, '0'), 67, center + 5);
-      line(c, 99, center, 140, center, '#a2c4caac', 2);
+      c.fillText(String(row + 1).padStart(2, '0'), 110, center - 14);
+      line(c, 138, center, 147, center, '#a2c4caac', 2);
       line(c, 1076, center, 1102, center, scene.rift + '82', 1.5);
     }
     if (scene.deckTint && this.field === 'standard') {
@@ -565,16 +621,32 @@ export class Renderer {
   draw(game: Game, menu = false) {
     if (menu) return;
     const c = this.c;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.round(this.canvas.clientWidth * dpr);
-    const height = Math.round((width * BOARD.height) / BOARD.width);
-    if (!width) return;
+    const cssWidth = this.canvas.clientWidth,
+      cssHeight = this.canvas.clientHeight;
+    if (!cssWidth || !cssHeight) return;
+    // Bound the backing store even when an ultrawide or high-DPI screen fills the arena.
+    const dpr = Math.min(
+      window.devicePixelRatio || 1,
+      2,
+      Math.sqrt(2_800_000 / (cssWidth * cssHeight)),
+    );
+    const width = Math.round(cssWidth * dpr),
+      height = Math.round(cssHeight * dpr);
+    const aspect = cssWidth / cssHeight;
+    const aspectChanged = this.viewAspect !== aspect;
+    this.viewAspect = aspect;
     if (game.sector !== this.sector) this.selectSector(game.sector);
+    else if (aspectChanged) this.repaintTerrain();
     if (this.canvas.width !== width || this.canvas.height !== height) {
       this.canvas.width = width;
       this.canvas.height = height;
     }
-    c.setTransform(width / BOARD.width, 0, 0, height / BOARD.height, 0, 0);
+    const scaleX = width / BOARD.width,
+      scaleY = height / BOARD.height;
+    const unitScale = Math.min(scaleX, scaleY);
+    const unitX = scaleX / unitScale,
+      unitY = scaleY / unitScale;
+    c.setTransform(scaleX, 0, 0, scaleY, 0, 0);
     c.drawImage(this.background, 0, 0);
     const t = this.reducedMotion ? 0 : game.time;
     for (let row = 0; row < ROWS; row++) {
@@ -600,12 +672,13 @@ export class Renderer {
         panel(c, x + 2, y + 2, 96, 78, 4, color + '20', color);
         if (empty && this.selection !== 'recycle') {
           c.globalAlpha = 0.5;
+          c.setTransform(unitScale, 0, 0, unitScale, 0, 0);
           drawBot(
             c,
             this.portrait(this.selection),
             this.selection,
-            x + 50,
-            y + 41,
+            (x + BOARD.cw / 2) * unitX,
+            (y + BOARD.ch / 2) * unitY,
             72,
             t,
             !this.reducedMotion,
@@ -614,12 +687,14 @@ export class Renderer {
         }
       }
     }
+    // Project each foot position onto its lane, keeping the artwork at its natural proportions.
+    c.setTransform(unitScale, 0, 0, unitScale, 0, 0);
     // Draw lane by lane so a boss can overlap the top edge of its own tile.
     for (let row = 0; row < ROWS; row++) {
-      const y = BOARD.y + (row + 0.5) * BOARD.ch;
+      const y = (BOARD.y + (row + 0.5) * BOARD.ch) * unitY;
       for (const bot of game.bots) {
         if (bot.row !== row) continue;
-        const x = BOARD.x + (bot.col + 0.5) * BOARD.cw;
+        const x = (BOARD.x + (bot.col + 0.5) * BOARD.cw) * unitX;
         drawBot(
           c,
           this.portrait(bot.kind),
@@ -642,7 +717,7 @@ export class Renderer {
       }
       for (const enemy of game.enemies) {
         if (enemy.row !== row) continue;
-        const x = BOARD.x + enemy.x * BOARD.cw;
+        const x = (BOARD.x + enemy.x * BOARD.cw) * unitX;
         const size =
           enemy.kind === 'overlord'
             ? 99
@@ -667,6 +742,7 @@ export class Renderer {
           this.health(x, y - size * 0.66, enemy.hp / enemy.maxHp, '#f0a3d4');
       }
     }
+    c.setTransform(scaleX, 0, 0, scaleY, 0, 0);
     for (const shot of game.shots) projectile(c, shot);
     for (const sweep of game.sweeps) {
       const x = BOARD.x + sweep.x * BOARD.cw;

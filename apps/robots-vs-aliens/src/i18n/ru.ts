@@ -117,7 +117,12 @@ export const ru: Messages = {
     riftborn: 'Обсидиан Разлома',
   },
   layouts: { expanded: 'Широкие линии', classic: 'Классический пульт' },
-  fields: { standard: 'Сплав сектора', foundry: 'Медный цех', polar: 'Полярный узел' },
+  fields: {
+    turf: 'Газон форпоста',
+    standard: 'Сплав сектора',
+    foundry: 'Медный цех',
+    polar: 'Полярный узел',
+  },
   difficulty: { cadet: 'Кадет', veteran: 'Ветеран' },
   selectBot: (name, cost, description) =>
     `Выбрать робота «${name}», ${cost} ед. энергии. ${description}`,

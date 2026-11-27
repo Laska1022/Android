@@ -92,6 +92,10 @@ Run `node scripts/generate-strides.mjs` with Playwright Chromium installed. Set 
 
 The three sheets total 4,295,412 bytes, an increase of 2,559,158 bytes over 1.5.0. Combat references the equipped brood’s sheet and draws one cropped frame per alien. The comparison clip uses the game renderer and advances real battles at 60 simulation steps per second. The left column follows unopposed aliens and the right places a Bastion in each alien’s attack range. [Animated comparison](screenshots/alien-motion.webp)
 
+## Outpost turf in 1.7.0
+
+The grass texture is an original ImageGen asset. The brief called for a directly overhead view of fine, clipped alien meadow grass, moss and silver mineral flecks in diffuse daylight. The 1536 × 1024 source was resampled to 900 × 600 and encoded as WebP at quality 74. The renderer draws the entire surface once on the terrain canvas, then adds five mowing bands, planting marks and irrigation seams. A green painted surface supplies the markings while the texture loads. [Bundled texture](../src/assets/fields/outpost-turf.webp) · [In-game capture](screenshots/wide-arena-landscape.webp)
+
 ## Battlefield materials in 1.6.0
 
 Copper foundry and Polar relay are original floor materials generated for this game with OpenAI ImageGen. The brief asked for two independent overhead industrial panels with quiet centers. The foundry uses worn gunmetal, copper scoring and cooling louvers. The relay uses slate ceramic, titanium edging and icy glass channels. The resulting 1774 × 887 atlas was split at its midpoint. Each 887 px square was resampled to 320 × 320 and encoded as WebP at quality 83.

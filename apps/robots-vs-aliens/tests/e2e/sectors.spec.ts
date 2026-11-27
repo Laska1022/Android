@@ -49,11 +49,26 @@ async function skyProfile(page: Page, assetUrl?: string) {
       source = image;
     }
     const probe = document.createElement('canvas');
-    probe.width = 32;
-    probe.height = 5;
+    // A finer profile preserves narrow highlights in the cropped Nest skyline.
+    probe.width = 128;
+    probe.height = 16;
     const c = probe.getContext('2d')!;
     c.imageSmoothingQuality = 'high';
-    c.drawImage(source, 0, 0, source.width, source.height * 0.18, 0, 0, probe.width, probe.height);
+    // The panorama covers the canvas at its on-screen aspect. Compare the same sky crop.
+    const aspect = element.clientWidth / element.clientHeight;
+    const w = url ? Math.min(source.width, source.height * aspect) : source.width;
+    const h = url ? Math.min(source.height, source.width / aspect) : source.height;
+    c.drawImage(
+      source,
+      (source.width - w) / 2,
+      (source.height - h) / 2,
+      w,
+      h * 0.18,
+      0,
+      0,
+      probe.width,
+      probe.height,
+    );
     const pixels = c.getImageData(0, 0, probe.width, probe.height).data;
     const profile: number[] = [];
     for (let y = 0; y < probe.height; y++) {

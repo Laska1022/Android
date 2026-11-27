@@ -88,9 +88,13 @@ test('expanded lanes are the default and both the classic layout and independent
   await expect(page.getByLabel('Robot skin')).toHaveValue('foundry');
   await expect(page.locator('#best-score')).toHaveText('4,710');
   await layout.selectOption('expanded');
-  await fieldSkin.selectOption('standard');
+  await fieldSkin.selectOption('turf');
   await done(page).click();
   await page.getByRole('button', { name: 'Deploy squad' }).click();
+  await expect.poll(async () => difference(await tileSample(page), standard)).toBeGreaterThan(12);
+  await settings(page).click();
+  await fieldSkin.selectOption('standard');
+  await done(page).click();
   await expect.poll(async () => difference(await tileSample(page), standard)).toBeLessThan(1);
 });
 
@@ -257,7 +261,9 @@ test('expanded lanes keep the loadout and battle actions on screen on short phon
   await page.goto('/');
   await page.getByRole('button', { name: 'Deploy squad' }).tap();
   for (const [width, height] of [
+    [320, 568],
     [340, 568],
+    [568, 320],
     [667, 320],
     [820, 600],
     [915, 600],
@@ -271,5 +277,62 @@ test('expanded lanes keep the loadout and battle actions on screen on short phon
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
     await expect(page.locator('.cell[data-row="4"][data-col="8"]')).toBeInViewport({ ratio: 1 });
+  }
+});
+
+test('the horizontal robot bank leaves all five lanes playable to their corners', async ({
+  page,
+  isMobile,
+}) => {
+  const sizes = isMobile
+    ? [
+        [775, 364],
+        [393, 719],
+      ]
+    : [
+        [1440, 960],
+        [1024, 768],
+      ];
+  await page.setViewportSize({ width: sizes[0][0], height: sizes[0][1] });
+  await page.goto('/');
+  await page.locator('#start-button').click();
+  await page.locator('[data-bot="spark"]').click();
+  let deployed = 0;
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    const grid = (await page.locator('#battle-grid').boundingBox())!;
+    expect(grid.width / width).toBeGreaterThan(0.8);
+    expect(grid.height / height).toBeGreaterThan(width > height ? 0.63 : 0.49);
+    const cards = await page.locator('.bot-card').evaluateAll((elements) =>
+      elements.map((el) => {
+        const { left, top, bottom } = el.getBoundingClientRect();
+        return { left, top, bottom };
+      }),
+    );
+    expect(cards).toHaveLength(5);
+    for (let i = 0; i < cards.length; i++) {
+      expect(cards[i].top).toBeCloseTo(cards[0].top, 0);
+      expect(cards[i].bottom).toBeLessThan(grid.y);
+      if (i) expect(cards[i].left).toBeGreaterThan(cards[i - 1].left);
+    }
+    const row = deployed === 0 ? 0 : 4;
+    for (const col of [0, 8]) {
+      const x = grid.x + ((col + 0.5) * grid.width) / 9;
+      const y = grid.y + ((row + 0.5) * grid.height) / 5;
+      if (isMobile) await page.touchscreen.tap(x, y);
+      else await page.mouse.click(x, y);
+      await expect(
+        page.locator(`.cell[data-row="${row}"][data-col="${col}"]`),
+      ).toHaveAccessibleName(/Spark/);
+      deployed++;
+    }
+    await expect(page.locator('.cell[aria-label*="Spark"]')).toHaveCount(deployed);
+    const canvas = await page.locator('#battlefield').evaluate((el: HTMLCanvasElement) => ({
+      pixels: el.width * el.height,
+      aspect: el.width / el.height,
+      displayedAspect: el.clientWidth / el.clientHeight,
+    }));
+    expect(canvas.pixels).toBeLessThan(2_805_000);
+    expect(canvas.aspect).toBeCloseTo(canvas.displayedAspect, 2);
   }
 });

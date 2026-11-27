@@ -1,7 +1,9 @@
 # Changelog
 
-## 1.7.0 · Release candidate
+## 1.7.0 · November 27, 2026
 
+- The default battle view fills the screen. Five robot cards sit above the nine-column field. Each lane has a numbered defense dock and a clear entry from the right. On a 775 × 364 landscape phone the playable grid grew from 514 × 202 to 631 × 240 CSS pixels. Classic console remains in Settings. [Landscape battlefield](docs/screenshots/wide-arena-landscape.webp) · [Desktop battlefield](docs/screenshots/wide-arena-desktop.webp)
+- Outpost turf gives new games five planted lanes. Existing campaigns keep their field finish. Choose any of the four materials in Settings. Unit proportions are preserved through rotation. [Portrait battlefield](docs/screenshots/wide-arena-portrait.webp)
 - Russian is available throughout the game, including sector briefings, skin names, lane warnings, energy pickups, battle results and screen-reader labels. Russian-speaking devices start in Russian. Choose **Settings → Language → Русский** to switch manually. The language can change during a mission and stays available offline. [Command screen](docs/screenshots/russian-command.webp) · [Language setting](docs/screenshots/russian-settings.webp)
 - On a Russian keyboard, Й selects the orbital strike, К selects recycling and У collects energy. The field guide lists both keyboard layouts. [Russian battlefield](docs/screenshots/russian-battle.webp)
 - Includes the 1.6 expanded battlefield and energy controls alongside the 1.5.3 cross-tab save and close-range combat fixes. Older campaigns retain their unlocks, stars and cosmetics.

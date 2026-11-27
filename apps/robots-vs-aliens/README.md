@@ -11,7 +11,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
 - Each sector has its own battlefield, from the Greenline perimeter and Badlands to the Crystal Basin, Relay Nine and the Nest. Selecting an unlocked sector reveals its location and briefing.
 - Choose robot and alien skins independently in Settings. All five aliens have full-body walking and attack animations in each brood, including ranged attacks against defenders. The art is bundled for offline play. [See the aliens in motion](docs/screenshots/alien-motion.webp)
-- Expanded lanes gives the battlefield more screen space by default. Settings → Battle layout switches to Classic console at any time. Settings → Battlefield skin changes the floor to Sector alloy, Copper foundry or Polar relay. [Landscape battle](docs/screenshots/field-copper-foundry.webp)
+- Expanded lanes fills the mission screen with five defense lanes. Choose a robot from the card bank above the field and tap any of the nine columns. New games begin on Outpost turf. Settings → Battlefield skin also offers Sector alloy, Copper foundry and Polar relay. Settings → Battle layout restores Classic console. [Landscape battle](docs/screenshots/wide-arena-landscape.webp) · [Portrait battle](docs/screenshots/wide-arena-portrait.webp)
 - Energy pickups, health-based recycling, lane-wide orbital strikes, pause, and double speed.
 - Procedural sci-fi sound effects, reduced-motion settings, keyboard navigation, and touch controls.
 - Saved campaign unlocks, star ratings, preferences, and best score on the current device.

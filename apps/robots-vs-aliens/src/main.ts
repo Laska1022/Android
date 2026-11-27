@@ -83,7 +83,7 @@ $('#app').innerHTML = `
       <div class="console-top"><div class="sector-status"><span class="live-dot"></span><span id="sector-label"></span><span class="separator">/</span><span id="mission-label"></span></div><div class="console-tags"><span><span data-caption="best"></span> &nbsp;<b id="best-score"></b></span></div></div>
       <div class="console-body">
         <div class="battle-column">
-          <div class="hud"><div class="energy-stat">${icon('bolt')}<strong id="energy"></strong><span data-caption="energy"></span></div><div class="integrity">${icon('shield')}<div><span data-caption="core"></span><div id="hearts">${'<i></i>'.repeat(5)}</div></div></div><div class="wave-stat"><span id="wave-label"></span><strong id="wave-count"></strong></div><button class="icon-button" id="pause-button" data-label="pause" disabled>${icon('pause')}</button></div>
+          <div class="hud"><div class="energy-stat">${icon('bolt')}<strong id="energy"></strong><span data-caption="energy"></span></div><div class="mission-vitals"><div class="integrity">${icon('shield')}<div><span data-caption="core"></span><div id="hearts">${'<i></i>'.repeat(5)}</div></div></div><div class="wave-stat"><span id="wave-label"></span><strong id="wave-count"></strong></div><button class="icon-button" id="pause-button" data-label="pause" disabled>${icon('pause')}</button></div></div>
           <div class="arena" id="arena">
             <div class="battle-scene" id="battle-scene"><canvas id="battlefield"></canvas>
             <div id="battle-grid" class="battle-grid" role="group" data-label="grid" hidden>${Array.from({ length: ROWS * COLS }, (_, i) => `<button class="cell" data-row="${Math.floor(i / COLS)}" data-col="${i % COLS}" tabindex="${i === 0 ? 0 : -1}"></button>`).join('')}<div class="energy-layer" id="energy-layer"></div></div></div>
@@ -109,7 +109,10 @@ $('#app').innerHTML = `
 `;
 const renderer = new Renderer($('#battlefield'));
 const laneWarning = new LaneWarning($('#arena'), $('#battle-scene'));
-document.body.dataset.battleLayout = save.battleLayout;
+function updateMissionLayout() {
+  document.body.classList.toggle('in-mission', !menu);
+  $('#app').classList.toggle('arena-view', !menu && save.battleLayout === 'expanded');
+}
 renderer.fieldSkin = save.fieldSkin;
 const energyLayer = $('#energy-layer');
 const energyButtons = new Map<number, HTMLButtonElement>();
@@ -202,7 +205,7 @@ function start(endless = false) {
   energyLayer.replaceChildren();
   energyButtons.clear();
   game = new Game(sector, endless, undefined, save.difficulty);
-  document.body.classList.add('in-mission');
+  updateMissionLayout();
   window.scrollTo(0, 0);
   previousPhase = 'playing';
   speed = 1;
@@ -223,7 +226,7 @@ function start(endless = false) {
 function mainMenu() {
   menu = true;
   closeModal(false);
-  document.body.classList.remove('in-mission');
+  updateMissionLayout();
   game.phase = 'paused';
   $('#menu-cover').hidden = false;
   $('#battle-grid').hidden = true;
@@ -533,8 +536,8 @@ function renderSettings() {
   $<HTMLSelectElement>('#battle-layout').onchange = (event) => {
     const layout = (event.target as HTMLSelectElement).value;
     if (!isBattleLayout(layout)) return;
-    document.body.dataset.battleLayout = layout;
     persist({ battleLayout: layout });
+    updateMissionLayout();
   };
   $<HTMLSelectElement>('#field-skin').onchange = (event) => {
     const skin = (event.target as HTMLSelectElement).value;

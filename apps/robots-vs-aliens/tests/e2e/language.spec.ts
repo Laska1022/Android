@@ -107,6 +107,23 @@ test('switching during combat keeps the defenders, loadout, warnings and collect
     'Поле боя «Первый контакт», пять линий обороны',
   );
   await expect(page.locator('.incoming-lane-label')).toHaveText('Угроза · Линия 3 · Разведчик');
+  if (isMobile) {
+    for (const [width, height] of [
+      [320, 568],
+      [568, 320],
+      [775, 364],
+    ]) {
+      await page.setViewportSize({ width, height });
+      const clipped = await page
+        .locator('.bot-card, .battle-actions button')
+        .evaluateAll((buttons) =>
+          buttons
+            .filter((button) => button.scrollWidth > button.clientWidth + 2)
+            .map((button) => button.textContent),
+        );
+      expect(clipped).toEqual([]);
+    }
+  }
   await page.getByRole('button', { name: /Выбрать робота «Искра»/ }).click();
   await page.getByRole('button', { name: 'Переключить двойную скорость' }).click();
   await page.getByRole('button', { name: 'Настройки', exact: true }).click();
