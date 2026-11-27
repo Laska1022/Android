@@ -71,7 +71,9 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 The Russian checkpoint at `82c585e` passed 34 unit tests and 50 desktop/mobile Chromium scenarios, with eight platform-specific skips. The wide-arena revision includes that checkpoint and the main-branch integration at `dcc81b0`.
 
-**Playable grid.** The table uses the rendered bounds of the 45 deployment buttons in the default Expanded lanes mode. The baseline is `82c585e`. Values are rounded CSS pixels. The change in area uses the displayed measurements.
+#### Playable grid
+
+Measurements cover all 45 deployment buttons in Expanded lanes, rounded to CSS pixels. The baseline is `82c585e`.
 
 | Viewport | Earlier grid | New grid | More playable area |
 | --- | ---: | ---: | ---: |
@@ -83,11 +85,19 @@ The Russian checkpoint at `82c585e` passed 34 unit tests and 50 desktop/mobile C
 
 The game captures show a real First Contact wave with four robots deployed from the ordinary starting budget. Both English and Russian controls, approaching aliens, lane markers and collectible buttons are visible in their respective layouts. [Landscape](docs/screenshots/wide-arena-landscape.webp) · [Portrait in Russian](docs/screenshots/wide-arena-portrait.webp) · [Desktop](docs/screenshots/wide-arena-desktop.webp)
 
-**Animation timing.** Chromium 156.0.8078.79 at 775 × 364 delivered 60.0 animation callbacks per second with the earlier alloy view, the new alloy view and Outpost turf. The p95 intervals were 16.7, 16.8 and 16.7 ms respectively. Each sample covered 360 intervals after 60 warm-up frames in First Contact at 2× with a Pulse and a Bastion. A separate 3440 × 1440 check at device pixel ratio 2 produced a 2,800,044-pixel canvas. These are browser measurements.
+#### Animation timing
 
-**Regression checks.** The initial offline panorama comparison failed on the Nest skyline. Its 32 × 5 sample lost the narrow highlights after the new camera crop. The check now samples 128 × 16 from the source at the displayed aspect and uses the original 0.85 similarity threshold. Small-phone checks also cover Russian card names and action buttons at 320 × 568 and 568 × 320.
+Chromium 156.0.8078.79 at 775 × 364 delivered 60.0 animation callbacks per second with the earlier alloy view, the new alloy view and Outpost turf. The p95 intervals were 16.7, 16.8 and 16.7 ms respectively. Each sample covered 360 intervals after 60 warm-up frames in First Contact at 2× with a Pulse and a Bastion. A separate 3440 × 1440 check at device pixel ratio 2 produced a 2,800,044-pixel canvas. These are browser measurements.
 
-**Android.** Capacitor sync, Gradle `assembleDebug` and `lintDebug` passed with zero app lint errors and four warnings. The locally built v2-signed APK reports `com.laska.robotvsaliens`, version 1.7.0, code 10 and the Russian launcher label «Роботы против пришельцев». All 76 production files, including 42 WebPs, matched their APK entries byte for byte. ADB listed no attached phone or emulator. The Redmi checks are in the [handoff](HANDOFF.md#message-for-the-first-ai).
+#### Browser and Android verification
+
+The full `npm run check` on the combined release passed 35 unit tests, strict TypeScript, the production build and 54 desktop/mobile Chromium scenarios. Eight platform-specific scenarios were skipped on the opposite input platform. The browser run exercised offline battles, rotation, energy collection and deployment at the four corners of the 45-cell field.
+
+The initial offline panorama comparison failed on the Nest skyline. Its 32 × 5 sample lost the narrow highlights after the new camera crop. The check now samples 128 × 16 from the source at the displayed aspect and uses the original 0.85 similarity threshold. Small-phone checks also cover Russian card names and action buttons at 320 × 568 and 568 × 320.
+
+The two-tab skin test lost a preference once in 16 mobile repeats on a browser without Web Locks. The fallback now merges against the last committed IndexedDB save and mirrors it to the original v1 key. After the fix, the simultaneous two-tab case and a deterministic stale-read and legacy-import case each passed 20 mobile repeats.
+
+Capacitor sync, Gradle `assembleDebug` and `lintDebug` passed with zero app lint errors and four warnings. The locally built v2-signed APK reports `com.laska.robotvsaliens`, version 1.7.0, code 10 and the Russian launcher label «Роботы против пришельцев». All 76 production files, including 42 WebPs, matched their APK entries byte for byte. The local APK at `170d844` is 10,501,816 bytes with SHA-256 `9cbef69b22be1f8ac91175d4ee81653d4fdfa0bfa840db4700cb0cac9994fcc5`. ADB listed no attached phone or emulator. The Redmi checks are in the [handoff](HANDOFF.md#message-for-the-first-ai).
 
 ### November 27, 2026 · 1.6.0, Android code 8
 
