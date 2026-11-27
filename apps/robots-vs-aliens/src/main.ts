@@ -35,7 +35,7 @@ import {
   setOrientationMode,
 } from './game/orientation';
 import { AudioEngine } from './game/audio';
-import { loadSave, storeSave } from './game/storage';
+import { loadSave, storeSave, type Preferences } from './game/storage';
 
 const $ = <T extends HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const icons = {
@@ -120,8 +120,11 @@ function toast(message: string) {
   $('#toast').classList.add('visible');
   toastTimer = 3;
 }
-function persist() {
-  if (!storeSave(save)) toast('Storage is unavailable. Progress will last for this session.');
+function persist(preferences: Partial<Preferences> = {}) {
+  Object.assign(save, preferences);
+  void storeSave(save, preferences).then((saved) => {
+    if (!saved) toast('Storage is unavailable. Progress will last for this session.');
+  });
   $('#best-score').textContent = save.best.toLocaleString();
 }
 function select(choice: typeof selected) {
@@ -436,9 +439,8 @@ document.querySelectorAll<HTMLButtonElement>('[data-sector]').forEach(
 $('#sound-button').onclick = () => {
   audio.unlock();
   audio.muted = !audio.muted;
-  save.muted = audio.muted;
   $('#sound-button').setAttribute('aria-pressed', String(!audio.muted));
-  persist();
+  persist({ muted: audio.muted });
   if (!audio.muted) audio.play('energy');
 };
 function selectOptions(choices: Record<string, string>, selectedSkin: string) {
@@ -492,51 +494,48 @@ $('#settings-button').onclick = () => {
   $<HTMLSelectElement>('#battle-layout').onchange = (event) => {
     const layout = (event.target as HTMLSelectElement).value;
     if (!isBattleLayout(layout)) return;
-    document.body.dataset.battleLayout = save.battleLayout = layout;
-    persist();
+    document.body.dataset.battleLayout = layout;
+    persist({ battleLayout: layout });
   };
   $<HTMLSelectElement>('#field-skin').onchange = (event) => {
     const skin = (event.target as HTMLSelectElement).value;
     if (!isFieldSkin(skin)) return;
-    renderer.fieldSkin = save.fieldSkin = skin;
+    renderer.fieldSkin = skin;
+    persist({ fieldSkin: skin });
     updateFieldSample();
-    persist();
   };
   const orientation = document.querySelector<HTMLSelectElement>('#orientation-setting');
   if (orientation) wireOrientationSetting(orientation);
   $<HTMLSelectElement>('#robot-skin').onchange = (event) => {
     const value = (event.target as HTMLSelectElement).value;
     if (!isRobotSkin(value)) return;
-    save.robotSkin = value;
+    persist({ robotSkin: value });
     applySkins();
     $<HTMLImageElement>('#robot-skin-preview').src = botIcon('pulse', value);
-    persist();
   };
   $<HTMLSelectElement>('#alien-skin').onchange = (event) => {
     const value = (event.target as HTMLSelectElement).value;
     if (!isAlienSkin(value)) return;
-    save.alienSkin = value;
+    persist({ alienSkin: value });
     renderer.alienSkin = value;
     $<HTMLImageElement>('#alien-skin-preview').src = alienIcon('scout', value);
-    persist();
   };
   $('#difficulty-setting').onchange = (event) => {
-    save.difficulty = (event.target as HTMLSelectElement).value === 'veteran' ? 'veteran' : 'cadet';
-    persist();
+    persist({
+      difficulty: (event.target as HTMLSelectElement).value === 'veteran' ? 'veteran' : 'cadet',
+    });
     updateHud();
   };
   $('#sound-setting').onchange = (e) => {
     audio.unlock();
     audio.muted = !(e.target as HTMLInputElement).checked;
-    save.muted = audio.muted;
     $('#sound-button').setAttribute('aria-pressed', String(!audio.muted));
-    persist();
+    persist({ muted: audio.muted });
   };
   $('#motion-setting').onchange = (e) => {
     renderer.reducedMotion = (e.target as HTMLInputElement).checked;
     document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
-    save.reducedMotion = renderer.reducedMotion;
-    persist();
+    persist({ reducedMotion: renderer.reducedMotion });
   };
   $('#settings-done').onclick = () => closeModal();
 };

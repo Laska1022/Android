@@ -1,11 +1,11 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { join } from 'node:path';
+import { join, posix } from 'node:path';
 
 async function files(dir, prefix = '') {
   const result = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const relative = join(prefix, entry.name);
+    const relative = posix.join(prefix, entry.name);
     if (entry.isDirectory()) result.push(...(await files(join(dir, entry.name), relative)));
     else if (entry.name !== 'sw.js') result.push(relative);
   }

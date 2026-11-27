@@ -1,5 +1,6 @@
 export const ROWS = 5;
 export const COLS = 9;
+const ENEMY_HIT_RADIUS = 0.3;
 export type BotKind = 'pulse' | 'spark' | 'frost' | 'nova' | 'bastion';
 export type EnemyKind = 'scout' | 'runner' | 'brute' | 'spitter' | 'overlord';
 export type Phase = 'playing' | 'paused' | 'won' | 'lost';
@@ -429,23 +430,26 @@ export class Game {
         this.burst(b.col + 0.5, b.row + 0.3, '#ffcc66', 8);
         this.event('energy');
       }
-      if (
-        BOTS[b.kind].damage &&
-        b.timer <= 0 &&
-        this.enemies.some((e) => e.row === b.row && e.x > b.col + 0.2 && e.x < 10.1)
-      ) {
-        this.shots.push({
-          id: ++this.id,
-          row: b.row,
-          x: b.col + 0.9,
-          kind: b.kind,
-          damage: BOTS[b.kind].damage,
-          speed: b.kind === 'nova' ? 3.7 : 6,
-        });
-        b.timer = BOTS[b.kind].rate;
-        b.flash = 0.18;
-        this.event('shoot', b.kind);
+      if (!BOTS[b.kind].damage || b.timer > 0) continue;
+      let nearestX = Infinity;
+      for (const enemy of this.enemies) {
+        if (enemy.row === b.row && enemy.x > b.col + 0.2 && enemy.x < 10.1) {
+          nearestX = Math.min(nearestX, enemy.x);
+        }
       }
+      if (nearestX === Infinity) continue;
+      this.shots.push({
+        id: ++this.id,
+        row: b.row,
+        // A robot placed on an approaching enemy can extend its muzzle past the hitbox.
+        x: Math.min(b.col + 0.9, nearestX + ENEMY_HIT_RADIUS),
+        kind: b.kind,
+        damage: BOTS[b.kind].damage,
+        speed: b.kind === 'nova' ? 3.7 : 6,
+      });
+      b.timer = BOTS[b.kind].rate;
+      b.flash = 0.18;
+      this.event('shoot', b.kind);
     }
     for (const e of this.enemies) {
       e.slow = Math.max(0, e.slow - dt);
@@ -512,7 +516,13 @@ export class Game {
         continue;
       }
       const e = this.enemies
-        .filter((e) => e.hp > 0 && e.row === s.row && e.x + 0.3 >= oldX && e.x - 0.3 <= s.x)
+        .filter(
+          (e) =>
+            e.hp > 0 &&
+            e.row === s.row &&
+            e.x + ENEMY_HIT_RADIUS >= oldX &&
+            e.x - ENEMY_HIT_RADIUS <= s.x,
+        )
         .sort((a, b) => a.x - b.x)[0];
       if (e) {
         if (s.kind === 'nova') {

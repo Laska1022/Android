@@ -1,19 +1,52 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSave, storeSave } from '../../src/game/storage';
 afterEach(() => vi.unstubAllGlobals());
 describe('save data', () => {
-  it('survives missing or inaccessible storage', () => {
-    vi.stubGlobal('localStorage', {
-      getItem() {
-        throw Error('blocked');
-      },
-      setItem() {
-        throw Error('blocked');
-      },
+  beforeEach(() => {
+    vi.stubGlobal('navigator', {
+      locks: { request: (_key: string, write: () => boolean) => write() },
     });
+  });
+  it('handles storage failures without overwriting a save it cannot read', async () => {
+    const getItem = vi.fn<() => string>(() => {
+      throw Error('blocked');
+    });
+    const setItem = vi.fn(() => {
+      throw Error('quota exceeded');
+    });
+    vi.stubGlobal('localStorage', { getItem, setItem });
     const save = loadSave();
     expect(save.unlocked).toBe(0);
-    expect(storeSave(save)).toBe(false);
+    expect(await storeSave(save, {})).toBe(false);
+    expect(setItem).not.toHaveBeenCalled();
+    getItem.mockReturnValue(JSON.stringify({ best: 100 }));
+    expect(await storeSave(save, { muted: true })).toBe(false);
+    expect(setItem).toHaveBeenCalledOnce();
+    expect(loadSave().best).toBe(100);
+  });
+  it('combines results from stale sessions using the best score, unlock and stars in each sector', async () => {
+    let value = JSON.stringify({
+      best: 4500,
+      unlocked: 3,
+      stars: [2, 3, 1],
+      muted: true,
+      robotSkin: 'cobalt',
+    });
+    vi.stubGlobal('localStorage', {
+      getItem: () => value,
+      setItem: (_key: string, next: string) => {
+        value = next;
+      },
+    });
+    const progress = { best: 4100, unlocked: 1, stars: [3] };
+    expect(await storeSave(progress, {})).toBe(true);
+    expect(loadSave()).toMatchObject({
+      best: 4500,
+      unlocked: 3,
+      stars: [3, 3, 1, 0, 0],
+      muted: true,
+      robotSkin: 'cobalt',
+    });
   });
   it('sanitizes corrupt and out-of-range progress', () => {
     vi.stubGlobal('localStorage', { getItem: () => '{broken' });

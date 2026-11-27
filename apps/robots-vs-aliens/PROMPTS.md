@@ -4,9 +4,9 @@
 
 ```text
 Continue your existing animation and skin work in Laska1022/Android. Fetch origin.
-Read apps/robots-vs-aliens/ART_HANDOFF.md on main. The 1.5.1 integration at
-9be2de4 includes your Foundry and Riftborn families and the Android Back flow.
-Continue from that revision or newer. Keep your existing art commits. Follow
+Read apps/robots-vs-aliens/ART_HANDOFF.md on main. Start from the 1.5.2
+integration or newer. It includes Foundry, Riftborn, the 24-frame walk and
+attack clips from 5a9da25, and Android Back. Keep your existing art commits. Follow
 the handover when extending the skin registry, animation and saved Settings choices.
 Implement and test new artwork and animations, document sources and evidence,
 then push your branch and open a PR. Leave physical Redmi testing to the local developer.

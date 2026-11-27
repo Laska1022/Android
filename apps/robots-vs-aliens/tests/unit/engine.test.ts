@@ -49,6 +49,19 @@ describe('deployment and economy', () => {
   });
 });
 describe('combat', () => {
+  it('Pulse hits the overlapping Scout in its lane before a farther target', () => {
+    const game = sandbox();
+    const farther = game.spawn('scout', 2, 9.4);
+    const otherLane = game.spawn('scout', 1, 8.55);
+    const contact = game.spawn('scout', 2, 8.55);
+    expect(game.place('pulse', 2, 8)).toBe(true);
+
+    advance(game, 3);
+
+    expect(contact.hp).toBe(contact.maxHp - 3 * BOTS.pulse.damage);
+    expect(farther.hp).toBe(farther.maxHp);
+    expect(otherLane.hp).toBe(otherLane.maxHp);
+  });
   it('Pulse fires only into its lane and kills a target with score and energy rewards', () => {
     const g = sandbox();
     g.place('pulse', 0, 0);

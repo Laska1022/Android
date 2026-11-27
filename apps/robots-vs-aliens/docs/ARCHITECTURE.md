@@ -29,7 +29,7 @@ Campaign completion requires the last wave's spawn queue and active enemies to b
 
 ## Persistence
 
-The `rva-save-v1` record stores `unlocked` (0–4), `best`, `stars` (five integers, 0–3), `muted`, `reducedMotion`, `difficulty`, independent robot and alien skins, `battleLayout` and `fieldSkin`. Older records keep their progress and load the Cadet preference. Malformed data falls back to valid values. If storage is unavailable, the session remains playable. Progress is local to the device or browser. Closing the process ends a running battle.
+The `rva-save-v1` record stores `unlocked` (0–4), `best`, `stars` (five integers, 0–3), `muted`, `reducedMotion`, `difficulty`, independent robot and alien skins, `battleLayout` and `fieldSkin`. Older records keep their progress and load the Cadet preference. Each save reads the latest record under a cross-tab lock, takes the highest score, unlock and star count per sector, and applies the preferences changed by that action. Malformed data falls back to valid values. If storage is unavailable, the session remains playable. Progress is local to the device or browser. Closing the process ends a running battle.
 
 The controller passes the chosen difficulty to each new campaign. Cadet holds the simulation clock and income before the player launches First Contact. The HUD and highlighted center lane use the first patrol's lane sequence. The opening budget and enemy-count adjustments taper over sectors one and two. Survival always runs the Veteran rules.
 
