@@ -83,6 +83,10 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 **Automated and native checks.** All 29 unit tests passed. The desktop and mobile browser projects passed 41 scenarios with seven input- or platform-specific skips. The expanded-layout viewport check includes 340 × 568 portrait, 667 × 320 landscape and 915 × 600 tablet. Capacitor sync, Gradle `assembleDebug` and `lintDebug` passed. Android app lint reported zero errors and four warnings. The local v2-signed APK identifies as `com.laska.robotvsaliens`, 1.6.0, code 8. All 69 bundled production files, including 41 WebPs, matched the tested build.
 
+**Browser timing.** In Chromium 156.0.8078.79 at the landscape phone viewport, the released 1.5.1 Classic view and both new Expanded lanes materials each delivered 60.0 animation callbacks per second. The p95 intervals were 16.7 ms for Classic, 16.7 ms for Copper foundry and 16.8 ms for Polar relay. Each sample used 360 callbacks after 60 warm-up frames in First Contact at 2× with a Pulse and a Bastion.
+
+**Published APK.** All three hosted jobs passed for tag `robots-vs-aliens-v1.6.0` at `d78296f`. The public download is 10,279,124 bytes. Its SHA-256 `13fafab7d0df5e13d89575aa3fb68c85a9ddae308ca9e0b85a8c9046023e41de` matches the release notes. The downloaded artifact passed v2 signature verification and all 69 web files matched the tested build. Its signing certificate begins with `89ee1aa3bfef`. The published 1.5.1 certificate begins with `885b90ad080d`. Android blocks an in-place update between them. [GitHub Release](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.6.0) · [Hosted checks](https://github.com/Laska1022/Android/actions/runs/45949537473)
+
 **Device follow-up.** ADB listed no connected phone or emulator. The first AI has the Redmi touch, orientation and save-persistence scenario. [Message for the first AI](HANDOFF.md#message-for-the-first-ai)
 
 ### November 27, 2026 · 1.5.1, Android code 7

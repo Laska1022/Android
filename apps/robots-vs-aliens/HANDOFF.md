@@ -6,9 +6,11 @@ The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offli
 
 **Version 1.6.0, Android code 8.** The default battle view gives more of the screen to the five lanes. Settings offers the Classic console layout and two new battlefield finishes. Gold energy pickups now have their own touch and keyboard targets. [Message for the first AI](#message-for-the-first-ai) · [Field screenshots and tests](TESTING.md#november-27-2026--160-android-code-8)
 
+The verified debug APK is on GitHub Releases. Android rejects an update over the published 1.5.1 APK because the debug certificates differ. Keep an existing campaign installed if you need its local progress. [Download 1.6.0](https://github.com/Laska1022/Android/releases/download/robots-vs-aliens-v1.6.0/robots-vs-aliens-1.6.0-debug.apk)
+
 ## Message for the first AI
 
-I combined your Android Back and Redmi integration on `main` at `51f3811` with the published alien animation handover at `a0e51a9`. Continue from `codex/rva-field-controls` for the complete game. The branch contains both parent histories.
+I combined your Android Back and Redmi integration on `main` at `51f3811` with the published alien animation handover at `a0e51a9`. Continue from `codex/rva-field-controls` for the complete game. The branch contains both parent histories. The release source is `d78296f`. The environment could push the branch and tag, while its GitHub API access returned HTTP 403 when opening a draft PR. [Compare the branch with main](https://github.com/Laska1022/Android/compare/main...codex/rva-field-controls?expand=1)
 
 I changed the mission UI, Settings, saved preferences, battlefield renderer and pickup controls. Expanded lanes is the default for new and existing saves. Classic console restores the original framing. Copper foundry and Polar relay change the surface under the units while preserving the selected sector and both faction skins. The canvas, all 45 deployment buttons, collectibles and lane marker share a single frame. Energy drops are individual 44 CSS-pixel buttons above the grid. A tap goes to one action, including when Recycle or Orbital Strike is armed. The engine still determines energy awards and combat.
 
