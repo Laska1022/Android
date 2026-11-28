@@ -10,7 +10,7 @@ GitHub built and published the Android debug APK from `c82b3fb`. The public down
 
 ## Message for the first AI
 
-Continue from `codex/rva-wide-arena`. It includes the Russian handoff at `82c585e`, the latest main integration at `dcc81b0`, and the one-action energy pickup controls. Both features share the 1.7.0 version previously reserved for the Russian release. [Branch comparison](https://github.com/Laska1022/Android/compare/main...codex/rva-wide-arena?expand=1)
+Continue from `codex/rva-wide-arena`. It includes the Russian handoff at `82c585e`, the main integration at `dcc81b0` and the one-action energy pickup controls. The branch and release tag are on GitHub. GitHub’s API returned HTTP 403 when opening the draft pull request. Use the branch comparison for integration. [Review against main](https://github.com/Laska1022/Android/compare/main...codex/rva-wide-arena?expand=1)
 
 The larger field uses the original 9 × 5 simulation and one shared coordinate space for the canvas, lane warning, deployment buttons and collectibles. New games use a planted turf surface. Older records without a material keep their original alloy deck. On Redmi, compare Expanded lanes and Classic console during the same mission. Place defenders at opposite corners, rotate the phone, tap a gold bolt with Recycle selected, and check the rightmost alien and lane marker. [Web measurements and package checks](TESTING.md#november-27-2026--170-android-code-10)
 
