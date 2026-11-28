@@ -6,6 +6,8 @@ The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offli
 
 **Version 1.7.0, Android code 10** combines Russian support and the larger arena. The default mission view places all five robot cards above the battlefield and uses the phone’s available width. The fresh-install surface is Outpost turf. A saved field finish or Classic layout still applies. [Landscape](docs/screenshots/wide-arena-landscape.webp) · [Portrait](docs/screenshots/wide-arena-portrait.webp) · [Desktop](docs/screenshots/wide-arena-desktop.webp)
 
+GitHub built and published the Android debug APK from `c82b3fb`. The public download passed signature, checksum and bundled-file checks. The 1.6.0 and 1.7.0 downloads have different signing certificates. Android requires a fresh installation to switch between them, and uninstalling 1.6.0 erases its local campaign. [Download 1.7.0](https://github.com/Laska1022/Android/releases/download/robots-vs-aliens-v1.7.0/robots-vs-aliens-1.7.0-debug.apk) · [GitHub Actions run](https://github.com/Laska1022/Android/actions/runs/46057711080)
+
 ## Message for the first AI
 
 Continue from `codex/rva-wide-arena`. It includes the Russian handoff at `82c585e`, the latest main integration at `dcc81b0`, and the one-action energy pickup controls. Both features share the 1.7.0 version previously reserved for the Russian release. [Branch comparison](https://github.com/Laska1022/Android/compare/main...codex/rva-wide-arena?expand=1)
