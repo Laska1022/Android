@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.0 · November 28, 2026
+
+- **Field guide → Aliens** shows five species in the equipped skin, with base health, attack behavior and a defense tip in English and Russian. Walk and Attack play two cycles of the actual combat animation. The guide pauses a live battle and works offline. [Russian portrait view](docs/screenshots/alien-guide-portrait.webp) · [English landscape view](docs/screenshots/alien-guide-landscape.webp)
+- An explicit Reduced motion choice survives a reload. **Use device setting** restores live updates from the operating system. Reduced motion keeps the portrait and defense advice visible.
+- Arrow keys stay in their lane and column at the edge of the arena. On narrow portrait phones, Guide and Pause have separate touch targets, including with the Russian controls.
+
 ## 1.7.0 · November 27, 2026
 
 - The default battle view fills the screen. Five robot cards sit above the nine-column field. Each lane has a numbered defense dock and a clear entry from the right. On a 775 × 364 landscape phone the playable grid grew from 514 × 202 to 631 × 240 CSS pixels. Choose Settings → Battle layout → Classic console for the original framing. [Landscape battlefield](docs/screenshots/wide-arena-landscape.webp) · [Desktop battlefield](docs/screenshots/wide-arena-desktop.webp)

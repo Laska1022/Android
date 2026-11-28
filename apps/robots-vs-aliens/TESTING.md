@@ -67,6 +67,22 @@ Android UI frame statistics, WebView animation callbacks and simulated game time
 
 ## Validation record
 
+### November 28, 2026 · 1.8.0, Android code 11
+
+At `9cfaece`, the full `npm run check` passed 36 unit tests, strict TypeScript, the production build and 62 desktop/mobile Chromium scenarios. Ten platform-specific cases were skipped on the opposite input platform.
+
+The guide checks inspect all five species after an offline reload, compare their base health with the engine, and trace the actual image source rectangles for a Spitter’s walk and attack. Desktop uses Riftborn and mobile uses Ember. The tests verify that the paused battlefield stops drawing while the guide is open, that the clip stops on close and that battle rendering and deployment state resume. A blocked atlas request keeps the equipped portrait and defense advice visible. Changing device language with the guide open preserves the selected species. [Browser scenarios](tests/e2e/field-guide.spec.ts) · [Language checks](tests/e2e/language.spec.ts)
+
+During the first complete run, a nested label prevented automation from finding the species selector by its exact label. The selector now has a separate, explicitly associated label in both languages. A desktop motion test also tried to clear the checkbox before Chromium delivered the second device preference change. It now waits for the visible checked state before toggling. The corrected guide and language cases passed twice on their applicable platforms.
+
+On a 320 × 568 Russian battlefield, the center of the Guide button originally hit Pause. The portrait layout now gives the vitals and navigation their own space. The touch test checks both ends and the center of each toolbar button, opens the guide, rotates to 568 × 320 and opens it again. Desktop keyboard coverage verifies all four board edges and deploys in the intended top-right tile. Captures show an Ember Runner on a 775 × 364 landscape screen and a Riftborn Spitter in Russian at 393 × 719. [Landscape](docs/screenshots/alien-guide-landscape.webp) · [Portrait](docs/screenshots/alien-guide-portrait.webp)
+
+At 568 × 320, the last line of the Russian Overlord advice initially extended 30 pixels below the dialog. Compact layouts now place health beside the species selector. The narrow-phone regression passed four consecutive mobile runs. A separate fit check measured all five profiles in English and Russian at 320 × 568, 393 × 719, 568 × 320 and 775 × 364. All 40 views had zero horizontal overflow and at least 16 pixels below the advice inside the dialog.
+
+At 775 × 364, Chromium 156 delivered 59.5 animation callbacks/s for the published 1.7.0 web bundle and 60.0 for 1.8.0. Both had a p95 frame interval of 16.8 ms. Each sample covered 360 intervals after 60 warm-up frames on Outpost turf with Pulse and Bastion at 2× in First Contact. This measures browser frame delivery on the cloud computer. The compact Russian guide also fit its complete Overlord defense text at 320 × 568.
+
+Capacitor sync and Gradle `assembleDebug lintDebug` passed. App lint reported zero errors and four warnings. Android build tools verified v2 signing, package `com.laska.robotvsaliens`, version 1.8.0, code 11 and the Russian launcher name «Роботы против пришельцев». The local APK for `9cfaece` was 10,535,918 bytes with SHA-256 `6370cc1bd93d169b39c5427d7ed52cd8e2fd1137384f92d72bc90e6070374ab6`. All 76 bundled production files, including all 42 WebPs, matched the web build byte for byte. ADB listed no connected Android device. [Redmi follow-up](HANDOFF.md#message-for-the-first-ai)
+
 ### November 27, 2026 · 1.7.0, Android code 10
 
 The Russian checkpoint at `82c585e` passed 34 unit tests and 50 desktop/mobile Chromium scenarios, with eight platform-specific skips. The wide-arena revision includes that checkpoint and the main-branch integration at `dcc81b0`.

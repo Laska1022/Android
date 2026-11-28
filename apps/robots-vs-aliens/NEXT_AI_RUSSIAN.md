@@ -1,6 +1,6 @@
 # Russian localization handoff
 
-The Russian-only handoff at `82c585e` has been integrated into `codex/rva-wide-arena` for **1.7.0, Android code 10**. Continue from that branch for both language support and the larger arena. The current release evidence and remaining Redmi checks are in [HANDOFF.md](HANDOFF.md) and [TESTING.md](TESTING.md#november-27-2026--170-android-code-10). The notes below describe the earlier Russian implementation.
+The Russian-only handoff at `82c585e` was integrated into `codex/rva-wide-arena` for **1.7.0, Android code 10**. Its successor, `codex/rva-alien-field-guide`, also contains the bilingual alien profiles and motion controls for 1.8.0. The current release evidence and remaining Redmi checks are in [HANDOFF.md](HANDOFF.md) and [TESTING.md](TESTING.md#november-28-2026--180-android-code-11). The notes below describe the earlier Russian implementation.
 
 ## What the player gets
 
@@ -17,4 +17,4 @@ The Russian-only handoff at `82c585e` has been integrated into `codex/rva-wide-a
 
 ## Where to edit
 
-The catalogs and language selection are in [src/i18n](src/i18n/). The UI and dialog refresh live in [main.ts](src/main.ts), warning disclosure in [lane-warning.ts](src/game/lane-warning.ts), and language persistence in [storage.ts](src/game/storage.ts). The [browser scenarios](tests/e2e/language.spec.ts) and [language unit tests](tests/unit/language.test.ts) exercise the new behavior. The separate keyboard-edge and reduced-motion reports remain in the [existing bug list](docs/KNOWN_BUGS.md).
+The catalogs and language selection are in [src/i18n](src/i18n/). The UI and dialog refresh live in [main.ts](src/main.ts), warning disclosure in [lane-warning.ts](src/game/lane-warning.ts), and language persistence in [storage.ts](src/game/storage.ts). The [browser scenarios](tests/e2e/language.spec.ts) and [language unit tests](tests/unit/language.test.ts) exercise the new behavior. Version 1.8.0 fixes the keyboard-edge and reduced-motion issues in the [original bug list](docs/KNOWN_BUGS.md).

@@ -62,6 +62,8 @@ The renderer caches portraits by finish and class and shares light textures. On 
 
 All placement cells and loadout cards are actual buttons. The battlefield uses roving focus and arrow keys. Modals trap keyboard focus and restore it. Touch and pointer inputs use the same command methods. Reduced motion disables ambience and particles. Full nonvisual gameplay, high-contrast options, and customizable input remain future accessibility work.
 
+The alien guide reads base health from `ENEMIES` and gets localized advice from the two message catalogs. A requested Walk or Attack clip uses the renderer’s equipped sheet and the same frame sampler as combat. The guide cancels playback on close, species change, document hiding or reduced motion. The paused battlefield resumes drawing when the guide closes. Saved motion values are `true`, `false` or `null` for the device preference. [Field guide](../src/game/field-guide.ts) · [Regression tests](../tests/e2e/field-guide.spec.ts)
+
 ## Player preferences and incoming attacks in 1.4
 
 In 1.5.1, `GameNavigationPlugin` registers a lifecycle-bound AndroidX Back callback. The game claims it during a mission or dialog. A cancelable `rvaBack` event calls the same screen navigation as Escape. A page navigation clears the native claim, and an unhandled event delegates to the Android dispatcher. The bare command screen leaves system Back available.

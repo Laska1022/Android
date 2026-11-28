@@ -10,6 +10,10 @@ Start each new art branch from the latest `origin/main` in `apps/robots-vs-alien
 2. If you already have art commits on another branch, keep them. Integrate the new base with a normal merge on your own branch. Resolve disagreements in the renderer against the contracts below. Record the base and tip in your PR. Use normal pushes.
 3. Scope your changes to game art, rendering, art tests and the related docs. The local developer owns Android rotation, physical Redmi verification and integration. Coordinate any engine, shared Settings or input change with that developer first.
 
+## Alien field guide in 1.8.0
+
+Choose **Field guide → Aliens**, select a species and press **Walk** or **Attack** to inspect an equipped brood at a larger size. The guide samples the same 24-frame clips, offsets and timing as the battlefield. With reduced motion enabled or an unavailable sheet, the player can still inspect the resting portrait. Include the guide and its offline case when verifying future broods. [Guide implementation](src/game/field-guide.ts) · [Browser tests](tests/e2e/field-guide.spec.ts) · [Current handoff](HANDOFF.md#message-for-the-first-ai)
+
 ## Selectable field materials in 1.6.0
 
 The field artist’s handoff for Copper foundry and Polar relay includes original square material tiles in `src/assets/fields/`, a saved selector separate from robot and alien finishes, and a cached terrain paint path with a procedural fallback. The new framing applies to the whole battle scene, which keeps overlays aligned across layouts. [Message for the first AI](HANDOFF.md#message-for-the-first-ai) · [Field art provenance](docs/ASSETS.md#battlefield-materials-in-160)

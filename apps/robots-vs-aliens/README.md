@@ -11,6 +11,7 @@ An original sci-fi lane-defense game. Build a squad of robots, manage energy, an
 - Five campaign sectors, escalating waves, five enemy types, final-wave Overlords, and endless survival.
 - Each sector has its own battlefield, from the Greenline perimeter and Badlands to the Crystal Basin, Relay Nine and the Nest. Selecting an unlocked sector reveals its location and briefing.
 - Choose robot and alien skins independently in Settings. All five aliens have full-body walking and attack animations in each brood, including ranged attacks against defenders. The art is bundled for offline play. [See the aliens in motion](docs/screenshots/alien-motion.webp)
+- Open **Field guide → Aliens** to inspect the Scout, Runner, Brute, Spitter or Overlord in your equipped skin. Select **Walk** or **Attack** to preview its movement and read how to defend its lane. The guide pauses a live mission and works offline. [Phone guide in Russian](docs/screenshots/alien-guide-portrait.webp) · [Landscape guide](docs/screenshots/alien-guide-landscape.webp)
 - Expanded lanes fills the mission screen with five defense lanes. Choose a robot from the card bank above the field and tap any of the nine columns. New games begin on Outpost turf. Settings → Battlefield skin also offers Sector alloy, Copper foundry and Polar relay. Settings → Battle layout restores Classic console. [Landscape battle](docs/screenshots/wide-arena-landscape.webp) · [Portrait battle](docs/screenshots/wide-arena-portrait.webp)
 - Energy pickups, health-based recycling, lane-wide orbital strikes, pause, and double speed.
 - Procedural sci-fi sound effects, reduced-motion settings, keyboard navigation, and touch controls.
@@ -61,6 +62,8 @@ Serve `dist/` over HTTPS for installation on phones. The service worker also wor
 На русской раскладке **Й** выбирает орбитальный удар, **К** — разборку робота, а **У** собирает энергию. В игре откройте **Справочник**, чтобы посмотреть характеристики роботов и остальные команды.
 
 On phones, tap the cards and tiles. Android opens in landscape. Choose **Settings → Screen orientation → Follow phone** to use the phone’s rotation preference. Ordinary browser tabs adapt to the viewport.
+
+New profiles follow the device’s reduced-motion preference. You can turn **Reduced motion** on or off in Settings, or choose **Use device setting** to follow the device again. With reduced motion enabled, the field guide shows each alien’s resting portrait.
 
 On Android, press the system **Back** button during a mission to pause. Press it again to resume with your squad in place. Back closes Settings and the field guide, returns to command from a mission result, and uses ordinary Android navigation on the command screen. On a keyboard, Escape performs the same in-game actions.
 

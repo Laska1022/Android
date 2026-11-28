@@ -4,11 +4,21 @@
 
 The game lives in `apps/robots-vs-aliens/` of `Laska1022/Android`. It runs offline in a browser or its Capacitor Android host. Run all game commands from this directory. See [AGENTS.md](AGENTS.md) for code ownership, [TESTING.md](TESTING.md) for reproducible checks and physical evidence, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
+**Version 1.8.0, Android code 11** adds five animated alien profiles to the field guide. Each profile shows the equipped brood, base health, behavior and a counter in English and Russian. The guide and battle share the same sprite sheet. Guide playback draws only the selected preview while the mission is paused. [Landscape preview](docs/screenshots/alien-guide-landscape.webp) · [Russian portrait preview](docs/screenshots/alien-guide-portrait.webp)
+
+## Message for the first AI
+
+Continue from `codex/rva-alien-field-guide`, based on the verified 1.7.0 branch at `b8a7a4d` with main at `dcc81b0`. I added the alien guide, fixed arrow-key deployment at the four board edges, and separated Guide and Pause targets on narrow portrait screens. The motion setting now follows the device until the player chooses an override. Legacy saved booleans keep their value. [Review against main](https://github.com/Laska1022/Android/compare/main...codex/rva-alien-field-guide?expand=1)
+
+For the Redmi check, open the guide mid-wave with Riftborn equipped, select Spitter, and play both clips. Use Android Back during the attack and confirm your robots and wave resume. Rotate, switch to Russian, and tap Guide beside Pause. Check a cold offline launch with Reduced motion on and again with **Use device setting**. [Release test record](TESTING.md#november-28-2026--180-android-code-11)
+
+## Larger arena and Russian release
+
 **Version 1.7.0, Android code 10** combines Russian support and the larger arena. The default mission view places all five robot cards above the battlefield and uses the phone’s available width. The fresh-install surface is Outpost turf. A saved field finish or Classic layout still applies. [Landscape](docs/screenshots/wide-arena-landscape.webp) · [Portrait](docs/screenshots/wide-arena-portrait.webp) · [Desktop](docs/screenshots/wide-arena-desktop.webp)
 
 GitHub built and published the Android debug APK from `c82b3fb`. The public download passed signature, checksum and bundled-file checks. The 1.6.0 and 1.7.0 downloads have different signing certificates. Android requires a fresh installation to switch between them, and uninstalling 1.6.0 erases its local campaign. [Download 1.7.0](https://github.com/Laska1022/Android/releases/download/robots-vs-aliens-v1.7.0/robots-vs-aliens-1.7.0-debug.apk) · [GitHub Actions run](https://github.com/Laska1022/Android/actions/runs/46057711080)
 
-## Message for the first AI
+### Integration notes for 1.7.0
 
 Continue from `codex/rva-wide-arena`. It includes the Russian handoff at `82c585e`, the main integration at `dcc81b0` and the one-action energy pickup controls. The branch and release tag are on GitHub. GitHub’s API returned HTTP 403 when opening the draft pull request. Use the branch comparison for integration. [Review against main](https://github.com/Laska1022/Android/compare/main...codex/rva-wide-arena?expand=1)
 
@@ -38,7 +48,7 @@ For Redmi verification, use a compatible signing key or a separate installation 
 
 **Version 1.5.1, Android code 7.** All five aliens now have full-body walks and attacks in Native carapace, Ember brood and Riftborn obsidian. A Scout reaching a Bastion keeps biting in place. A Spitter recoils when the engine releases acid. The incoming-lane arrow sits in the outer gutter so players can see enemies in front of the last column. The branch `codex/rva-alien-animation` builds on the published 1.5.0 handover at `c1d37fe`. [Watch all five species](docs/screenshots/alien-motion.webp) · [Art handover](ART_HANDOFF.md) · [Validation](TESTING.md#november-27-2026--151-android-code-7)
 
-**Main integration 1.5.3, Android code 9.** A settings change in an older tab preserves a newer campaign win. Pulse can hit a Scout already crossing its tile. The keyboard edge and reduced-motion reports are still open. [Bug report and reproductions](docs/KNOWN_BUGS.md)
+**Main integration 1.5.3, Android code 9.** A settings change in an older tab preserves a newer campaign win. Pulse can hit a Scout already crossing its tile. Version 1.8.0 addresses the two remaining reports on keyboard edges and reduced motion. [Bug report and reproductions](docs/KNOWN_BUGS.md)
 
 The main-branch APK for this integration was **1.5.2** at `5672626`. Its checksum, v2 signature and all 67 production web files were verified after download. The public 1.5.1 and 1.5.2 debug certificates differ. On the locally signed Redmi build, the Scout’s bite, the Spitter’s ranged attack and system Back passed. [Release and APK](https://github.com/Laska1022/Android/releases/tag/robots-vs-aliens-v1.5.2) · [Verified build and device record](TESTING.md#november-27-2026--152-android-code-8)
 

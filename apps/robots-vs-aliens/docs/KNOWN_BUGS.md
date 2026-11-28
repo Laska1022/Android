@@ -40,14 +40,14 @@ JS
 
 In 1.5.3 the projectile starts at the edge of the nearest target's hitbox if the muzzle extends past it. Running the same command leaves the Scout at **27 HP in both placements**. The regression also puts Scouts farther ahead and in the adjacent lane and checks that Pulse leaves both unharmed. [Engine](../src/game/engine.ts) · [Combat regression](../tests/unit/engine.test.ts)
 
-## 3. Arrow keys can deploy a robot in the wrong lane at a board edge
+## 3. Arrow keys can deploy a robot in the wrong lane at a board edge (fixed in 1.8.0)
 
 Choose **Deploy squad**. Focus starts at lane 1, column 1. Press Right four times to reach column 5, then Up. Focus jumps to column 1. From there, press Right eight times to reach column 9, then Right once more and Enter. Pulse lands in lane 2, column 1 and spends 100 energy.
 
-The handler clamps a single index across all 45 buttons. Check that Up on the top row preserves the column, and Right on the right edge preserves the lane. Enter should deploy on the tile that retained focus. [Battlefield keyboard handler](../src/main.ts#L511)
+The old handler clamped a single index across all 45 buttons. Version 1.8.0 checks row and column separately. The regression presses each arrow at its boundary and deploys Pulse in the top-right corner with Enter. [Keyboard regression](../tests/e2e/game.spec.ts)
 
-## 4. The reduced-motion switch turns itself back on after reload
+## 4. The reduced-motion switch turns itself back on after reload (fixed in 1.8.0)
 
 Enable the operating system's reduced-motion preference, or emulate `prefers-reduced-motion: reduce` in Chromium. Open **Settings**, turn **Reduced motion** off, and reload. Reopen Settings. The checkbox is checked and the page has the `reduced-motion` class again, even though `rva-save-v1.reducedMotion` still contains `false`.
 
-Startup combines the saved value and system preference with `||`. This treats an explicit Off choice like a first visit. A regression test should cover both a fresh profile inheriting the system preference and a returning player who explicitly changed the switch. [Startup](../src/main.ts#L100) · [Settings handler](../src/main.ts#L455)
+Startup used to combine the saved value and system preference with `||`. Version 1.8.0 preserves saved booleans and uses `null` to follow the device. The browser regression changes the device preference with Settings open, reloads with an explicit Off choice, restores device control, and verifies the resting portrait in the guide. [Preference handling](../src/game/storage.ts) · [Browser regression](../tests/e2e/field-guide.spec.ts)
