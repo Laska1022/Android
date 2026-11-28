@@ -21,6 +21,7 @@ import {
   type BotKind,
 } from './game/engine';
 import { Renderer, botIcon, alienIcon } from './game/render';
+import { FieldGuide } from './game/field-guide';
 import { LaneWarning } from './game/lane-warning';
 import { fieldTextures, isBattleLayout, isFieldSkin } from './game/field';
 import { GAME_BACK_EVENT, setGameBackHandled } from './game/navigation';
@@ -108,6 +109,7 @@ $('#app').innerHTML = `
   <div id="modal-backdrop" class="modal-backdrop" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"></section></div>
 `;
 const renderer = new Renderer($('#battlefield'));
+const guide = new FieldGuide($('#modal'), renderer, renderModal);
 const laneWarning = new LaneWarning($('#arena'), $('#battle-scene'));
 function updateMissionLayout() {
   document.body.classList.toggle('in-mission', !menu);
@@ -124,9 +126,20 @@ function applySkins() {
   }
 }
 applySkins();
-renderer.reducedMotion =
-  save.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
-document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
+const deviceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function applyMotion() {
+  renderer.reducedMotion = save.reducedMotion ?? deviceMotion.matches;
+  document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
+  const checkbox = document.querySelector<HTMLInputElement>('#motion-setting');
+  if (checkbox) {
+    checkbox.checked = renderer.reducedMotion;
+    $('#motion-system').hidden = save.reducedMotion === null;
+  }
+  guide.updateMotion(t);
+}
+applyMotion();
+if (deviceMotion.addEventListener) deviceMotion.addEventListener('change', applyMotion);
+else deviceMotion.addListener(applyMotion);
 
 function toast(message: (copy: Messages) => string) {
   activeToast = message;
@@ -369,6 +382,7 @@ function openModal(render: () => void) {
   updateHud();
 }
 function closeModal(resume = true) {
+  guide.close();
   renderDialog = null;
   $('#modal-backdrop').hidden = true;
   syncBackHandling();
@@ -519,7 +533,9 @@ function renderSettings() {
       `<label class="setting select-setting"><span class="skin-label"><i id="field-sample" aria-hidden="true"></i><span>${t.fieldSkin}</span></span><select id="field-skin" aria-label="${t.fieldSkin}">${selectOptions(t.fields, save.fieldSkin)}</select></label>` +
       `<label class="setting select-setting"><span class="skin-label"><img id="robot-skin-preview" src="${botIcon('pulse', save.robotSkin)}" alt=""/><span>${t.robotSkin}</span></span><select id="robot-skin" aria-label="${t.robotSkin}">${selectOptions(t.robotSkins, save.robotSkin)}</select></label>` +
       `<label class="setting select-setting"><span class="skin-label"><img id="alien-skin-preview" src="${alienIcon('scout', save.alienSkin)}" alt=""/><span>${t.alienSkin}</span></span><select id="alien-skin" aria-label="${t.alienSkin}">${selectOptions(t.alienSkins, save.alienSkin)}</select></label>` +
-      `<label class="setting"><span>${t.sound}<small>${t.soundHelp}</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label><label class="setting"><span>${t.motion}<small>${t.motionHelp}</small></span><input id="motion-setting" type="checkbox" ${renderer.reducedMotion ? 'checked' : ''}/></label><p class="fine-print">${t.saveHelp}</p><button class="primary" id="settings-done">${t.done}</button>`,
+      `<label class="setting"><span>${t.sound}<small>${t.soundHelp}</small></span><input id="sound-setting" type="checkbox" ${!audio.muted ? 'checked' : ''}/></label>
+       <div class="setting"><span><label for="motion-setting">${t.motion}</label><small id="motion-help">${t.motionHelp}</small><button type="button" class="text-button" id="motion-system" ${save.reducedMotion === null ? 'hidden' : ''}>${t.motionSystem}</button></span><input id="motion-setting" type="checkbox" aria-describedby="motion-help" ${renderer.reducedMotion ? 'checked' : ''}/></div>
+       <p class="fine-print">${t.saveHelp}</p><button class="primary" id="settings-done">${t.done}</button>`,
   );
   const language = $<HTMLSelectElement>('#language-setting');
   language.value = save.language;
@@ -575,21 +591,19 @@ function renderSettings() {
     persist({ muted: audio.muted });
   };
   $('#motion-setting').onchange = (e) => {
-    renderer.reducedMotion = (e.target as HTMLInputElement).checked;
-    document.documentElement.classList.toggle('reduced-motion', renderer.reducedMotion);
-    persist({ reducedMotion: renderer.reducedMotion });
+    persist({ reducedMotion: (e.target as HTMLInputElement).checked });
+    applyMotion();
+  };
+  $('#motion-system').onclick = () => {
+    persist({ reducedMotion: null });
+    applyMotion();
+    $('#motion-setting').focus({ preventScroll: true });
   };
   $('#settings-done').onclick = () => closeModal();
 }
 $('#settings-button').onclick = () => openModal(renderSettings);
 function renderGuide() {
-  renderModal(
-    t.guideTitle,
-    `<p>${t.guideIntro}</p><div class="guide-grid">${kinds.map((kind) => `<div><img src="${botIcon(kind, save.robotSkin)}" alt=""/><span><strong>${t.bots[kind].name} <small>· ${BOTS[kind].cost} ${t.labels.energy}</small></strong><p>${t.bots[kind].description}</p></span></div>`).join('')}</div>
-     <div class="guide-notes">${t.guideNotes.map(([title, note]) => `<p><strong>${title}</strong> ${note}</p>`).join('')}</div>
-     <div class="keyboard-guide">${t.shortcuts.map(([key, action]) => `<kbd>${key}</kbd> ${action}`).join(' ')}</div>
-     <p class="fine-print">${t.guideControls}</p>`,
-  );
+  guide.render(t);
 }
 $('#guide-button').onclick = () => openModal(renderGuide);
 document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
@@ -622,18 +636,27 @@ document.querySelectorAll<HTMLButtonElement>('.cell').forEach((cell) => {
     renderer.hover = { row: Number(cell.dataset.row), col: Number(cell.dataset.col) };
   };
   cell.onkeydown = (e) => {
-    const delta: Record<string, number> = {
-      ArrowUp: -9,
-      ArrowDown: 9,
-      ArrowLeft: -1,
-      ArrowRight: 1,
-    };
-    if (e.key in delta) {
-      e.preventDefault();
-      const cells = [...document.querySelectorAll<HTMLButtonElement>('.cell')];
-      const idx = cells.indexOf(cell);
-      cells[Math.max(0, Math.min(44, idx + delta[e.key]))].focus();
+    let row = Number(cell.dataset.row);
+    let col = Number(cell.dataset.col);
+    switch (e.key) {
+      case 'ArrowUp':
+        row--;
+        break;
+      case 'ArrowDown':
+        row++;
+        break;
+      case 'ArrowLeft':
+        col--;
+        break;
+      case 'ArrowRight':
+        col++;
+        break;
+      default:
+        return;
     }
+    e.preventDefault();
+    if (row >= 0 && row < ROWS && col >= 0 && col < COLS)
+      $(`.cell[data-row="${row}"][data-col="${col}"]`).focus({ preventScroll: true });
   };
 });
 $('#battle-grid').onpointerleave = () => (renderer.hover = null);
@@ -648,7 +671,7 @@ document.addEventListener('keydown', (e) => {
         ...$('#modal').querySelectorAll<HTMLElement>(
           'button:not(:disabled), input, select, [tabindex="0"]',
         ),
-      ];
+      ].filter((el) => el.getClientRects().length > 0);
       const first = focusables[0],
         final = focusables.at(-1)!;
       if (
@@ -678,6 +701,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 document.addEventListener('visibilitychange', () => {
+  if (document.hidden) guide.stopPreview();
   if (document.hidden && !menu && game.phase === 'playing') pause();
   last = 0;
   accumulator = 0;
@@ -708,7 +732,8 @@ function frame(now: number) {
     }
   }
   laneWarning.update(menu ? null : game.incomingThreat, t);
-  if (!menu) renderer.draw(game);
+  // The guide pauses the simulation and paints its own short preview over the last battle frame.
+  if (!menu && renderDialog !== renderGuide) renderer.draw(game);
   if (toastTimer > 0) {
     toastTimer -= elapsed;
     if (toastTimer <= 0) $('#toast').classList.remove('visible');

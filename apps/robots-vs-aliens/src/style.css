@@ -1911,13 +1911,6 @@ kbd {
     display: none;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition: none !important;
-  }
-}
-
 .site-header {
   border-color: #283d45;
 }
@@ -2083,6 +2076,12 @@ footer {
 .reduced-motion *::after {
   animation-duration: 0.01ms !important;
   transition-duration: 0.01ms !important;
+}
+#motion-system {
+  color: var(--lime);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 6px 0;
 }
 @keyframes connect-feed {
   from {

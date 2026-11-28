@@ -43,7 +43,15 @@ test('Russian device language, campaign briefings, guide and language choice wor
   await expect(page.getByRole('dialog', { name: 'Справочник отряда' })).toBeVisible();
   await expect(page.locator('.guide-grid > div')).toHaveCount(5);
   await expect(page.locator('.keyboard-guide')).toContainText('У/E');
+  await page.getByRole('button', { name: 'Пришельцы', exact: true }).click();
+  await page.getByLabel('Вид', { exact: true }).selectOption('spitter');
+  await expect(page.getByRole('dialog', { name: 'Справочник пришельцев' })).toBeVisible();
+  await expect(page.locator('.guide-defense')).toContainText('кислотные плевки');
   await deviceLanguages(page, ['en-US']);
+  await expect(page.getByRole('dialog', { name: 'Know your enemy.' })).toBeVisible();
+  await expect(page.getByLabel('Species')).toHaveValue('spitter');
+  await expect(page.locator('.guide-defense')).toContainText('intercepts the acid');
+  await page.getByRole('button', { name: 'Robots', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Know your squad.' })).toBeVisible();
   await page.getByRole('button', { name: 'Close dialog' }).click();
   await expect(page.locator('#mission-label')).toHaveText('IRON HORIZON');

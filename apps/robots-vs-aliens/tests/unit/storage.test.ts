@@ -86,7 +86,7 @@ describe('save data', () => {
       best: 0,
       stars: [3, 0, 0, 0, 0],
       muted: false,
-      reducedMotion: false,
+      reducedMotion: null,
       difficulty: 'cadet',
       robotSkin: 'standard',
       alienSkin: 'standard',
@@ -94,6 +94,20 @@ describe('save data', () => {
       fieldSkin: 'standard',
       language: 'system',
     });
+  });
+  it('inherits device motion only when the v1 save has no valid override', () => {
+    for (const [value, expected] of [
+      [undefined, null],
+      [null, null],
+      ['off', null],
+      [false, false],
+      [true, true],
+    ] as const) {
+      vi.stubGlobal('localStorage', {
+        getItem: () => JSON.stringify({ reducedMotion: value, best: 4200 }),
+      });
+      expect(loadSave()).toMatchObject({ reducedMotion: expected, best: 4200 });
+    }
   });
   it('keeps v1 progress while accepting only supported campaign difficulty values', () => {
     const raw = {

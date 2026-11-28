@@ -9,7 +9,7 @@ export interface Save {
   best: number;
   stars: number[];
   muted: boolean;
-  reducedMotion: boolean;
+  reducedMotion: boolean | null;
   difficulty: CampaignDifficulty;
   robotSkin: RobotSkin;
   alienSkin: AlienSkin;
@@ -26,7 +26,7 @@ const defaults = (): Save => ({
   best: 0,
   stars: [0, 0, 0, 0, 0],
   muted: false,
-  reducedMotion: false,
+  reducedMotion: null,
   difficulty: 'cadet',
   robotSkin: 'standard',
   alienSkin: 'standard',
@@ -45,7 +45,7 @@ function parseSave(value: string | null): Save {
         Number.isInteger(raw.stars?.[i]) ? Math.max(0, Math.min(3, raw.stars[i])) : 0,
       ),
       muted: raw.muted === true,
-      reducedMotion: raw.reducedMotion === true,
+      reducedMotion: typeof raw.reducedMotion === 'boolean' ? raw.reducedMotion : null,
       difficulty: raw.difficulty === 'veteran' ? 'veteran' : 'cadet',
       robotSkin: isRobotSkin(raw.robotSkin) ? raw.robotSkin : 'standard',
       alienSkin: isAlienSkin(raw.alienSkin) ? raw.alienSkin : 'standard',

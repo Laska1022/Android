@@ -350,11 +350,12 @@ body.in-mission {
     --camera-top: 65;
     --camera-height: 570;
     grid-template:
-      'energy vitals tools' auto
-      'cards cards cards' auto
-      'field field field' minmax(0, 1fr)
-      'status status status' auto
-      'abilities actions actions' auto / auto minmax(0, 1fr) auto;
+      'energy vitals vitals tools' auto
+      'cards cards cards cards' auto
+      'field field field field' minmax(0, 1fr)
+      'status status status status' auto
+      'abilities abilities actions actions' auto / max-content minmax(0, 1fr) minmax(0, 1fr)
+      max-content;
   }
   .arena-view .mission-vitals {
     justify-content: center;
@@ -400,6 +401,18 @@ body.in-mission {
 }
 
 @media (max-width: 360px) and (orientation: portrait) {
+  .arena-view .mission-vitals {
+    gap: 4px;
+    padding-inline: 2px;
+  }
+  .arena-view .energy-stat,
+  .arena-view .abilities button {
+    padding-inline: 2px;
+  }
+  .arena-view .site-header nav {
+    gap: 2px;
+    padding-inline: 2px;
+  }
   .arena-view .battle-actions {
     gap: 2px;
     padding-inline: 2px 4px;

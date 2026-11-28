@@ -134,10 +134,49 @@ export const en = {
   soundHelp: 'Original synthesized sci-fi audio',
   motion: 'Reduced motion',
   motionHelp: 'Disable ambient movement and combat particles',
+  motionSystem: 'Use device setting',
   saveHelp:
     'Campaign progress and preferences save automatically on this device. No account or internet needed after your first visit.',
   done: 'Back to the outpost',
   guideTitle: 'Know your squad.',
+  alienGuide: {
+    title: 'Know your enemy.',
+    robots: 'Robots',
+    aliens: 'Aliens',
+    species: 'Species',
+    baseHealth: 'Base health',
+    defense: 'How to defend',
+    walk: 'Walk',
+    attack: 'Attack',
+    previews: 'Animation previews',
+    still: 'Reduced motion is on.',
+    unavailable: 'Animation unavailable. Showing the equipped skin.',
+    entries: {
+      scout: {
+        behavior: 'Stops at the first robot in its lane and attacks at close range.',
+        counter: 'Place Pulse in the marked lane before sending the first wave.',
+      },
+      runner: {
+        behavior:
+          'The fastest alien. It can cross an undefended lane while your squad is busy elsewhere.',
+        counter:
+          'Place Frost in front of Pulse in the same lane. The slowdown gives Pulse time for more shots.',
+      },
+      brute: {
+        behavior: 'Advances slowly and hits the front robot hard once it reaches it.',
+        counter: 'Let Bastion take the hits while Nova fires from behind.',
+      },
+      spitter: {
+        behavior: 'Stops up to three tiles away and spits acid at the first robot in its lane.',
+        counter: 'Put Bastion ahead of your gunners so it intercepts the acid.',
+      },
+      overlord: {
+        behavior: 'Arrives at the end of the final wave. A breach costs three core integrity.',
+        counter:
+          'Slow it with Frost, concentrate your gunners in its lane and use an orbital strike.',
+      },
+    } satisfies Record<EnemyKind, { behavior: string; counter: string }>,
+  },
   guideIntro:
     'Aliens advance from the right. The incoming marker shows the next lane. Cadet also identifies the alien. Place robots on empty tiles to protect the core on the left.',
   guideNotes: [

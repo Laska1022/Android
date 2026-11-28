@@ -208,3 +208,32 @@ test('keyboard deployment and modal focus containment', async ({ page, isMobile 
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toBeHidden();
 });
+
+test('arrow keys stop on each lane boundary and Enter deploys in the focused corner', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'Desktop Chromium drives physical keyboard input.');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Deploy squad' }).click();
+  const cell = (row: number, col: number) =>
+    page.locator(`.cell[data-row="${row}"][data-col="${col}"]`);
+  await cell(0, 4).focus();
+  await page.keyboard.press('ArrowUp');
+  await expect(cell(0, 4)).toBeFocused();
+  await cell(2, 0).focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(cell(2, 0)).toBeFocused();
+  await cell(4, 7).focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(cell(4, 7)).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await expect(cell(4, 8)).toBeFocused();
+  await cell(0, 8).focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await expect(cell(0, 8)).toHaveAccessibleName(/Pulse/);
+  await expect(cell(1, 0)).toHaveAccessibleName(/empty/);
+  await expect(page.locator('#energy')).toHaveText('300');
+});

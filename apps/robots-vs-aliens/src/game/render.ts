@@ -254,6 +254,28 @@ function drawBot(
   }
 }
 
+function attackPeriod(kind: EnemyKind) {
+  return kind === 'spitter' ? 1.8 : 0.9;
+}
+
+function drawAlienPose(
+  c: Ctx,
+  sheet: HTMLImageElement,
+  cells: number[][],
+  kind: EnemyKind,
+  attacking: boolean,
+  phase: number,
+  x: number,
+  feet: number,
+  size: number,
+) {
+  const frame = Math.min(gaits.frames - 1, Math.floor(phase * gaits.frames));
+  const clip = gaits.species[kind].row * 2 + Number(attacking);
+  const [sx, sy, w, h, dx, dy] = cells[clip * gaits.frames + frame];
+  const scale = size / gaits.referenceSize;
+  c.drawImage(sheet, sx, sy, w, h, x + dx * scale, feet + dy * scale, w * scale, h * scale);
+}
+
 function drawAlien(
   c: Ctx,
   image: HTMLImageElement,
@@ -280,17 +302,13 @@ function drawAlien(
 
   const gait = gaits.species[kind];
   const travel = (9.6 - enemy.x) / gait.strideCells + enemy.id * 0.347;
-  const cooldown = kind === 'spitter' ? 1.8 : 0.9;
+  const cooldown = attackPeriod(kind);
   // Frame zero of the attack is the bite, ram, slash or acid release.
   const phase = holding
     ? 1 - Math.min(1, Math.max(0, enemy.timer / cooldown))
     : travel - Math.floor(travel);
   if (sheet?.complete && sheet.naturalWidth) {
-    const frame = Math.min(gaits.frames - 1, Math.floor(phase * gaits.frames));
-    const clip = gait.row * 2 + Number(holding);
-    const [sx, sy, w, h, dx, dy] = cells[clip * gaits.frames + frame];
-    const scale = size / gaits.referenceSize;
-    c.drawImage(sheet, sx, sy, w, h, x + dx * scale, feet + dy * scale, w * scale, h * scale);
+    drawAlienPose(c, sheet, cells, kind, holding, phase, x, feet, size);
   } else {
     // Keep the equipped portrait readable while its sheet decodes or if it fails.
     const beat = Math.sin(phase * Math.PI * 2);
@@ -482,12 +500,34 @@ export class Renderer {
   }
 
   private prepareStride() {
-    if (!this.battleStarted || this.motionReduced || this.strideSheet) return;
+    if (this.battleStarted && !this.motionReduced) this.loadStride();
+  }
+
+  private loadStride() {
+    if (this.strideSheet) return this.strideSheet;
     const sheet = new Image();
     sheet.decoding = 'async';
     sheet.src = new URL(`../assets/motion/${this.aliens}-stride.webp`, import.meta.url).href;
     this.strideSheet = sheet;
     void sheet.decode().catch(() => {}); // Static portraits remain available while loading or after failure.
+    return sheet;
+  }
+
+  async prepareAlienPreview(canvas: HTMLCanvasElement, kind: EnemyKind, attacking: boolean) {
+    const sheet = this.loadStride();
+    const cells = alienFrames[this.aliens].cells;
+    await sheet.decode();
+    const c = canvas.getContext('2d')!;
+    const seconds = attacking
+      ? attackPeriod(kind)
+      : gaits.species[kind].strideCells / ENEMIES[kind].speed;
+    return {
+      seconds,
+      draw(phase: number) {
+        c.clearRect(0, 0, canvas.width, canvas.height);
+        drawAlienPose(c, sheet, cells, kind, attacking, phase, canvas.width / 2, 152, 125);
+      },
+    };
   }
 
   // The simulation advances every mobile alien, including slowed ones. A fixed x
